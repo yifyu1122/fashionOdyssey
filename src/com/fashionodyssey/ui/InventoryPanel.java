@@ -48,8 +48,8 @@ public class InventoryPanel extends JPanel {
         appendResource(sb, ItemDescription.COTTON_SEED, "cotton_seeds");
         appendResource(sb, ItemDescription.ROSE_SEED, "rose_seeds");
         appendResource(sb, ItemDescription.SUNFLOWER_SEED, "sunflower_seeds");
-        appendResource(sb, ItemDescription.TULIP_SEED, "tulip_seeds");
         appendResource(sb, ItemDescription.LAVENDER_SEED, "lavender_seeds");
+        appendResource(sb, ItemDescription.TULIP_PINK_SEED, "tulip_pink_seeds");
         sb.append("\n");
         
         // 顯示收穫物品
@@ -57,8 +57,8 @@ public class InventoryPanel extends JPanel {
         appendResource(sb, ItemDescription.COTTON, "harvested_cotton");
         appendResource(sb, ItemDescription.ROSE, "harvested_rose");
         appendResource(sb, ItemDescription.SUNFLOWER, "harvested_sunflower");
-        appendResource(sb, ItemDescription.TULIP, "harvested_tulip");
         appendResource(sb, ItemDescription.LAVENDER, "harvested_lavender");
+        appendResource(sb, ItemDescription.TULIP_PINK, "harvested_tulip_pink");
         sb.append("\n");
         
         // 顯示加工物品
@@ -67,6 +67,13 @@ public class InventoryPanel extends JPanel {
         appendResource(sb, ItemDescription.RED_DYE, "red_dye");
         appendResource(sb, ItemDescription.YELLOW_DYE, "yellow_dye");
         appendResource(sb, ItemDescription.PURPLE_DYE, "purple_dye");
+        appendResource(sb, ItemDescription.PINK_DYE, "pink_dye");
+        
+        appendResource(sb, ItemDescription.RED_FABRIC, "red_fabric");
+        appendResource(sb, ItemDescription.YELLOW_FABRIC, "yellow_fabric");
+        appendResource(sb, ItemDescription.PURPLE_FABRIC, "purple_fabric");
+        appendResource(sb, ItemDescription.PINK_FABRIC, "pink_fabric");
+        sb.append("\n");    
         
         inventoryText.setText(sb.toString());
     }

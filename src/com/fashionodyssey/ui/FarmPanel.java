@@ -2,12 +2,7 @@ package com.fashionodyssey.ui;
 
 import java.awt.*;
 import javax.swing.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
+
 
 import com.fashionodyssey.event.EventManager;
 import com.fashionodyssey.event.GameEvent;
@@ -15,10 +10,9 @@ import com.fashionodyssey.model.resource.CropStage;
 import com.fashionodyssey.model.resource.CropType;
 import com.fashionodyssey.ui.dialog.ShopDialog;
 import com.fashionodyssey.util.ResourceManager;
-import com.fashionodyssey.event.GameEventListener;
 
 public class FarmPanel extends JPanel {
-    private static final int GRID_SIZE = 2;
+    private static final int GRID_SIZE = 1;
     private JButton[] farmSlots;
     private JComboBox<String> cropSelector;
     private JButton plantButton;
@@ -28,7 +22,6 @@ public class FarmPanel extends JPanel {
     private JLabel harvestCountLabel;
     private JPanel resourcePanel;
     private JLabel statusLabel;
-    private CropStage currentStage = CropStage.EMPTY;
     
     public FarmPanel() {
         setLayout(new BorderLayout());
@@ -52,7 +45,7 @@ public class FarmPanel extends JPanel {
             CropType.cotton.getDisplayName(),
             CropType.rose.getDisplayName(),
             CropType.sunflower.getDisplayName(),
-            CropType.tulip.getDisplayName(),
+            CropType.tulip_pink.getDisplayName(),
             CropType.lavender.getDisplayName()
         };
         
@@ -120,11 +113,12 @@ public class FarmPanel extends JPanel {
             farmSlots[index].setContentAreaFilled(true);
             farmSlots[index].addActionListener(e -> {
                 System.out.println("===== 土地格子點擊事件 =====");
-                System.out.println("點擊的格子索引: " + index);
                 this.requestFocusInWindow();
                 int row = index / GRID_SIZE;
                 int col = index % GRID_SIZE;
-                System.out.println("轉換後的座標: row=" + row + ", col=" + col);
+                System.out.println("點擊的格子索引: " + index);
+                System.out.println("轉換後座標: row=" + row + ", col=" + col);
+                
                 EventManager.getInstance().fireEvent(
                     new GameEvent("SELECT_FARM_SLOT", row, col)
                 );
@@ -161,7 +155,7 @@ public class FarmPanel extends JPanel {
                 System.out.println("cotton_seeds: " + rm.getResourceAmount("cotton_seeds"));
                 System.out.println("rose_seeds: " + rm.getResourceAmount("rose_seeds"));
                 System.out.println("sunflower_seeds: " + rm.getResourceAmount("sunflower_seeds"));
-                System.out.println("tulip_seeds: " + rm.getResourceAmount("tulip_seeds"));
+                System.out.println("tulip_pink_seeds: " + rm.getResourceAmount("tulip_pink_seeds"));
                 System.out.println("lavender_seeds: " + rm.getResourceAmount("lavender_seeds"));
                 
                 if (seedCount > 0) {
@@ -243,16 +237,11 @@ public class FarmPanel extends JPanel {
     }
 
     public void updateSlotStatus(int index, String cropType, CropStage stage) {
-        System.out.println("===== 更新格子狀態 =====");
-        System.out.println("格子索引: " + index);
-        System.out.println("作物類型: " + cropType);
-        System.out.println("生長階段: " + stage);
-        
         if (index >= 0 && index < farmSlots.length) {
-            String status = "一個空地";
+            String status = "一個空地";  // 默認狀態
             String tooltip = "點擊選擇此格子";
             
-            if (cropType != null) {
+            if (cropType != null) {  // 如果有作物，則顯示作物狀態
                 String displayName = getChineseCropName(cropType);
                 
                 switch (stage) {
@@ -274,31 +263,12 @@ public class FarmPanel extends JPanel {
                         break;
                 }
                 tooltip += "\n" + getCropDescription(displayName);
+            } else {
+                farmSlots[index].setBackground(null);  // 空地的背景色
             }
             
             farmSlots[index].setText("<html>" + status + "</html>");
             farmSlots[index].setToolTipText(tooltip);
-            
-            if (cropType != null) {
-                switch (stage) {
-                    case SEEDED:
-                        farmSlots[index].setBackground(new Color(255, 255, 200));
-                        break;
-                    case WATERED:
-                        farmSlots[index].setBackground(new Color(200, 255, 200));
-                        break;
-                    case FERTILIZED:
-                        farmSlots[index].setBackground(new Color(200, 255, 255));
-                        break;
-                    case MATURE:
-                        farmSlots[index].setBackground(new Color(255, 200, 200));
-                        break;
-                    default:
-                        farmSlots[index].setBackground(null);
-                }
-            } else {
-                farmSlots[index].setBackground(null);
-            }
         }
     }
     
@@ -314,11 +284,7 @@ public class FarmPanel extends JPanel {
         return cropType;
     }
     
-    private void updateSeedCount(String cropType) {
-        EventManager.getInstance().fireEvent(
-            new GameEvent("UPDATE_SEED_COUNT", cropType)
-        );
-    }
+
 
     public void updateResources(int seeds, int water, int fertilizer) {
         resourcePanel.removeAll();
@@ -349,8 +315,8 @@ public class FarmPanel extends JPanel {
         seedTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         contentPanel.add(seedTitle);
         
-        String[] cropTypes = {"棉花", "玫瑰", "向日葵", "鬱金香", "薰衣草"};
-        String[] seedKeys = {"cotton_seeds", "rose_seeds", "sunflower_seeds", "tulip_seeds", "lavender_seeds"};
+        String[] cropTypes = {"棉花", "玫瑰", "向日葵", "薰衣草", "鬱金香(粉)"};
+        String[] seedKeys = {"cotton_seeds", "rose_seeds", "sunflower_seeds", "lavender_seeds", "tulip_pink_seeds"};
         
         for (int i = 0; i < cropTypes.length; i++) {
             JLabel seedLabel = new JLabel(String.format("%s種子: %d", 
@@ -369,8 +335,8 @@ public class FarmPanel extends JPanel {
         contentPanel.add(harvestTitle);
         
         String[] harvestKeys = {
-            "harvested_cotton", "harvested_rose", "harvested_sunflower", 
-            "harvested_tulip", "harvested_lavender"
+            "harvested_cotton", "harvested_rose", "harvested_sunflower",
+            "harvested_lavender", "harvested_tulip_pink"
         };
         
         for (int i = 0; i < cropTypes.length; i++) {
@@ -392,8 +358,8 @@ public class FarmPanel extends JPanel {
             case "cotton" -> "棉花";
             case "rose" -> "玫瑰";
             case "sunflower" -> "向日葵";
-            case "tulip" -> "鬱金香";
             case "lavender" -> "薰衣草";
+            case "tulip_pink" -> "鬱金香(粉)";
             default -> cropType;
         };
     }

@@ -7,7 +7,7 @@ import com.fashionodyssey.model.resource.CropStage;
 import com.fashionodyssey.util.ResourceManager;
 
 public class FarmController {
-    private static final int GRID_SIZE = 2;
+    private static final int GRID_SIZE = 1;
     private ResourceManager resourceManager;
     private Grid[][] farmGrid;
     private int currentRow = 0;
@@ -32,9 +32,9 @@ public class FarmController {
         // 監聽選擇土地格子的事件
         eventManager.addEventListener("SELECT_FARM_SLOT", event -> {
             Object[] data = (Object[]) event.getData();
-            int row = (int) data[0];
-            int col = (int) data[1];
-            System.out.println("選擇格子：" + row + "," + col);  // 調試輸出
+            int row = (Integer) data[0];
+            int col = (Integer) data[1];
+            System.out.println("選擇格子：row=" + row + ", col=" + col);
             setCurrentPosition(row, col);
         });
         
@@ -94,7 +94,7 @@ public class FarmController {
             case "水資源不足" -> 
                 "水都不夠了，植物要渴死啦！快去澆水！";
             case "肥料不足" -> 
-                "沒有肥料，植物寶寶們會長不高的！快去施肥！";
+                "沒有料，植物寶寶們會長不高的！快去施肥！";
             case "作物還未成熟，無法收穫" -> 
                 "還不夠成熟呢，先澆水施肥吧~";
             case "這個格子沒有作物可以收穫" -> 
@@ -115,8 +115,8 @@ public class FarmController {
                 "哇！玫瑰的香氣撲鼻而來~";
             case "選擇了種植 向日葵 的格子" ->
                 "向日葵朝著你露出燦爛的笑容！";
-            case "選擇了種植 鬱金香 的格子" ->
-                "優雅的鬱金香在跟你打招呼呢！";
+            case "選擇了種植 鬱金香(粉) 的格子" ->
+                "優雅的粉色鬱金香在跟你打招呼呢！";
             case "選擇了種植 薰衣草 的格子" ->
                 "空氣中瀰漫著薰衣草的香氣~";
             default -> {
@@ -164,11 +164,18 @@ public class FarmController {
     public void fertilizeCrop() {
         Grid currentGrid = farmGrid[currentRow][currentCol];
         if (currentGrid.isOccupied()) {
-            if (currentGrid.getCropStage() == CropStage.WATERED) {
-                if (resourceManager.canPerformAction("FERTILIZE")) {
-                    currentGrid.fertilize();
-                    resourceManager.consumeActionResource("FERTILIZE");
-                    currentGrid.mature();
+            // 添加調試輸出
+            System.out.println("\n===== 嘗試施肥 =====");
+            System.out.println("當前作物狀態: " + currentGrid.getCropStage());
+            System.out.println("肥料數量: " + resourceManager.getResourceAmount("fertilizer"));
+            
+            if (currentGrid.getCropStage() == CropStage.WATERED) {  // 確認是否已澆水
+                if (resourceManager.canPerformAction("FERTILIZE")) {  // 確認是否有足夠肥料
+                    currentGrid.fertilize();  // 施肥
+                    currentGrid.mature();     // 設置為成熟狀態
+                    resourceManager.consumeResource("fertilizer", 1);  // 消耗肥料
+                    
+                    // 更新格子顯示
                     EventManager.getInstance().fireEvent(
                         new GameEvent("UPDATE_FARM_SLOT", 
                             currentRow * GRID_SIZE + currentCol,
@@ -221,23 +228,31 @@ public class FarmController {
             case "cotton" -> "棉花";
             case "rose" -> "玫瑰";
             case "sunflower" -> "向日葵";
-            case "tulip" -> "鬱金香";
+            case "tulip_pink" -> "鬱金香(粉)";
             case "lavender" -> "薰衣草";
             default -> cropType;
         };
     }
 
     public void setCurrentPosition(int row, int col) {
+        // 添加調試輸出
+        System.out.println("\n===== 設置當前位置 =====");
+        System.out.println("輸入座標: row=" + row + ", col=" + col);
+        
         if (row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE) {
             this.currentRow = row;
             this.currentCol = col;
             Grid currentGrid = farmGrid[row][col];
+            
+            System.out.println("設置成功: currentRow=" + currentRow + ", currentCol=" + currentCol);
+            
             if (currentGrid.isOccupied()) {
-                showStatus("選擇了種植 " + currentGrid.getCropType() + " 的格子");
+                showStatus("選擇了種植 " + getChineseCropName(currentGrid.getCropType()) + " 的格子");
             } else {
                 showStatus("選擇了一個空地");
             }
         } else {
+            System.out.println("座標超出範圍！");
             showStatus("選擇的位置超出範圍");
         }
     }
@@ -295,7 +310,7 @@ public class FarmController {
         String cropKey = selectedCrop.equals("棉花") ? "cotton" : 
                         selectedCrop.equals("玫瑰") ? "rose" :
                         selectedCrop.equals("向日葵") ? "sunflower" :
-                        selectedCrop.equals("鬱金香") ? "tulip" :
+                        selectedCrop.equals("鬱金香(粉)") ? "tulip_pink" :
                         selectedCrop.equals("薰衣草") ? "lavender" : "cotton";
                         
         String seedKey = cropKey + "_seeds";
@@ -382,7 +397,7 @@ public class FarmController {
                 showStatus("自動施肥完成！按空白鍵收割");
             }
         } else {
-            showStatus("肥料不足，無法施肥");
+            showStatus("肥料不足，無法肥");
         }
     }
     

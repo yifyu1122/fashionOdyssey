@@ -22,8 +22,8 @@ public class ResourceManager {
         "棉花", "cotton",
         "玫瑰", "rose",
         "向日葵", "sunflower",
-        "鬱金香", "tulip",
-        "薰衣草", "lavender"
+        "薰衣草", "lavender",
+        "鬱金香(粉)", "tulip_pink"
     );
     
     private ResourceManager() {
@@ -47,20 +47,21 @@ public class ResourceManager {
         resources.put("cotton_seeds", 5);
         resources.put("rose_seeds", 5);
         resources.put("sunflower_seeds", 5);
-        resources.put("tulip_seeds", 5);
+        resources.put("tulip_pink_seeds", 5);
         resources.put("lavender_seeds", 5);
         
         // 初始化收穫物品
         resources.put("harvested_cotton", 0);
         resources.put("harvested_rose", 0);
         resources.put("harvested_sunflower", 0);
-        resources.put("harvested_tulip", 0);
+        resources.put("harvested_tulip_pink", 0);
         resources.put("harvested_lavender", 0);
         
         // 初始化加工材料
         resources.put("fabric", 0);
         resources.put("red_dye", 0);
         resources.put("yellow_dye", 0);
+        resources.put("pink_dye", 0);
         resources.put("purple_dye", 0);
     }
     
@@ -204,6 +205,7 @@ public class ResourceManager {
             case "red_dye" -> getResourceAmount("harvested_rose") >= 1;
             case "yellow_dye" -> getResourceAmount("harvested_sunflower") >= 1;
             case "purple_dye" -> getResourceAmount("harvested_lavender") >= 1;
+            case "pink_dye" -> getResourceAmount("harvested_tulip_pink") >= 1;
             default -> false;
         };
     }
@@ -231,6 +233,11 @@ public class ResourceManager {
                     consumeResource("harvested_lavender", 1);
                     addResource("purple_dye", 1);
                     showStatus("紫色染料製作成功！");
+                    break;
+                case "pink_dye":
+                    consumeResource("harvested_tulip_pink", 1);
+                    addResource("pink_dye", 1);
+                    showStatus("粉色染料製作成功！");
                     break;
             }
             notifyResourceChange();
@@ -272,12 +279,12 @@ public class ResourceManager {
             "棉花種子 (種植價格: $8)", 
             "玫瑰種子 (種植價格: $10)", 
             "向日葵種子 (種植價格: $8)", 
-            "鬱金香種子 (種植價格: $25)", 
+            "鬱金香(粉)種子 (種植價格: $25)", 
             "薰衣草種子 (種植價格: $15)",
             "棉花 (收穫量: 3-5個，用於製作布料)", 
             "玫瑰 (收穫量: 1-3個，用於製作紅色染料)", 
             "向日葵 (收穫量: 1-3個，用於製作黃色染料)", 
-            "鬱金香 (收穫量: 1-3個，用於製作各色染料)", 
+            "鬱金香(粉) (收穫量: 1-3個，用於製作粉色染料)", 
             "薰衣草 (收穫量: 1-3個，用於製作紫色染料)",
             "布料 (由2個棉花製成，用於製作服裝)", 
             "紅色染料 (由1個玫瑰製成，用於染色)", 
@@ -293,17 +300,18 @@ public class ResourceManager {
             getResourceAmount("cotton_seeds"),
             getResourceAmount("rose_seeds"),
             getResourceAmount("sunflower_seeds"),
-            getResourceAmount("tulip_seeds"),
+            getResourceAmount("tulip_pink_seeds"),
             getResourceAmount("lavender_seeds"),
             getResourceAmount("harvested_cotton"),
             getResourceAmount("harvested_rose"),
             getResourceAmount("harvested_sunflower"),
-            getResourceAmount("harvested_tulip"),
+            getResourceAmount("harvested_tulip_pink"),
             getResourceAmount("harvested_lavender"),
             getResourceAmount("fabric"),
             getResourceAmount("red_dye"),
             getResourceAmount("yellow_dye"),
             getResourceAmount("purple_dye"),
+            getResourceAmount("pink_dye"),
             getResourceAmount("dress"),
             getResourceAmount("shirt"),
             getResourceAmount("pants")

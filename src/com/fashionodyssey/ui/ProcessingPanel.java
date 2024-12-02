@@ -48,12 +48,23 @@ public class ProcessingPanel extends JPanel {
         // 添加配方按鈕
         String[][] recipes = {
             {"布料", "2個棉花 → 1個布料"},
+            {"蕾絲", "1個棉花 → 1個蕾絲"},
             {"紅色染料", "1個玫瑰 → 1個紅色染料"},
             {"黃色染料", "1個向日葵 → 1個黃色染料"},
+            {"粉色染料", "1個鬱金香(粉) → 1個粉色染料"},
             {"紫色染料", "1個薰衣草 → 1個紫色染料"},
             {"紅色布料", "1個布料 + 1個紅色染料 → 1個紅色布料"},
             {"黃色布料", "1個布料 + 1個黃色染料 → 1個黃色布料"},
-            {"紫色布料", "1個布料 + 1個紫色染料 → 1個紫色布料"}
+            {"粉色布料", "1個布料 + 1個粉色染料 → 1個粉色布料"},
+            {"紫色布料", "1個布料 + 1個紫色染料 → 1個紫色布料"},
+            {"紅色蝴蝶結", "1個紅色布料 → 2個紅色蝴蝶結"},
+            {"黃色蝴蝶結", "1個黃色布料 → 2個黃色蝴蝶結"},
+            {"粉色蝴蝶結", "1個粉色布料 → 2個粉色蝴蝶結"},
+            {"紫色蝴蝶結", "1個紫色布料 → 2個紫色蝴蝶結"},
+            {"紅色緞帶", "1個紅色布料 → 1個紅色緞帶"},
+            {"黃色緞帶", "1個黃色布料 → 1個黃色緞帶"},
+            {"粉色緞帶", "1個粉色布料 → 1個粉色緞帶"},
+            {"紫色緞帶", "1個紫色布料 → 1個紫色緞帶"}
         };
         
         recipeButtons = new JButton[recipes.length];
@@ -134,15 +145,27 @@ public class ProcessingPanel extends JPanel {
         ResourceManager rm = ResourceManager.getInstance();
         boolean canCraft = switch (recipe) {
             case "布料" -> rm.getResourceAmount("harvested_cotton") >= 2;
+            case "蕾絲" -> rm.getResourceAmount("harvested_cotton") >= 1;
             case "紅色染料" -> rm.getResourceAmount("harvested_rose") >= 1;
             case "黃色染料" -> rm.getResourceAmount("harvested_sunflower") >= 1;
+            case "粉色染料" -> rm.getResourceAmount("harvested_tulip_pink") >= 1;
             case "紫色染料" -> rm.getResourceAmount("harvested_lavender") >= 1;
             case "紅色布料" -> rm.getResourceAmount("fabric") >= 1 && 
                              rm.getResourceAmount("red_dye") >= 1;
             case "黃色布料" -> rm.getResourceAmount("fabric") >= 1 && 
                              rm.getResourceAmount("yellow_dye") >= 1;
+            case "粉色布料" -> rm.getResourceAmount("fabric") >= 1 && 
+                             rm.getResourceAmount("pink_dye") >= 1;
             case "紫色布料" -> rm.getResourceAmount("fabric") >= 1 && 
                              rm.getResourceAmount("purple_dye") >= 1;
+            case "紅色蝴蝶結" -> rm.getResourceAmount("red_fabric") >= 1;
+            case "黃色蝴蝶結" -> rm.getResourceAmount("yellow_fabric") >= 1;
+            case "粉色蝴蝶結" -> rm.getResourceAmount("pink_fabric") >= 1;
+            case "紫色蝴蝶結" -> rm.getResourceAmount("purple_fabric") >= 1;
+            case "紅色緞帶" -> rm.getResourceAmount("red_fabric") >= 1;
+            case "黃色緞帶" -> rm.getResourceAmount("yellow_fabric") >= 1;
+            case "粉色緞帶" -> rm.getResourceAmount("pink_fabric") >= 1;
+            case "紫色緞帶" -> rm.getResourceAmount("purple_fabric") >= 1;
             default -> false;
         };
         
@@ -173,7 +196,122 @@ public class ProcessingPanel extends JPanel {
                     showSuccess("紅色染料製作成功！");
                 }
                 break;
-            // ... 其他配方的處理 ...
+            case "黃色染料":
+                if (rm.getResourceAmount("harvested_sunflower") >= 1) {
+                    rm.consumeResource("harvested_sunflower", 1);
+                    rm.addResource("yellow_dye", 1);
+                    showSuccess("黃色染料製作成功！");
+                }
+                break;
+            case "粉色染料":
+                if (rm.getResourceAmount("harvested_tulip_pink") >= 1) {
+                    rm.consumeResource("harvested_tulip_pink", 1);
+                    rm.addResource("pink_dye", 1);
+                    showSuccess("粉色染料製作成功！");
+                }
+                break;
+            case "紫色染料":
+                if (rm.getResourceAmount("harvested_lavender") >= 1) {
+                    rm.consumeResource("harvested_lavender", 1);
+                    rm.addResource("purple_dye", 1);
+                    showSuccess("紫色染料製作成功！");
+                }
+                break;
+            case "紅色布料":
+                if (rm.getResourceAmount("fabric") >= 1 && rm.getResourceAmount("red_dye") >= 1) {
+                    rm.consumeResource("fabric", 1);
+                    rm.consumeResource("red_dye", 1);
+                    rm.addResource("red_fabric", 1);
+                    showSuccess("紅色布料製作成功！");
+                }
+                break;
+            case "黃色布料":
+                if (rm.getResourceAmount("fabric") >= 1 && rm.getResourceAmount("yellow_dye") >= 1) {
+                    rm.consumeResource("fabric", 1);
+                    rm.consumeResource("yellow_dye", 1);
+                    rm.addResource("yellow_fabric", 1);
+                    showSuccess("黃色布料製作成功！");
+                }
+                break;
+            case "粉色布料":
+                if (rm.getResourceAmount("fabric") >= 1 && rm.getResourceAmount("pink_dye") >= 1) {
+                    rm.consumeResource("fabric", 1);
+                    rm.consumeResource("pink_dye", 1);
+                    rm.addResource("pink_fabric", 1);
+                    showSuccess("粉色布料製作成功！");
+                }
+                break;
+            case "紫色布料":
+                if (rm.getResourceAmount("fabric") >= 1 && rm.getResourceAmount("purple_dye") >= 1) {
+                    rm.consumeResource("fabric", 1);
+                    rm.consumeResource("purple_dye", 1);
+                    rm.addResource("purple_fabric", 1);
+                    showSuccess("紫色布料製作成功！");
+                }
+                break;
+            case "蕾絲":
+                if (rm.getResourceAmount("harvested_cotton") >= 1) {
+                    rm.consumeResource("harvested_cotton", 1);
+                    rm.addResource("lace", 1);
+                    showSuccess("蕾絲製作成功！");
+                }
+                break;
+            case "紅色蝴蝶結":
+                if (rm.getResourceAmount("red_fabric") >= 1) {
+                    rm.consumeResource("red_fabric", 1);
+                    rm.addResource("red_bow", 2);
+                    showSuccess("紅色蝴蝶結製作成功！");
+                }
+                break;
+            case "黃色蝴蝶結":
+                if (rm.getResourceAmount("yellow_fabric") >= 1) {
+                    rm.consumeResource("yellow_fabric", 1);
+                    rm.addResource("yellow_bow", 2);
+                    showSuccess("黃色蝴蝶結製作成功！");
+                }
+                break;
+            case "粉色蝴蝶結":
+                if (rm.getResourceAmount("pink_fabric") >= 1) {
+                    rm.consumeResource("pink_fabric", 1);
+                    rm.addResource("pink_bow", 2);
+                    showSuccess("粉色蝴蝶結製作成功！");
+                }
+                break;
+            case "紫色蝴蝶結":
+                if (rm.getResourceAmount("purple_fabric") >= 1) {
+                    rm.consumeResource("purple_fabric", 1);
+                    rm.addResource("purple_bow", 2);
+                    showSuccess("紫色蝴蝶結製作成功！");
+                }
+                break;
+            case "紅色緞帶":
+                if (rm.getResourceAmount("red_fabric") >= 1) {
+                    rm.consumeResource("red_fabric", 1);
+                    rm.addResource("red_ribbon", 1);
+                    showSuccess("紅色緞帶製作成功！");
+                }
+                break;
+            case "黃色緞帶":
+                if (rm.getResourceAmount("yellow_fabric") >= 1) {
+                    rm.consumeResource("yellow_fabric", 1);
+                    rm.addResource("yellow_ribbon", 1);
+                    showSuccess("黃色緞帶製作成功！");
+                }
+                break;
+            case "粉色緞帶":
+                if (rm.getResourceAmount("pink_fabric") >= 1) {
+                    rm.consumeResource("pink_fabric", 1);
+                    rm.addResource("pink_ribbon", 1);
+                    showSuccess("粉色緞帶製作成功！");
+                }
+                break;
+            case "紫色緞帶":
+                if (rm.getResourceAmount("purple_fabric") >= 1) {
+                    rm.consumeResource("purple_fabric", 1);
+                    rm.addResource("purple_ribbon", 1);
+                    showSuccess("紫色緞帶製作成功！");
+                }
+                break;
         }
         
         updateResources();
@@ -214,10 +352,10 @@ public class ProcessingPanel extends JPanel {
         flowerTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         contentPanel.add(flowerTitle);
         
-        String[] flowers = {"棉花", "玫瑰", "向日葵", "薰衣草"};
+        String[] flowers = {"棉花", "玫瑰", "向日葵", "薰衣草", "鬱金香(粉)"};
         String[] flowerKeys = {
             "harvested_cotton", "harvested_rose", 
-            "harvested_sunflower", "harvested_lavender"
+            "harvested_sunflower", "harvested_lavender", "harvested_tulip_pink"
         };
         
         for (int i = 0; i < flowers.length; i++) {
@@ -236,8 +374,8 @@ public class ProcessingPanel extends JPanel {
         dyeTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         contentPanel.add(dyeTitle);
         
-        String[] dyes = {"紅色染料", "黃色染料", "紫色染料"};
-        String[] dyeKeys = {"red_dye", "yellow_dye", "purple_dye"};
+        String[] dyes = {"紅色染料", "黃色染料", "紫色染料", "粉色染料"};
+        String[] dyeKeys = {"red_dye", "yellow_dye", "purple_dye", "pink_dye"};
         
         for (int i = 0; i < dyes.length; i++) {
             JLabel label = new JLabel(String.format("%s: %d", 
@@ -254,12 +392,18 @@ public class ProcessingPanel extends JPanel {
         fabricTitle.setFont(new Font("微軟正黑體", Font.BOLD, 16));
         fabricTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         contentPanel.add(fabricTitle);
+
+        String[] fabrics = {"紅色布料", "黃色布料", "紫色布料", "粉色布料"};
+        String[] fabricKeys = {"red_fabric", "yellow_fabric", "purple_fabric", "pink_fabric"};
         
-        JLabel fabricLabel = new JLabel(String.format("布料: %d", 
-            rm.getResourceAmount("fabric")));
-        fabricLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
-        fabricLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        contentPanel.add(fabricLabel);
+        for (int i = 0; i < fabrics.length; i++) {
+            JLabel label = new JLabel(String.format("%s: %d", 
+                fabrics[i], rm.getResourceAmount(fabricKeys[i])));
+            label.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
+            label.setAlignmentX(Component.LEFT_ALIGNMENT);
+            contentPanel.add(label);
+            contentPanel.add(Box.createVerticalStrut(5));
+        }
         
         resourcePanel.add(contentPanel);
         resourcePanel.revalidate();
