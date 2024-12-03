@@ -20,6 +20,12 @@ public class ProcessingPanel extends JPanel {
         setLayout(new BorderLayout());
         initComponents();
         
+        // Initialize and add the resource panel
+        resourcePanel = new JPanel();
+        resourcePanel.setLayout(new BoxLayout(resourcePanel, BoxLayout.Y_AXIS));
+        resourcePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        add(resourcePanel, BorderLayout.EAST);  // Add to the appropriate position
+        
         // Listen for resource updates
         EventManager.getInstance().addEventListener("UPDATE_RESOURCES", event -> updateResources());
     }

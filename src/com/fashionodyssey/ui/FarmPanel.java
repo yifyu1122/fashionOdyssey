@@ -178,7 +178,7 @@ public class FarmPanel extends JPanel {
                     System.out.println("\n種植失敗：種子數量不足");
                 }
             } else {
-                System.out.println("\n種植失敗：作物類型轉換失敗");
+                System.out.println("\n種植失敗��作物類型轉換失敗");
             }
             System.out.println("===== 種植事件結束 =====\n");
         });
@@ -216,7 +216,7 @@ public class FarmPanel extends JPanel {
         resourcePanel.setPreferredSize(new Dimension(200, 0));  // 設置固定寬度
         resourcePanel.setBackground(new Color(240, 240, 240));  // 設置背景色
         
-        // 確保所��標籤左對齊
+        // 確保所有標籤左對齊
         resourcePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         
         // 將資源面板添加到左側
@@ -228,7 +228,7 @@ public class FarmPanel extends JPanel {
         add(resourceScrollPane, BorderLayout.WEST);
         
         // 在控制面板下方添加狀態標籤
-        statusLabel = new JLabel("歡迎來到時尚農場！");
+        statusLabel = new JLabel("歡迎來到農場！");
         statusLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
         statusLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -248,37 +248,41 @@ public class FarmPanel extends JPanel {
 
     public void updateSlotStatus(int index, String cropType, CropStage stage) {
         if (index >= 0 && index < farmSlots.length) {
-            String status = "一個空地";  // 默認狀態
+            String status = "一個空地";  // Default status
             String tooltip = "點擊選擇此格子";
+            Color bgColor = null;  // Default background color
             
-            if (cropType != null) {  // 如果有作物，則顯示作物狀態
+            if (cropType != null) {  // If there's a crop, show its status
                 String displayName = getChineseCropName(cropType);
                 
                 switch (stage) {
                     case SEEDED:
                         status = displayName + " (種子)";
                         tooltip = "需要水";
+                        bgColor = new Color(233, 236, 239);  // Light gray
                         break;
                     case WATERED:
                         status = displayName + " (已澆水)";
                         tooltip = "需施肥";
+                        bgColor = new Color(209, 231, 221);  // Light green
                         break;
                     case FERTILIZED:
                         status = displayName + " (已施肥)";
                         tooltip = "等待成熟";
+                        bgColor = new Color(255, 243, 205);  // Light yellow
                         break;
                     case MATURE:
                         status = displayName + " (已成熟)";
                         tooltip = "可以收割";
+                        bgColor = new Color(255, 228, 181);  // Light orange
                         break;
                 }
                 tooltip += "\n" + getCropDescription(displayName);
-            } else {
-                farmSlots[index].setBackground(null);  // 空地的背景色
             }
             
-            farmSlots[index].setText("<html>" + status + "</html>");
+            farmSlots[index].setText("<html><center>" + status + "</center></html>");
             farmSlots[index].setToolTipText(tooltip);
+            farmSlots[index].setBackground(bgColor);
         }
     }
     

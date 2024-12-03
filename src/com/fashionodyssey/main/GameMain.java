@@ -1,7 +1,6 @@
 package com.fashionodyssey.main;
 
 import com.fashionodyssey.controller.FarmController;
-import com.fashionodyssey.controller.ProcessingController;
 import com.fashionodyssey.event.EventManager;
 import com.fashionodyssey.model.resource.CropStage;
 import com.fashionodyssey.ui.MainFrame;
@@ -10,13 +9,8 @@ import com.fashionodyssey.util.ResourceManager;
 public class GameMain {
     public static void main(String[] args) {
         FarmController farmController = new FarmController();
-        ProcessingController processingController = new ProcessingController();
         MainFrame mainFrame = new MainFrame();
         ResourceManager resourceManager = ResourceManager.getInstance();
-        
-        EventManager.getInstance().addEventListener("PLANT_CROP", event -> {
-            farmController.plantCrop((String)event.getData());
-        });
         
         EventManager.getInstance().addEventListener("HARVEST_CROP", event -> {
             farmController.harvestCrop();
@@ -41,11 +35,14 @@ public class GameMain {
         });
         
         EventManager.getInstance().addEventListener("UPDATE_RESOURCES", event -> {
-            int money = (Integer) event.getArgs()[0];
-            int seeds = (Integer) event.getArgs()[1];
-            int water = (Integer) event.getArgs()[2];
-            int fertilizer = (Integer) event.getArgs()[3];
-            mainFrame.updateResources(money, seeds, water, fertilizer);
+            Object[] eventArgs = event.getArgs();
+            if (eventArgs != null && eventArgs.length >= 4) {
+                int money = (Integer) eventArgs[0];
+                int seeds = (Integer) eventArgs[1];
+                int water = (Integer) eventArgs[2];
+                int fertilizer = (Integer) eventArgs[3];
+                mainFrame.updateResources(money, seeds, water, fertilizer);
+            }
         });
         
         EventManager.getInstance().addEventListener("WATER_CROP", event -> {
@@ -70,10 +67,7 @@ public class GameMain {
         EventManager.getInstance().addEventListener("BUY_FERTILIZER", event -> {
             resourceManager.buyFertilizer();
         });
-        
-        EventManager.getInstance().addEventListener("FARM_AUTO_ACTION", event -> {
-            farmController.handleAutoAction();
-        });
+
         
         mainFrame.setVisible(true);
     }

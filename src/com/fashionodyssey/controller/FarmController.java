@@ -31,9 +31,8 @@ public class FarmController {
         
         // 監聽選擇土地格子的事件
         eventManager.addEventListener("SELECT_FARM_SLOT", event -> {
-            Object[] data = (Object[]) event.getData();
-            int row = (Integer) data[0];
-            int col = (Integer) data[1];
+            int row = (Integer) event.getArgs()[0];
+            int col = (Integer) event.getArgs()[1];
             System.out.println("選擇格子：row=" + row + ", col=" + col);
             setCurrentPosition(row, col);
         });
@@ -56,14 +55,11 @@ public class FarmController {
     }
 
     public void plantCrop(String cropType) {
-        System.out.println("FarmController.plantCrop: " + cropType);  // 調試輸出
+        System.out.println("FarmController.plantCrop: " + cropType);  // Debug output
         Grid currentGrid = farmGrid[currentRow][currentCol];
         if (!currentGrid.isOccupied()) {
-            String seedKey = cropType + "_seeds";
-            System.out.println("Checking seed key: " + seedKey);  // 調試輸出
-            
-            if (resourceManager.getResourceAmount(seedKey) > 0) {
-                resourceManager.consumeResource(seedKey, 1);
+            if (resourceManager.getResourceAmount(cropType + "_seeds") > 0) {
+                resourceManager.consumeResource(cropType + "_seeds", 1);
                 currentGrid.plant(cropType);
                 
                 EventManager.getInstance().fireEvent(
@@ -74,13 +70,13 @@ public class FarmController {
                     )
                 );
                 
-                // 通知資源更新
+                // Notify resource updates
                 resourceManager.notifyResourceChange();
                 resourceManager.notifyInventoryChange();
                 
                 showStatus("種植 " + getChineseCropName(cropType) + "，現在處於種子階段");
             } else {
-                showStatus(cropType + "的種子不足，無法種植");
+                showStatus(getChineseCropName(cropType) + "的種子不足，無法種植");
             }
         } else {
             showStatus("這個格子已經種植作物了");
@@ -98,7 +94,7 @@ public class FarmController {
             case "作物還未成熟，無法收穫" -> 
                 "還不夠成熟呢，先澆水施肥吧~";
             case "這個格子沒有作物可以收穫" -> 
-                "這裡空空如也，種點什麼吧！";
+                "這裡空空如也，種點什麼吧";
             case "擇了一個空地" -> 
                 "這塊地正期待著新生命的到來！";
             case "作物不在種子階段，無法澆水" ->
@@ -164,26 +160,40 @@ public class FarmController {
     public void fertilizeCrop() {
         Grid currentGrid = farmGrid[currentRow][currentCol];
         if (currentGrid.isOccupied()) {
-            // 添加調試輸出
             System.out.println("\n===== 嘗試施肥 =====");
             System.out.println("當前作物狀態: " + currentGrid.getCropStage());
             System.out.println("肥料數量: " + resourceManager.getResourceAmount("fertilizer"));
             
-            if (currentGrid.getCropStage() == CropStage.WATERED) {  // 確認是否已澆水
-                if (resourceManager.canPerformAction("FERTILIZE")) {  // 確認是否有足夠肥料
-                    currentGrid.fertilize();  // 施肥
-                    currentGrid.mature();     // 設置為成熟狀態
-                    resourceManager.consumeResource("fertilizer", 1);  // 消耗肥料
+            if (currentGrid.getCropStage() == CropStage.WATERED) {
+                if (resourceManager.canPerformAction("FERTILIZE")) {
+                    currentGrid.fertilize();
+                    resourceManager.consumeResource("fertilizer", 1);
                     
-                    // 更新格子顯示
+                    // 先更新為已施肥狀態
                     EventManager.getInstance().fireEvent(
                         new GameEvent("UPDATE_FARM_SLOT", 
                             currentRow * GRID_SIZE + currentCol,
                             currentGrid.getCropType(),
-                            CropStage.MATURE
+                            CropStage.FERTILIZED
                         )
                     );
-                    showStatus("施肥完成，作物已成熟");
+                    
+                    // 延遲一小段時間後成熟
+                    javax.swing.Timer timer = new javax.swing.Timer(1000, e -> {
+                        currentGrid.mature();
+                        EventManager.getInstance().fireEvent(
+                            new GameEvent("UPDATE_FARM_SLOT", 
+                                currentRow * GRID_SIZE + currentCol,
+                                currentGrid.getCropType(),
+                                CropStage.MATURE
+                            )
+                        );
+                        showStatus("施肥完成，作物已成熟");
+                    });
+                    timer.setRepeats(false);
+                    timer.start();
+                    
+                    showStatus("正在施肥中...");
                 } else {
                     showStatus("肥料不足");
                 }
@@ -227,7 +237,7 @@ public class FarmController {
         return switch (cropType.toLowerCase()) {
             case "cotton" -> "棉花";
             case "rose" -> "玫瑰";
-            case "sunflower" -> "向日葵";
+            case "sunflower" -> "向日";
             case "tulip_pink" -> "鬱金香(粉)";
             case "lavender" -> "薰衣草";
             default -> cropType;
@@ -237,7 +247,7 @@ public class FarmController {
     public void setCurrentPosition(int row, int col) {
         // 添加調試輸出
         System.out.println("\n===== 設置當前位置 =====");
-        System.out.println("輸入座標: row=" + row + ", col=" + col);
+        System.out.println("輸入標: row=" + row + ", col=" + col);
         
         if (row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE) {
             this.currentRow = row;
@@ -260,208 +270,10 @@ public class FarmController {
     public int getHarvestCount() {
         return harvestCount;
     }
-
-    public void handleAutoAction() {
-        System.out.println("執行自動操作，當前階段: " + currentStage);
-        
-        // 檢查所有格子的狀態
-        boolean hasSeeded = false;
-        boolean hasWatered = false;
-        boolean hasMature = false;
-        
-        for (int i = 0; i < GRID_SIZE; i++) {
-            for (int j = 0; j < GRID_SIZE; j++) {
-                Grid grid = farmGrid[i][j];
-                if (grid.isOccupied()) {
-                    switch (grid.getCropStage()) {
-                        case SEEDED -> hasSeeded = true;
-                        case WATERED -> hasWatered = true;
-                        case MATURE -> hasMature = true;
-                    }
-                }
-            }
-        }
-        
-        // 根據實際格子狀態決定當前階段
-        if (hasMature) {
-            currentStage = CropStage.MATURE;
-        } else if (hasWatered) {
-            currentStage = CropStage.WATERED;
-        } else if (hasSeeded) {
-            currentStage = CropStage.SEEDED;
-        } else {
-            currentStage = CropStage.EMPTY;
-        }
-        
-        System.out.println("檢測到的當前階段: " + currentStage);
-        
-        // 執行對應操作
-        switch (currentStage) {
-            case EMPTY -> autoPlant();
-            case SEEDED -> autoWater();
-            case WATERED -> autoFertilize();
-            case MATURE -> autoHarvest();
-        }
-    }
-    
-    private void autoPlant() {
-        System.out.println("開始自動種植");
-        String selectedCrop = resourceManager.getCurrentCropType();
-        String cropKey = selectedCrop.equals("棉花") ? "cotton" : 
-                        selectedCrop.equals("玫瑰") ? "rose" :
-                        selectedCrop.equals("向日葵") ? "sunflower" :
-                        selectedCrop.equals("鬱金香(粉)") ? "tulip_pink" :
-                        selectedCrop.equals("薰衣草") ? "lavender" : "cotton";
-                        
-        String seedKey = cropKey + "_seeds";
-        int seedCount = resourceManager.getResourceAmount(seedKey);
-        int emptySlots = countEmptySlots();
-        
-        System.out.println("選擇的作物: " + selectedCrop);
-        System.out.println("種子類型: " + seedKey);
-        System.out.println("種子數量: " + seedCount);
-        System.out.println("空地數量: " + emptySlots);
-        
-        int plantCount = Math.min(seedCount, emptySlots);
-        System.out.println("可種植數量: " + plantCount);
-        
-        if (plantCount > 0) {
-            // 遍歷所有格子進行種植
-            for (int i = 0; i < GRID_SIZE; i++) {
-                for (int j = 0; j < GRID_SIZE; j++) {
-                    if (!farmGrid[i][j].isOccupied() && plantCount > 0) {
-                        plantCropAt(i, j, cropKey);  // 使用英文作物名稱
-                        plantCount--;
-                    }
-                }
-            }
-            currentStage = CropStage.SEEDED;
-            showStatus("自動種植完成！按空白鍵澆水");
-            System.out.println("種植完成");
-        } else {
-            showStatus("種子不足，無法種植");
-            System.out.println("無法種植：種子不足或沒有空地");
-        }
-    }
-    
-    private void autoWater() {
-        boolean anyWatered = false;
-        for (int i = 0; i < GRID_SIZE; i++) {
-            for (int j = 0; j < GRID_SIZE; j++) {
-                Grid grid = farmGrid[i][j];
-                if (grid.isOccupied() && grid.getCropStage() == CropStage.SEEDED) {
-                    grid.water();
-                    EventManager.getInstance().fireEvent(
-                        new GameEvent("UPDATE_FARM_SLOT", 
-                            i * GRID_SIZE + j,
-                            grid.getCropType(),
-                            CropStage.WATERED
-                        )
-                    );
-                    anyWatered = true;
-                }
-            }
-        }
-        if (anyWatered) {
-            currentStage = CropStage.WATERED;
-            showStatus("自動澆水完成！按空白鍵施肥");
-        }
-    }
-    
-    private void autoFertilize() {
-        int fertilizerCount = resourceManager.getResourceAmount("fertilizer");
-        int needFertilizer = countWateredCrops();
-        
-        if (fertilizerCount >= needFertilizer) {
-            boolean anyFertilized = false;
-            for (int i = 0; i < GRID_SIZE; i++) {
-                for (int j = 0; j < GRID_SIZE; j++) {
-                    Grid grid = farmGrid[i][j];
-                    if (grid.isOccupied() && grid.getCropStage() == CropStage.WATERED) {
-                        grid.fertilize();
-                        grid.mature();
-                        resourceManager.consumeResource("fertilizer", 1);
-                        EventManager.getInstance().fireEvent(
-                            new GameEvent("UPDATE_FARM_SLOT", 
-                                i * GRID_SIZE + j,
-                                grid.getCropType(),
-                                CropStage.MATURE
-                            )
-                        );
-                        anyFertilized = true;
-                    }
-                }
-            }
-            if (anyFertilized) {
-                currentStage = CropStage.MATURE;
-                showStatus("自動施肥完成！按空白鍵收割");
-            }
-        } else {
-            showStatus("肥料不足，無法肥");
-        }
-    }
-    
-    private void autoHarvest() {
-        boolean anyHarvested = false;
-        for (int i = 0; i < GRID_SIZE; i++) {
-            for (int j = 0; j < GRID_SIZE; j++) {
-                Grid grid = farmGrid[i][j];
-                if (grid.isOccupied() && grid.getCropStage() == CropStage.MATURE) {
-                    String cropType = grid.getCropType();
-                    resourceManager.addHarvestedCrop(getChineseCropName(cropType));
-                    grid.clear();
-                    EventManager.getInstance().fireEvent(
-                        new GameEvent("UPDATE_FARM_SLOT", 
-                            i * GRID_SIZE + j,
-                            null,
-                            CropStage.EMPTY
-                        )
-                    );
-                    anyHarvested = true;
-                }
-            }
-        }
-        if (anyHarvested) {
-            currentStage = CropStage.EMPTY;
-            showStatus("自動收割完成！按空白鍵開始新一輪種植");
-        }
-    }
-    
-    private int countEmptySlots() {
-        int count = 0;
-        for (int i = 0; i < GRID_SIZE; i++) {
-            for (int j = 0; j < GRID_SIZE; j++) {
-                if (!farmGrid[i][j].isOccupied()) {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-    
-    private int countWateredCrops() {
-        int count = 0;
-        for (int i = 0; i < GRID_SIZE; i++) {
-            for (int j = 0; j < GRID_SIZE; j++) {
-                Grid grid = farmGrid[i][j];
-                if (grid.isOccupied() && grid.getCropStage() == CropStage.WATERED) {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-
-    private void plantCropAt(int row, int col, String cropType) {
-        String seedKey = cropType.toLowerCase() + "_seeds";
-        resourceManager.consumeResource(seedKey, 1);
-        farmGrid[row][col].plant(cropType);
-        EventManager.getInstance().fireEvent(
-            new GameEvent("UPDATE_FARM_SLOT", 
-                row * GRID_SIZE + col,
-                cropType,
-                CropStage.SEEDED
-            )
-        );
-    }
 }
+
+    
+    
+    
+    
+   

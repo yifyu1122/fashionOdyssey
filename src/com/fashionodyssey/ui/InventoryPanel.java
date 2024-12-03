@@ -10,11 +10,20 @@ public class InventoryPanel extends JPanel {
     private JTextArea inventoryText;
     private JScrollPane scrollPane;
     private ResourceManager resourceManager;
+    private JPanel resourcePanel;
     
     public InventoryPanel() {
         setLayout(new BorderLayout());
         resourceManager = ResourceManager.getInstance();
         initComponents();
+        
+        // Initialize resourcePanel
+        resourcePanel = new JPanel();
+        resourcePanel.setLayout(new BoxLayout(resourcePanel, BoxLayout.Y_AXIS));
+        resourcePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        // Add resourcePanel to the layout
+        add(resourcePanel, BorderLayout.CENTER);
         
         // Listen for resource updates
         EventManager.getInstance().addEventListener("UPDATE_RESOURCES", event -> updateDisplay());
@@ -151,7 +160,7 @@ public class InventoryPanel extends JPanel {
             case "紅色蝴蝶結" -> "red_bow";
             case "黃色蝴蝶結" -> "yellow_bow";
             case "紫色蝴蝶結" -> "purple_bow";
-            case "粉色���蝶結" -> "pink_bow";
+            case "粉色蝴蝶結" -> "pink_bow";
             // 緞帶類
             case "白色緞帶" -> "white_ribbon";
             case "紅色緞帶" -> "red_ribbon";
@@ -170,9 +179,22 @@ public class InventoryPanel extends JPanel {
     }
     
     public void updateInventory(String[] items, int[] amounts) {
-        updateDisplay();
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        revalidate();
-        repaint();
+        JLabel titleLabel = new JLabel("倉庫物品");
+        titleLabel.setFont(new Font("微軟正黑體", Font.BOLD, 20));
+        contentPanel.add(titleLabel);
+        contentPanel.add(Box.createVerticalStrut(20));
+        
+        for (int i = 0; i < items.length; i++) {
+            JLabel itemLabel = new JLabel(String.format("%s: %d", items[i], amounts[i]));
+            contentPanel.add(itemLabel);
+        }
+        
+        resourcePanel.add(contentPanel);
+        resourcePanel.revalidate();
+        resourcePanel.repaint();
     }
 } 

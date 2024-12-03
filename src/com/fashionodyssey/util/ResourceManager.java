@@ -115,13 +115,10 @@ public class ResourceManager {
     }
     
     public void addToInventory(String item) {
-        // 將收穫的作物名稱轉換為對應的資源鍵值
-        String resourceKey = "harvested_" + item.toLowerCase()
-            .replace("收的", "")  // 移除"收穫的"前綴
-            .trim();               // 移除多餘空格
+        // 移除"收穫的"前綴並清理字串
+        String cropName = item.replace("收穫的", "").trim();
         
         // 使用 addHarvestedCrop 方法來處理收穫
-        String cropName = item.replace("收穫", "").trim();
         addHarvestedCrop(cropName);
     }
     
@@ -211,6 +208,9 @@ public class ResourceManager {
         if (current >= amount) {
             resources.put(type, current - amount);
             notifyResourceChange();
+            notifyInventoryChange();
+        } else {
+            System.out.println("Not enough resources: " + type);
         }
     }
     
