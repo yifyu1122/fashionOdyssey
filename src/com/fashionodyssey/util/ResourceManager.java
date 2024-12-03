@@ -145,10 +145,7 @@ public class ResourceManager {
     }
     
     public void notifyResourceChange() {
-        EventManager.getInstance().fireEvent(
-            new GameEvent("UPDATE_RESOURCES")
-        );
-        notifyInventoryChange();
+        EventManager.getInstance().fireEvent(new GameEvent("INVENTORY_CHANGED"));
     }
     
     // 添加購買種子的方法
@@ -219,96 +216,14 @@ public class ResourceManager {
     }
     
     public void notifyInventoryChange() {
-        String[] items = {
-            "肥料",
-            "棉花種子", 
-            "玫瑰種子", 
-            "向日葵種子", 
-            "鬱金香(粉)種子", 
-            "薰衣草種子",
-            "棉花", 
-            "玫瑰", 
-            "向日葵", 
-            "鬱金香(粉)", 
-            "薰衣草",
-            "白色布料", 
-            "紅色染料", 
-            "黃色染料", 
-            "紫色染料",
-            "粉色染料",
-            "白色緞帶", 
-            "紅色緞帶", 
-            "黃色緞帶", 
-            "紫色緞帶",
-            "粉色緞帶",
-            "白色蝴蝶結", 
-            "紅色蝴蝶結", 
-            "黃色蝴蝶結", 
-            "紫色蝴蝶結",
-            "粉色蝴蝶結",
-            "白色連衣裙",
-            "紅色連衣裙",
-            "黃色連衣裙",
-            "紫色連衣裙",
-            "粉色連衣裙",
-            "白色褲子",
-            "紅色褲子",
-            "黃色褲子",
-            "紫色褲子",
-            "粉色褲子",
-            "白色襯衫",
-            "紅色襯衫",
-            "黃色襯衫",
-            "紫色襯衫",
-            "粉色襯衫"
-        };
-        
-        int[] amounts = {
-            getResourceAmount("fertilizer"),
-            getResourceAmount("cotton_seeds"),
-            getResourceAmount("rose_seeds"),
-            getResourceAmount("sunflower_seeds"),
-            getResourceAmount("tulip_pink_seeds"),
-            getResourceAmount("lavender_seeds"),
-            getResourceAmount("harvested_cotton"),
-            getResourceAmount("harvested_rose"),
-            getResourceAmount("harvested_sunflower"),
-            getResourceAmount("harvested_tulip_pink"),
-            getResourceAmount("harvested_lavender"),
-            getResourceAmount("white_fabric"),
-            getResourceAmount("red_dye"),
-            getResourceAmount("yellow_dye"),
-            getResourceAmount("purple_dye"),
-            getResourceAmount("pink_dye"),
-            getResourceAmount("white_ribbon"),
-            getResourceAmount("red_ribbon"),
-            getResourceAmount("yellow_ribbon"),
-            getResourceAmount("purple_ribbon"),
-            getResourceAmount("pink_ribbon"),
-            getResourceAmount("white_bow"),
-            getResourceAmount("red_bow"),
-            getResourceAmount("yellow_bow"),
-            getResourceAmount("purple_bow"),
-            getResourceAmount("pink_bow"),
-            getResourceAmount("white_dress"),
-            getResourceAmount("red_dress"),
-            getResourceAmount("yellow_dress"),
-            getResourceAmount("purple_dress"),
-            getResourceAmount("pink_dress"),
-            getResourceAmount("white_pants"),
-            getResourceAmount("red_pants"),
-            getResourceAmount("yellow_pants"),
-            getResourceAmount("purple_pants"),
-            getResourceAmount("pink_pants"),
-            getResourceAmount("white_shirt"),
-            getResourceAmount("red_shirt"),
-            getResourceAmount("yellow_shirt"),
-            getResourceAmount("purple_shirt"),
-            getResourceAmount("pink_shirt")
-        };
-        
+        // 發送帶有資源數據的事件
         EventManager.getInstance().fireEvent(
-            new GameEvent("UPDATE_INVENTORY", items, amounts)
+            new GameEvent("UPDATE_RESOURCES", 
+                money,  // 金錢
+                getResourceAmount(getCurrentCropType() + "_seeds"),  // 當前作物的種子數量
+                0,  // 水量（如果需要的話）
+                getResourceAmount("fertilizer")  // 肥料數量
+            )
         );
     }
     
@@ -323,5 +238,22 @@ public class ResourceManager {
     
     public static String getCropKey(String displayName) {
         return CROP_KEY_MAP.get(displayName);
+    }
+    
+    private boolean isNotifying = false;
+
+    public void setResourceAmount(String resourceKey, int amount) {
+        if (isNotifying) return;
+        
+        Integer currentAmount = resources.get(resourceKey);
+        if (currentAmount == null || currentAmount != amount) {
+            isNotifying = true;
+            try {
+                resources.put(resourceKey, amount);
+                EventManager.getInstance().fireEvent(new GameEvent("INVENTORY_CHANGED"));
+            } finally {
+                isNotifying = false;
+            }
+        }
     }
 } 

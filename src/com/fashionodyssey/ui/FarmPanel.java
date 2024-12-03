@@ -27,14 +27,16 @@ public class FarmPanel extends JPanel {
         setLayout(new BorderLayout());
         initComponents();
         
-        // Listen for resource updates
+        // 監聽資源更新事件
         EventManager.getInstance().addEventListener("UPDATE_RESOURCES", event -> {
+            System.out.println("收到資源更新事件");  // 除錯訊息
             ResourceManager rm = ResourceManager.getInstance();
             updateResources(
                 rm.getResourceAmount(rm.getCurrentCropType() + "_seeds"),
-                0,  // Assuming water is not used
+                0,
                 rm.getResourceAmount("fertilizer")
             );
+            System.out.println("資源面板已更新");  // 除錯訊息
         });
         
         // 在初始化後立即觸發資源更新
@@ -45,6 +47,7 @@ public class FarmPanel extends JPanel {
             rm.getResourceAmount("fertilizer")
         );
         
+        // 通知資源管理器觸發初始更新
         rm.notifyInventoryChange();
     }
     
@@ -178,16 +181,35 @@ public class FarmPanel extends JPanel {
                     System.out.println("\n種植失敗：種子數量不足");
                 }
             } else {
-                System.out.println("\n種植失敗��作物類型轉換失敗");
+                System.out.println("\n種植失敗：作物類型轉換失敗");
             }
             System.out.println("===== 種植事件結束 =====\n");
         });
         
         harvestButton.addActionListener(e -> {
+            System.out.println("\n===== 收穫按鈕點擊事件 =====");
             requestFocusInWindow();
+            
+            // 獲取當前選中的作物類型
+            ResourceManager rm = ResourceManager.getInstance();
+            String currentCrop = rm.getCurrentCropType();
+            System.out.println("當前作物：" + currentCrop);
+            
+            // 檢查收穫前的資源數量
+            String harvestKey = "harvested_" + ResourceManager.CROP_KEY_MAP.get(currentCrop).toLowerCase();
+            System.out.println("收穫前數量檢查：");
+            System.out.println("收穫鍵值：" + harvestKey);
+            System.out.println("當前收穫數量：" + rm.getResourceAmount(harvestKey));
+            
+            // 觸發收穫事件
             EventManager.getInstance().fireEvent(
                 new GameEvent("HARVEST_CROP", null)
             );
+            
+            // 檢查收穫後的資源數量
+            System.out.println("收穫後數量檢查：");
+            System.out.println("收穫數量：" + rm.getResourceAmount(harvestKey));
+            System.out.println("===== 收穫事件結束 =====\n");
         });
         
         waterButton.addActionListener(e -> {
@@ -329,12 +351,14 @@ public class FarmPanel extends JPanel {
         seedTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         contentPanel.add(seedTitle);
         
-        String[] cropTypes = {"棉花", "玫瑰", "向日葵", "薰衣草", "鬱金香(粉)"};
-        String[] seedKeys = {"cotton_seeds", "rose_seeds", "sunflower_seeds", "lavender_seeds", "tulip_pink_seeds"};
-        
-        for (int i = 0; i < cropTypes.length; i++) {
-            JLabel seedLabel = new JLabel(String.format("%s種子: %d", 
-                cropTypes[i], rm.getResourceAmount(seedKeys[i])));
+        // 使用 CropType enum 來遍歷所有作物
+        for (CropType crop : CropType.values()) {
+            String seedCount = String.format("%s種子: %d", 
+                crop.getDisplayName(), 
+                rm.getResourceAmount(crop.name().toLowerCase() + "_seeds")
+            );
+            
+            JLabel seedLabel = new JLabel(seedCount);
             seedLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
             seedLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
             contentPanel.add(seedLabel);
@@ -348,14 +372,14 @@ public class FarmPanel extends JPanel {
         harvestTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         contentPanel.add(harvestTitle);
         
-        String[] harvestKeys = {
-            "harvested_cotton", "harvested_rose", "harvested_sunflower",
-            "harvested_lavender", "harvested_tulip_pink"
-        };
-        
-        for (int i = 0; i < cropTypes.length; i++) {
-            JLabel harvestLabel = new JLabel(String.format("收穫的%s: %d", 
-                cropTypes[i], rm.getResourceAmount(harvestKeys[i])));
+        // 同樣使用 CropType enum 來顯示收穫數量
+        for (CropType crop : CropType.values()) {
+            String harvestCount = String.format("收穫的%s: %d", 
+                crop.getDisplayName(), 
+                rm.getResourceAmount("harvested_" + crop.name().toLowerCase())
+            );
+            
+            JLabel harvestLabel = new JLabel(harvestCount);
             harvestLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
             harvestLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
             contentPanel.add(harvestLabel);

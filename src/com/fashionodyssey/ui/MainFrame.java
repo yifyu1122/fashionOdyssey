@@ -4,14 +4,14 @@ import java.awt.*;
 import javax.swing.*;
 
 public class MainFrame extends JFrame {
-    private JTabbedPane tabbedPane;
-    private FarmPanel farmPanel;
-    private ProcessingPanel processingPanel;
-    private DesignPanel designPanel;
-    private SalesPanel salesPanel;
-    private JLabel moneyLabel;
-    private JLabel statusLabel;
-    private InventoryPanel inventoryPanel;
+    private JTabbedPane tabbedPane;        // 分頁面板
+    private FarmPanel farmPanel;           // 農場面板
+    private ProcessingPanel processingPanel;// 加工面板
+    private DesignPanel designPanel;       // 設計面板
+    private SalesPanel salesPanel;         // 銷售面板
+    private JLabel moneyLabel;             // 資金顯示標籤
+    private JLabel statusLabel;            // 狀態顯示標籤
+    private InventoryPanel inventoryPanel; // 庫存面板
     
     public MainFrame() {
         setTitle("時尚創夢家 Fashion Odyssey");

@@ -35,12 +35,12 @@ public class GameMain {
         });
         
         EventManager.getInstance().addEventListener("UPDATE_RESOURCES", event -> {
-            Object[] eventArgs = event.getArgs();
-            if (eventArgs != null && eventArgs.length >= 4) {
-                int money = (Integer) eventArgs[0];
-                int seeds = (Integer) eventArgs[1];
-                int water = (Integer) eventArgs[2];
-                int fertilizer = (Integer) eventArgs[3];
+            Object[] resourceArgs = event.getArgs();
+            if (resourceArgs != null && resourceArgs.length >= 4) {
+                int money = (Integer) resourceArgs[0];
+                int seeds = (Integer) resourceArgs[1];
+                int water = (Integer) resourceArgs[2];
+                int fertilizer = (Integer) resourceArgs[3];
                 mainFrame.updateResources(money, seeds, water, fertilizer);
             }
         });

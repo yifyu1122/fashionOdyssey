@@ -237,7 +237,7 @@ public class FarmController {
         return switch (cropType.toLowerCase()) {
             case "cotton" -> "棉花";
             case "rose" -> "玫瑰";
-            case "sunflower" -> "向日";
+            case "sunflower" -> "向日葵";
             case "tulip_pink" -> "鬱金香(粉)";
             case "lavender" -> "薰衣草";
             default -> cropType;
