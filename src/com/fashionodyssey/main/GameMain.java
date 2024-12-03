@@ -6,7 +6,6 @@ import com.fashionodyssey.event.EventManager;
 import com.fashionodyssey.model.resource.CropStage;
 import com.fashionodyssey.ui.MainFrame;
 import com.fashionodyssey.util.ResourceManager;
-import java.awt.KeyboardFocusManager;
 
 public class GameMain {
     public static void main(String[] args) {
@@ -70,10 +69,6 @@ public class GameMain {
         
         EventManager.getInstance().addEventListener("BUY_FERTILIZER", event -> {
             resourceManager.buyFertilizer();
-        });
-        
-        EventManager.getInstance().addEventListener("UPDATE_PROCESSING_PANEL", event -> {
-            mainFrame.getProcessingPanel().updateResources();
         });
         
         EventManager.getInstance().addEventListener("FARM_AUTO_ACTION", event -> {

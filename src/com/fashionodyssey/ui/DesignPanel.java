@@ -10,7 +10,6 @@ import com.fashionodyssey.model.design.Clothing;
 public class DesignPanel extends JPanel {
     private JComboBox<String> styleSelector;
     private JComboBox<String> colorSelector;
-    private JSlider qualitySlider;
     private JButton designButton;
     private JButton saveButton;
     private JPanel previewPanel;
@@ -22,16 +21,12 @@ public class DesignPanel extends JPanel {
     
     private void initComponents() {
         // 設計控制面板
-        JPanel controlPanel = new JPanel(new GridLayout(4, 2, 5, 5));
+        JPanel controlPanel = new JPanel(new GridLayout(3, 2, 5, 5));
         String[] styles = {"連衣裙", "上衣", "褲子"};
         String[] colors = {"紅色", "藍色", "綠色", "黃色"};
         
         styleSelector = new JComboBox<>(styles);
         colorSelector = new JComboBox<>(colors);
-        qualitySlider = new JSlider(1, 10, 5);
-        qualitySlider.setMajorTickSpacing(1);
-        qualitySlider.setPaintTicks(true);
-        qualitySlider.setPaintLabels(true);
         
         designButton = new JButton("設計");
         saveButton = new JButton("保存");
@@ -40,8 +35,6 @@ public class DesignPanel extends JPanel {
         controlPanel.add(styleSelector);
         controlPanel.add(new JLabel("顏色:"));
         controlPanel.add(colorSelector);
-        controlPanel.add(new JLabel("品質:"));
-        controlPanel.add(qualitySlider);
         
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(designButton);
@@ -62,9 +55,8 @@ public class DesignPanel extends JPanel {
         designButton.addActionListener(e -> {
             String style = (String) styleSelector.getSelectedItem();
             String color = (String) colorSelector.getSelectedItem();
-            int quality = qualitySlider.getValue();
             
-            Clothing clothing = new Clothing(style, color, quality);
+            Clothing clothing = new Clothing(style, color, 5);  // 固定品質為5
             EventManager.getInstance().fireEvent(
                 new GameEvent("DESIGN_CLOTHING", clothing)
             );

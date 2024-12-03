@@ -58,7 +58,7 @@ public class ResourceManager {
         resources.put("harvested_lavender", 0);
         
         // 初始化加工材料
-        resources.put("fabric", 0);
+        resources.put("white_fabric", 0);
         resources.put("red_dye", 0);
         resources.put("yellow_dye", 0);
         resources.put("pink_dye", 0);
@@ -67,8 +67,7 @@ public class ResourceManager {
     
     public void addResource(String type, int amount) {
         resources.merge(type, amount, Integer::sum);
-        notifyResourceChange();     // 通知更新
-        notifyInventoryChange();    // 更新倉庫顯示
+        notifyResourceChange();
     }
     
     public boolean useResource(String type, int amount) {
@@ -149,17 +148,9 @@ public class ResourceManager {
     }
     
     public void notifyResourceChange() {
-        // 更新資源顯示
         EventManager.getInstance().fireEvent(
-            new GameEvent("UPDATE_RESOURCES",
-                money,
-                getResourceAmount(currentCropType + "_seeds"),
-                0,  // water 未使用
-                getResourceAmount("fertilizer")
-            )
+            new GameEvent("UPDATE_RESOURCES")
         );
-        
-        // 確保同時更新倉庫顯示
         notifyInventoryChange();
     }
     
@@ -198,51 +189,6 @@ public class ResourceManager {
         );
     }
     
-    public boolean hasMaterials(String product) {
-        // 檢查製作產品所需的材料
-        return switch(product) {
-            case "fabric" -> getResourceAmount("harvested_cotton") >= 2;
-            case "red_dye" -> getResourceAmount("harvested_rose") >= 1;
-            case "yellow_dye" -> getResourceAmount("harvested_sunflower") >= 1;
-            case "purple_dye" -> getResourceAmount("harvested_lavender") >= 1;
-            case "pink_dye" -> getResourceAmount("harvested_tulip_pink") >= 1;
-            default -> false;
-        };
-    }
-    
-    public void craftProduct(String product) {
-        // 製作產品並消耗材料
-        if (hasMaterials(product)) {
-            switch (product) {
-                case "fabric":
-                    consumeResource("harvested_cotton", 2);
-                    addResource("fabric", 1);
-                    showStatus("布料製作成功！");
-                    break;
-                case "red_dye":
-                    consumeResource("harvested_rose", 1);
-                    addResource("red_dye", 1);
-                    showStatus("紅色染料製作成功！");
-                    break;
-                case "yellow_dye":
-                    consumeResource("harvested_sunflower", 1);
-                    addResource("yellow_dye", 1);
-                    showStatus("黃色染料製作成功！");
-                    break;
-                case "purple_dye":
-                    consumeResource("harvested_lavender", 1);
-                    addResource("purple_dye", 1);
-                    showStatus("紫色染料製作成功！");
-                    break;
-                case "pink_dye":
-                    consumeResource("harvested_tulip_pink", 1);
-                    addResource("pink_dye", 1);
-                    showStatus("粉色染料製作成功！");
-                    break;
-            }
-            notifyResourceChange();
-        }
-    }
     
     public void buyFertilizer() {
         int fertilizerCost = 20;  // 肥料價格
@@ -264,7 +210,6 @@ public class ResourceManager {
         int current = getResourceAmount(type);
         if (current >= amount) {
             resources.put(type, current - amount);
-            System.out.println("消耗資源: " + type + ", 消耗: " + amount + ", 剩餘: " + (current - amount));
             notifyResourceChange();
         }
     }
@@ -275,24 +220,47 @@ public class ResourceManager {
     
     public void notifyInventoryChange() {
         String[] items = {
-            "肥料 (用於加速作物生長)",
-            "棉花種子 (種植價格: $8)", 
-            "玫瑰種子 (種植價格: $10)", 
-            "向日葵種子 (種植價格: $8)", 
-            "鬱金香(粉)種子 (種植價格: $25)", 
-            "薰衣草種子 (種植價格: $15)",
-            "棉花 (收穫量: 3-5個，用於製作布料)", 
-            "玫瑰 (收穫量: 1-3個，用於製作紅色染料)", 
-            "向日葵 (收穫量: 1-3個，用於製作黃色染料)", 
-            "鬱金香(粉) (收穫量: 1-3個，用於製作粉色染料)", 
-            "薰衣草 (收穫量: 1-3個，用於製作紫色染料)",
-            "布料 (由2個棉花製成，用於製作服裝)", 
-            "紅色染料 (由1個玫瑰製成，用於染色)", 
-            "黃色染料 (由1個向日葵製成，用於染色)", 
-            "紫色染料 (由1個薰衣草製成，用於染色)",
-            "連衣裙 (需要2塊布料製作)", 
-            "襯衫 (需要1塊布料製作)", 
-            "褲子 (需要1塊布料製作)"
+            "肥料",
+            "棉花種子", 
+            "玫瑰種子", 
+            "向日葵種子", 
+            "鬱金香(粉)種子", 
+            "薰衣草種子",
+            "棉花", 
+            "玫瑰", 
+            "向日葵", 
+            "鬱金香(粉)", 
+            "薰衣草",
+            "白色布料", 
+            "紅色染料", 
+            "黃色染料", 
+            "紫色染料",
+            "粉色染料",
+            "白色緞帶", 
+            "紅色緞帶", 
+            "黃色緞帶", 
+            "紫色緞帶",
+            "粉色緞帶",
+            "白色蝴蝶結", 
+            "紅色蝴蝶結", 
+            "黃色蝴蝶結", 
+            "紫色蝴蝶結",
+            "粉色蝴蝶結",
+            "白色連衣裙",
+            "紅色連衣裙",
+            "黃色連衣裙",
+            "紫色連衣裙",
+            "粉色連衣裙",
+            "白色褲子",
+            "紅色褲子",
+            "黃色褲子",
+            "紫色褲子",
+            "粉色褲子",
+            "白色襯衫",
+            "紅色襯衫",
+            "黃色襯衫",
+            "紫色襯衫",
+            "粉色襯衫"
         };
         
         int[] amounts = {
@@ -307,14 +275,36 @@ public class ResourceManager {
             getResourceAmount("harvested_sunflower"),
             getResourceAmount("harvested_tulip_pink"),
             getResourceAmount("harvested_lavender"),
-            getResourceAmount("fabric"),
+            getResourceAmount("white_fabric"),
             getResourceAmount("red_dye"),
             getResourceAmount("yellow_dye"),
             getResourceAmount("purple_dye"),
             getResourceAmount("pink_dye"),
-            getResourceAmount("dress"),
-            getResourceAmount("shirt"),
-            getResourceAmount("pants")
+            getResourceAmount("white_ribbon"),
+            getResourceAmount("red_ribbon"),
+            getResourceAmount("yellow_ribbon"),
+            getResourceAmount("purple_ribbon"),
+            getResourceAmount("pink_ribbon"),
+            getResourceAmount("white_bow"),
+            getResourceAmount("red_bow"),
+            getResourceAmount("yellow_bow"),
+            getResourceAmount("purple_bow"),
+            getResourceAmount("pink_bow"),
+            getResourceAmount("white_dress"),
+            getResourceAmount("red_dress"),
+            getResourceAmount("yellow_dress"),
+            getResourceAmount("purple_dress"),
+            getResourceAmount("pink_dress"),
+            getResourceAmount("white_pants"),
+            getResourceAmount("red_pants"),
+            getResourceAmount("yellow_pants"),
+            getResourceAmount("purple_pants"),
+            getResourceAmount("pink_pants"),
+            getResourceAmount("white_shirt"),
+            getResourceAmount("red_shirt"),
+            getResourceAmount("yellow_shirt"),
+            getResourceAmount("purple_shirt"),
+            getResourceAmount("pink_shirt")
         };
         
         EventManager.getInstance().fireEvent(

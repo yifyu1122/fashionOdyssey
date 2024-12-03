@@ -27,6 +27,16 @@ public class FarmPanel extends JPanel {
         setLayout(new BorderLayout());
         initComponents();
         
+        // Listen for resource updates
+        EventManager.getInstance().addEventListener("UPDATE_RESOURCES", event -> {
+            ResourceManager rm = ResourceManager.getInstance();
+            updateResources(
+                rm.getResourceAmount(rm.getCurrentCropType() + "_seeds"),
+                0,  // Assuming water is not used
+                rm.getResourceAmount("fertilizer")
+            );
+        });
+        
         // 在初始化後立即觸發資源更新
         ResourceManager rm = ResourceManager.getInstance();
         updateResources(
@@ -45,8 +55,8 @@ public class FarmPanel extends JPanel {
             CropType.cotton.getDisplayName(),
             CropType.rose.getDisplayName(),
             CropType.sunflower.getDisplayName(),
-            CropType.tulip_pink.getDisplayName(),
-            CropType.lavender.getDisplayName()
+            CropType.lavender.getDisplayName(),
+            CropType.tulip_pink.getDisplayName()
         };
         
         // 設置大字體
@@ -206,7 +216,7 @@ public class FarmPanel extends JPanel {
         resourcePanel.setPreferredSize(new Dimension(200, 0));  // 設置固定寬度
         resourcePanel.setBackground(new Color(240, 240, 240));  // 設置背景色
         
-        // 確保所有標籤左對齊
+        // 確保所��標籤左對齊
         resourcePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         
         // 將資源面板添加到左側
