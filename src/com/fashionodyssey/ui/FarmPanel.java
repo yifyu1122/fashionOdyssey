@@ -12,7 +12,7 @@ import com.fashionodyssey.ui.dialog.ShopDialog;
 import com.fashionodyssey.util.ResourceManager;
 
 public class FarmPanel extends JPanel {
-    private static final int GRID_SIZE = 1;
+    private static final int GRID_SIZE = 2;
     private JButton[] farmSlots;
     private JComboBox<String> cropSelector;
     private JButton plantButton;
@@ -26,6 +26,7 @@ public class FarmPanel extends JPanel {
     
     public FarmPanel() {
         setLayout(new BorderLayout());
+        
         initComponents();
         
         // 監聽資源更新事件
@@ -127,31 +128,27 @@ public class FarmPanel extends JPanel {
         Dimension buttonSize = new Dimension(120, 120);
         Font gridFont = new Font("微軟正黑體", Font.BOLD, 14);  // 格子字體
         
-        
-        for (int slotIndex = 0; slotIndex < GRID_SIZE * GRID_SIZE; slotIndex++) {
-            final int index = slotIndex;
-            farmSlots[index] = new JButton("一個空地");
-            farmSlots[index].setFont(gridFont);
-            farmSlots[index].setToolTipText("點擊選擇此格子");
-            farmSlots[index].setPreferredSize(buttonSize);
-            farmSlots[index].setMinimumSize(buttonSize);
-            farmSlots[index].setMaximumSize(buttonSize);
-            farmSlots[index].setOpaque(true);
-            farmSlots[index].setBorderPainted(true);
-            farmSlots[index].setContentAreaFilled(true);
-            farmSlots[index].addActionListener(e -> {
-                System.out.println("===== 土地格子點擊事件 =====");
-                this.requestFocusInWindow();
-                int row = index / GRID_SIZE;
-                int col = index % GRID_SIZE;
-                System.out.println("點擊的格子索引: " + index);
-                System.out.println("轉換後座標: row=" + row + ", col=" + col);
+        for (int i = 0; i < GRID_SIZE; i++) {
+            for (int j = 0; j < GRID_SIZE; j++) {
+                final int index = i * GRID_SIZE + j;
+                farmSlots[index] = new JButton("一個空地");
+                farmSlots[index].setFont(gridFont);
+                farmSlots[index].setPreferredSize(buttonSize);
+                farmSlots[index].setMinimumSize(buttonSize);
+                farmSlots[index].setMaximumSize(buttonSize);
                 
-                EventManager.getInstance().fireEvent(
-                    new GameEvent("SELECT_FARM_SLOT", row, col)
-                );
-            });
-            farmGrid.add(farmSlots[index]);
+                // 設置點擊事件
+                final int row = i;
+                final int col = j;
+                farmSlots[index].addActionListener(e -> {
+                    System.out.println("點擊格子：" + row + "," + col);
+                    EventManager.getInstance().fireEvent(
+                        new GameEvent("SELECT_FARM_SLOT", row, col)
+                    );
+                });
+                
+                farmGrid.add(farmSlots[index]);
+            }
         }
         
         // 創建一個新的面板來包含農場格子和狀態標籤
@@ -161,6 +158,9 @@ public class FarmPanel extends JPanel {
         // 創建一個面板來放置狀態標籤，並將其靠左對齊
         JPanel statusPanel = new JPanel(new BorderLayout());
         statusPanel.add(farmStatusLabel, BorderLayout.WEST);
+        
+        // 設置狀態標籤的邊距
+        farmStatusLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));  // 上, 左, 下, 右
         
         centerPanel.add(statusPanel, BorderLayout.SOUTH);
         
@@ -271,7 +271,8 @@ public class FarmPanel extends JPanel {
         harvestCountLabel.setText("收穫數量: " + count);
     }
 
-    public void updateSlotStatus(int index, String cropType, CropStage stage) {
+    public void updateSlotStatus(int row, int col, String cropType, CropStage stage) {
+        int index = row * GRID_SIZE + col;
         if (index >= 0 && index < farmSlots.length) {
             String status = "一個空地";
             String message = "這塊地正期待著新生命的到來！";
@@ -292,7 +293,7 @@ public class FarmPanel extends JPanel {
                         bgColor = new Color(209, 231, 221);
                     }
                     case FERTILIZED -> {
-                        status = displayName + " (已施肥)";
+                        status = displayName + " (施肥)";
                         message = "植物正在努力成長中，讓我們耐心等待～";
                         bgColor = new Color(255, 243, 205);
                     }

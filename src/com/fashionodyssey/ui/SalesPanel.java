@@ -42,7 +42,10 @@ public class SalesPanel extends JPanel {
     
     public SalesPanel() {
         setLayout(new BorderLayout());
+        
         initComponents();
+        
+
     }
     
     private void initComponents() {

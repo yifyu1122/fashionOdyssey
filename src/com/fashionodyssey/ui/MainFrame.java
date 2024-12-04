@@ -1,5 +1,7 @@
 package com.fashionodyssey.ui;
 
+import com.fashionodyssey.event.EventManager;
+import com.fashionodyssey.util.ResourceManager;
 import java.awt.*;
 import javax.swing.*;
 
@@ -10,9 +12,9 @@ public class MainFrame extends JFrame {
     private ProcessingPanel processingPanel;// 加工面板
     private DesignPanel designPanel;       // 設計面板
     private SalesPanel salesPanel;         // 銷售面板
-    private JLabel moneyLabel;             // 資金顯示標籤
     private JLabel statusLabel;            // 狀態顯示標籤
     private InventoryPanel inventoryPanel; // 庫存面板
+    private JLabel moneyLabel;             // 資金顯示標籤
     
     public MainFrame() {
         setTitle("時尚創夢家 Fashion Odyssey");
@@ -21,15 +23,17 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         
         // 初始化標籤，使用更大的字體
-        moneyLabel = new JLabel("資金: $1000");
-        moneyLabel.setFont(new Font("微軟正黑體", Font.BOLD, 24));  // 改為24號字體
         statusLabel = new JLabel("歡迎來到夢想農場！今天也要好好照顧作物喔～");
         statusLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
         
-        // 創建頂部面板
+        // 初始化資金標籤
+        moneyLabel = new JLabel("資金: $" + ResourceManager.getInstance().getMoney());
+        moneyLabel.setFont(new Font("微軟正黑體", Font.BOLD, 16));
+        
+        // 創建頂部面板，包含狀態標籤和資金標籤
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));  // 添加邊距
-        topPanel.add(statusLabel, BorderLayout.WEST);  // 將狀態標籤放在左側
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        topPanel.add(statusLabel, BorderLayout.CENTER);
         topPanel.add(moneyLabel, BorderLayout.EAST);
         add(topPanel, BorderLayout.NORTH);
         
@@ -70,6 +74,12 @@ public class MainFrame extends JFrame {
         
         // 顯示初始面板
         showPanel("農場");
+        
+        // 註冊資金更新事件
+        EventManager.getInstance().addEventListener("UPDATE_MONEY", event -> {
+            int amount = (Integer) event.getData();
+            updateMoney(amount);
+        });
     }
     
     private JButton createNavButton(String name, Font font) {
@@ -116,21 +126,20 @@ public class MainFrame extends JFrame {
         CardLayout cl = (CardLayout) contentPanel.getLayout();
         cl.show(contentPanel, name);
     }
+
+    public void updateStatus(String message) {
+        statusLabel.setText(message);
+    }
     
     public void updateMoney(int amount) {
         moneyLabel.setText("資金: $" + amount);
-    }
-    
-    public void updateStatus(String message) {
-        statusLabel.setText(message);
     }
     
     public FarmPanel getFarmPanel() {
         return farmPanel;
     }
     
-    public void updateResources(int money, int seeds, int water, int fertilizer) {
-        updateMoney(money);
+    public void updateResources(int seeds, int water, int fertilizer) {
         farmPanel.updateResources(seeds, water, fertilizer);
     }
     

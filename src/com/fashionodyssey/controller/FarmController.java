@@ -7,13 +7,15 @@ import com.fashionodyssey.model.resource.CropStage;
 import com.fashionodyssey.util.ResourceManager;
 
 public class FarmController {
-    private static final int GRID_SIZE = 1;
+    private static final int GRID_SIZE = 2;
     private ResourceManager resourceManager;
     private Grid[][] farmGrid;
     private int currentRow = 0;
     private int currentCol = 0;
     private int harvestCount = 0;
     private CropStage currentStage = CropStage.EMPTY;
+    private int fertilizingRow = -1;
+    private int fertilizingCol = -1;
 
     public FarmController() {
         this.resourceManager = ResourceManager.getInstance();
@@ -166,13 +168,17 @@ public class FarmController {
             
             if (currentGrid.getCropStage() == CropStage.WATERED) {
                 if (resourceManager.canPerformAction("FERTILIZE")) {
+                    // 記錄正在施肥的格子位置
+                    fertilizingRow = currentRow;
+                    fertilizingCol = currentCol;
+                    
                     currentGrid.fertilize();
                     resourceManager.consumeResource("fertilizer", 1);
                     
                     // 先更新為已施肥狀態
                     EventManager.getInstance().fireEvent(
                         new GameEvent("UPDATE_FARM_SLOT", 
-                            currentRow * GRID_SIZE + currentCol,
+                            fertilizingRow * GRID_SIZE + fertilizingCol,
                             currentGrid.getCropType(),
                             CropStage.FERTILIZED
                         )
@@ -180,15 +186,19 @@ public class FarmController {
                     
                     // 延遲一小段時間後成熟
                     javax.swing.Timer timer = new javax.swing.Timer(1000, e -> {
-                        currentGrid.mature();
+                        Grid targetGrid = farmGrid[fertilizingRow][fertilizingCol];
+                        targetGrid.mature();
                         EventManager.getInstance().fireEvent(
                             new GameEvent("UPDATE_FARM_SLOT", 
-                                currentRow * GRID_SIZE + currentCol,
-                                currentGrid.getCropType(),
+                                fertilizingRow * GRID_SIZE + fertilizingCol,
+                                targetGrid.getCropType(),
                                 CropStage.MATURE
                             )
                         );
                         showStatus("施肥完成，作物已成熟");
+                        // 重置施肥狀態
+                        fertilizingRow = -1;
+                        fertilizingCol = -1;
                     });
                     timer.setRepeats(false);
                     timer.start();

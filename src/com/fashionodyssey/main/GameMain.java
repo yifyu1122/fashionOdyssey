@@ -20,7 +20,11 @@ public class GameMain {
             int index = (Integer) event.getArgs()[0];
             String cropType = (String) event.getArgs()[1];
             CropStage stage = (CropStage) event.getArgs()[2];
-            mainFrame.getFarmPanel().updateSlotStatus(index, cropType, stage);
+            
+            int row = index / 2;  // Assuming GRID_SIZE is 2
+            int col = index % 2;
+            
+            mainFrame.getFarmPanel().updateSlotStatus(row, col, cropType, stage);
         });
         
         EventManager.getInstance().addEventListener("SELECT_FARM_SLOT", event -> {
@@ -38,7 +42,7 @@ public class GameMain {
                 int seeds = (Integer) resourceArgs[1];
                 int water = (Integer) resourceArgs[2];
                 int fertilizer = (Integer) resourceArgs[3];
-                mainFrame.updateResources(money, seeds, water, fertilizer);
+                mainFrame.updateResources( seeds, water, fertilizer);
             }
         });
         

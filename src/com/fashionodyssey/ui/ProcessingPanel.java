@@ -14,6 +14,7 @@ public class ProcessingPanel extends JPanel {
     private int currentPage = 0;
     private final String[] pageNames = {"基本", "染料", "布料", "蝴蝶結", "緞帶", "連衣裙", "襯衫", "褲子"};
     private ProcessingController controller;
+    private JLabel moneyLabel;
 
     public ProcessingPanel() {
         controller = new ProcessingController();
@@ -28,6 +29,12 @@ public class ProcessingPanel extends JPanel {
         
         // Listen for resource updates
         EventManager.getInstance().addEventListener("UPDATE_RESOURCES", event -> updateResources());
+        
+        // 添加資金更新監聽
+        EventManager.getInstance().addEventListener("UPDATE_MONEY", event -> {
+            int amount = (Integer) event.getData();
+            moneyLabel.setText("資金: $" + amount);
+        });
     }
 
     private void initComponents() {
@@ -54,7 +61,7 @@ public class ProcessingPanel extends JPanel {
         // 添加配方按鈕
         String[][] recipes = {
             {"白色布料", "2個棉花 → 1個白色布料"},
-            {"蕾絲", "1個棉花 → 1個蕾絲"},
+            {"白色蕾絲", "1個棉花 → 1個白色蕾絲"},
             {"紅色染料", "1個玫瑰 → 1個紅色染料"},
             {"黃色染料", "1個向日葵 → 1個黃色染料"},
             {"粉色染料", "1個鬱金香(粉) → 1個粉色染料"},
@@ -241,6 +248,11 @@ public class ProcessingPanel extends JPanel {
             case "黃色蕾絲" -> "yellow_lace";
             case "紫色蕾絲" -> "purple_lace";
             case "粉色蕾絲" -> "pink_lace";
+            case "棉花" -> "harvested_cotton";
+            case "玫瑰" -> "rose";
+            case "向日葵" -> "sunflower";
+            case "鬱金香(粉)" -> "tulip_pink";
+            case "薰衣草" -> "lavender";
             default -> "";
         };
     }
@@ -328,49 +340,133 @@ public class ProcessingPanel extends JPanel {
             }
             case 1 -> { // 染料
                 String[] items = {"玫瑰", "向日葵", "鬱金香(粉)", "薰衣草", "紅色染料", "黃色染料", "紫色染料", "粉色染料"};
-                String[] keys = {"rose", "sunflower", "tulip_pink", "lavender", "red_dye", "yellow_dye", "purple_dye", "pink_dye"};
+                String[] keys = {
+                    "harvested_rose",      
+                    "harvested_sunflower", 
+                    "harvested_tulip_pink",
+                    "harvested_lavender",  
+                    "red_dye", 
+                    "yellow_dye", 
+                    "purple_dye", 
+                    "pink_dye"
+                };
                 addResourceList(contentPanel, items, keys, rm);
                 updateRecipeButtons(new int[]{2, 3, 4, 5});
             }
             case 2 -> { // 布料
                 String[] items = {"白色布料","紅色染料", "紅色布料", "黃色染料", "黃色布料", "紫色染料", "紫色布料", "粉色染料", "粉色布料"};
-                String[] keys = {"white_fabric", "red_dye", "red_fabric", "yellow_dye", "yellow_fabric", "purple_dye", "purple_fabric", "pink_dye", "pink_fabric"};
+                String[] keys = {
+                    "white_fabric", 
+                    "red_dye", 
+                    "red_fabric", 
+                    "yellow_dye", 
+                    "yellow_fabric", 
+                    "purple_dye", 
+                    "purple_fabric", 
+                    "pink_dye", 
+                    "pink_fabric"
+                };
                 addResourceList(contentPanel, items, keys, rm);
                 updateRecipeButtons(new int[]{0, 6, 7, 8, 9});
             }
             case 3 -> { // 蝴蝶結
                 String[] items = {"白色布料", "白色蝴蝶結", "紅色布料", "紅色蝴蝶結", "黃色布料", "黃色蝴蝶結", "紫色布料", "紫色蝴蝶結", "粉色布料", "粉色蝴蝶結"};
-                String[] keys = {"white_fabric", "white_bow", "red_fabric", "red_bow", "yellow_fabric", "yellow_bow", "purple_fabric", "purple_bow", "pink_fabric", "pink_bow"};
+                String[] keys = {
+                    "white_fabric", 
+                    "white_bow", 
+                    "red_fabric", 
+                    "red_bow", 
+                    "yellow_fabric", 
+                    "yellow_bow", 
+                    "purple_fabric", 
+                    "purple_bow", 
+                    "pink_fabric", 
+                    "pink_bow"
+                };
                 addResourceList(contentPanel, items, keys, rm);
                 updateRecipeButtons(new int[]{10, 11, 12, 13, 14});
             }
             case 4 -> { // 緞帶
                 String[] items = {"白色布料", "白色緞帶", "紅色布料", "紅色緞帶", "黃色布料", "黃色緞帶", "紫色布料", "紫色緞帶", "粉色布料", "粉色緞帶"};
-                String[] keys = {"white_fabric", "white_ribbon", "red_fabric", "red_ribbon", "yellow_fabric", "yellow_ribbon", "purple_fabric", "purple_ribbon", "pink_fabric", "pink_ribbon"};
+                String[] keys = {
+                    "white_fabric", 
+                    "white_ribbon", 
+                    "red_fabric", 
+                    "red_ribbon", 
+                    "yellow_fabric", 
+                    "yellow_ribbon", 
+                    "purple_fabric", 
+                    "purple_ribbon", 
+                    "pink_fabric", 
+                    "pink_ribbon"
+                };
                 addResourceList(contentPanel, items, keys, rm);
                 updateRecipeButtons(new int[]{15, 16, 17, 18, 19});
             }
             case 5 -> { // 連衣裙     
                 String[] items = {"白色布料", "白色連衣裙", "紅色布料", "紅色連衣裙", "黃色布料", "黃色連衣裙", "紫色布料", "紫色連衣裙", "粉色布料", "粉色連衣裙"};
-                String[] keys = {"white_fabric", "white_dress", "red_fabric", "red_dress", "yellow_fabric", "yellow_dress", "purple_fabric", "purple_dress", "pink_fabric", "pink_dress"};
+                String[] keys = {
+                    "white_fabric", 
+                    "white_dress", 
+                    "red_fabric", 
+                    "red_dress", 
+                    "yellow_fabric", 
+                    "yellow_dress", 
+                    "purple_fabric", 
+                    "purple_dress", 
+                    "pink_fabric", 
+                    "pink_dress"
+                };
                 addResourceList(contentPanel, items, keys, rm);
                 updateRecipeButtons(new int[]{20, 21, 22, 23, 24});
             }
             case 6 -> { // 襯衫
                 String[] items = {"白色布料", "白色襯衫", "紅色布料", "紅色襯衫", "黃色布料", "黃色襯衫", "紫色布料", "紫色襯衫", "粉色布料", "粉色襯衫"};
-                String[] keys = {"white_fabric", "white_shirt", "red_fabric", "red_shirt", "yellow_fabric", "yellow_shirt", "purple_fabric", "purple_shirt", "pink_fabric", "pink_shirt"};
+                String[] keys = {
+                    "white_fabric", 
+                    "white_shirt", 
+                    "red_fabric", 
+                    "red_shirt", 
+                    "yellow_fabric", 
+                    "yellow_shirt", 
+                    "purple_fabric", 
+                    "purple_shirt", 
+                    "pink_fabric", 
+                    "pink_shirt"
+                };
                 addResourceList(contentPanel, items, keys, rm);
                 updateRecipeButtons(new int[]{25, 26, 27, 28, 29});
             }
             case 7 -> { // 褲子
                 String[] items = {"白色布料", "白色褲子", "紅色布料", "紅色褲子", "黃色布料", "黃色褲子", "紫色布料", "紫色褲子", "粉色布料", "粉色褲子"};
-                String[] keys = {"white_fabric", "white_pants", "red_fabric", "red_pants", "yellow_fabric", "yellow_pants", "purple_fabric", "purple_pants", "pink_fabric", "pink_pants"};
+                String[] keys = {
+                    "white_fabric", 
+                    "white_pants", 
+                    "red_fabric", 
+                    "red_pants", 
+                    "yellow_fabric", 
+                    "yellow_pants", 
+                    "purple_fabric", 
+                    "purple_pants", 
+                    "pink_fabric", 
+                    "pink_pants"
+                };
                 addResourceList(contentPanel, items, keys, rm);
                 updateRecipeButtons(new int[]{30, 31, 32, 33, 34});
             }
             case 8 -> { // 蕾絲
                 String[] items = {"白色蕾絲", "紅色染料", "紅色蕾絲", "黃色染料", "黃色蕾絲", "紫色染料", "紫色蕾絲", "粉色染料", "粉色蕾絲"};
-                String[] keys = {"white_lace", "red_dye", "red_lace", "yellow_dye", "yellow_lace", "purple_dye", "purple_lace", "pink_dye", "pink_lace"};
+                String[] keys = {
+                    "white_lace", 
+                    "red_dye", 
+                    "red_lace", 
+                    "yellow_dye", 
+                    "yellow_lace", 
+                    "purple_dye", 
+                    "purple_lace", 
+                    "pink_dye", 
+                    "pink_lace"
+                };
                 addResourceList(contentPanel, items, keys, rm);
                 updateRecipeButtons(new int[]{35, 36, 37, 38});
             }

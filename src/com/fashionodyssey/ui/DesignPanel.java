@@ -16,7 +16,10 @@ public class DesignPanel extends JPanel {
     
     public DesignPanel() {
         setLayout(new BorderLayout());
+        
         initComponents();
+        
+    
     }
     
     private void initComponents() {

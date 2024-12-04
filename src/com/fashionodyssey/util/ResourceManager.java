@@ -112,7 +112,12 @@ public class ResourceManager {
     
     public void addMoney(int amount) {
         money += amount;
-        notifyResourceChange();
+        EventManager.getInstance().fireEvent(new GameEvent("UPDATE_MONEY", money));
+    }
+    
+    public void spendMoney(int amount) {
+        money -= amount;
+        EventManager.getInstance().fireEvent(new GameEvent("UPDATE_MONEY", money));
     }
     
     public boolean useMoney(int amount) {
