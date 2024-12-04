@@ -63,6 +63,30 @@ public class ResourceManager {
         resources.put("yellow_dye", 0);
         resources.put("pink_dye", 0);
         resources.put("purple_dye", 0);
+
+        resources.put("white_bow", 0);
+        resources.put("red_bow", 0);
+        resources.put("yellow_bow", 0);
+        resources.put("pink_bow", 0);
+        resources.put("purple_bow", 0);
+
+        resources.put("white_dress", 0);
+        resources.put("red_dress", 0);
+        resources.put("yellow_dress", 0);
+        resources.put("pink_dress", 0);
+        resources.put("purple_dress", 0);
+
+        resources.put("white_shirt", 0);
+        resources.put("red_shirt", 0);
+        resources.put("yellow_shirt", 0);
+        resources.put("pink_shirt", 0);
+        resources.put("purple_shirt", 0);
+
+        resources.put("white_pants", 0);
+        resources.put("red_pants", 0);
+        resources.put("yellow_pants", 0);
+        resources.put("pink_pants", 0);
+        resources.put("purple_pants", 0);
     }
     
     public void addResource(String type, int amount) {

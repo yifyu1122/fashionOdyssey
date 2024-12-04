@@ -21,7 +21,7 @@ public class ProcessingController {
     public boolean canCraft(String product) {
         return switch(product) {
             case "white_fabric" -> resourceManager.getResourceAmount("harvested_cotton") >= 2;
-            case "lace" -> resourceManager.getResourceAmount("harvested_cotton") >= 1;
+            case "white_lace" -> resourceManager.getResourceAmount("harvested_cotton") >= 1;
             case "red_dye" -> resourceManager.getResourceAmount("harvested_rose") >= 1;
             case "yellow_dye" -> resourceManager.getResourceAmount("harvested_sunflower") >= 1;
             case "pink_dye" -> resourceManager.getResourceAmount("harvested_tulip_pink") >= 1;
@@ -59,6 +59,10 @@ public class ProcessingController {
             case "yellow_pants" -> resourceManager.getResourceAmount("yellow_fabric") >= 1;
             case "purple_pants" -> resourceManager.getResourceAmount("purple_fabric") >= 1;
             case "pink_pants" -> resourceManager.getResourceAmount("pink_fabric") >= 1;
+            case "red_lace" -> resourceManager.getResourceAmount("white_lace") >= 1;
+            case "yellow_lace" -> resourceManager.getResourceAmount("white_lace") >= 1;
+            case "purple_lace" -> resourceManager.getResourceAmount("white_lace") >= 1;
+            case "pink_lace" -> resourceManager.getResourceAmount("white_lace") >= 1;
             default -> false;
         };
     }
@@ -107,9 +111,9 @@ public class ProcessingController {
                 resourceManager.consumeResource("purple_dye", 1);
                 resourceManager.addResource("purple_fabric", 1);
                 break;
-            case "lace":
+            case "white_lace":
                 resourceManager.consumeResource("harvested_cotton", 1);
-                resourceManager.addResource("lace", 1);
+                resourceManager.addResource("white_lace", 1);
                 break;
             case "white_bow":
                 resourceManager.consumeResource("white_fabric", 1);
@@ -211,6 +215,22 @@ public class ProcessingController {
                 resourceManager.consumeResource("pink_fabric", 1);
                 resourceManager.addResource("pink_pants", 1);
                 break;
+            case "red_lace":
+                resourceManager.consumeResource("white_lace", 1);
+                resourceManager.addResource("red_lace", 1);
+                break;  
+            case "yellow_lace":
+                resourceManager.consumeResource("white_lace", 1);
+                resourceManager.addResource("yellow_lace", 1);
+                break;  
+            case "purple_lace":
+                resourceManager.consumeResource("white_lace", 1);
+                resourceManager.addResource("purple_lace", 1);
+                break;        
+            case "pink_lace":
+                resourceManager.consumeResource("white_lace", 1);
+                resourceManager.addResource("pink_lace", 1);
+                break;        
         }
         
         resourceManager.notifyResourceChange();

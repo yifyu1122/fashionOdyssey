@@ -204,7 +204,7 @@ public class ProcessingPanel extends JPanel {
     private String getProductId(String recipeName) {
         return switch(recipeName) {
             case "白色布料" -> "white_fabric";
-            case "蕾絲" -> "lace";
+            case "白色蕾絲" -> "white_lace";
             case "紅色染料" -> "red_dye";
             case "黃色染料" -> "yellow_dye";
             case "粉色染料" -> "pink_dye";
@@ -238,6 +238,10 @@ public class ProcessingPanel extends JPanel {
             case "黃色褲子" -> "yellow_pants";
             case "粉色褲子" -> "pink_pants";
             case "紫色褲子" -> "purple_pants";
+            case "紅色蕾絲" -> "red_lace";
+            case "黃色蕾絲" -> "yellow_lace";
+            case "紫色蕾絲" -> "purple_lace";
+            case "粉色蕾絲" -> "pink_lace";
             default -> "";
         };
     }
@@ -327,10 +331,10 @@ public class ProcessingPanel extends JPanel {
         // 根據當前頁面顯示對應資源和配方
         switch (currentPage) {
             case 0 -> { // 基本
-                String[] flowers = {"棉花", "白色布料", "蕾絲"};
-                String[] keys = {"harvested_cotton", "white_fabric", "lace"};
+                String[] flowers = {"棉花", "白色布料", "白色蕾絲"};
+                String[] keys = {"harvested_cotton", "white_fabric", "white_lace"};
                 addResourceList(contentPanel, flowers, keys, rm);
-                updateRecipeButtons(new int[]{0, 1, 2});
+                updateRecipeButtons(new int[]{0, 1});
             }
             case 1 -> { // 染料
                 String[] items = {"紅色染料", "黃色染料", "紫色染料", "粉色染料"};
@@ -373,6 +377,12 @@ public class ProcessingPanel extends JPanel {
                 String[] keys = {"white_pants", "red_pants", "yellow_pants", "pink_pants", "purple_pants"};
                 addResourceList(contentPanel, items, keys, rm);
                 updateRecipeButtons(new int[]{30, 31, 32, 33, 34});
+            }
+            case 8 -> { // 蕾絲
+                String[] items = {"白色蕾絲", "紅色蕾絲", "黃色蕾絲", "紫色蕾絲", "粉色蕾絲"};
+                String[] keys = {"white_lace", "red_lace", "yellow_lace", "purple_lace", "pink_lace"};
+                addResourceList(contentPanel, items, keys, rm);
+                updateRecipeButtons(new int[]{1, 35, 36, 37, 38});
             }
         }
 
