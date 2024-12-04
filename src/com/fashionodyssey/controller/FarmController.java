@@ -224,6 +224,7 @@ public class FarmController {
                 EventManager.getInstance().fireEvent(
                     new GameEvent("UPDATE_HARVEST_COUNT", harvestCount)
                 );
+                resourceManager.notifyResourceChange();
                 resourceManager.notifyInventoryChange();
             } else {
                 showStatus("作物還未成熟，無法收穫");

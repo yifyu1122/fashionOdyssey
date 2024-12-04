@@ -90,7 +90,13 @@ public class ResourceManager {
     }
     
     public void addResource(String type, int amount) {
-        resources.merge(type, amount, Integer::sum);
+        System.out.println("\n===== 增加資源 =====");
+        System.out.println("資源類型: " + type);
+        System.out.println("增加數量: " + amount);
+        int currentAmount = resources.getOrDefault(type, 0);
+        resources.put(type, currentAmount + amount);
+        
+        // 確保觸發更新事件
         notifyResourceChange();
     }
     
@@ -119,7 +125,9 @@ public class ResourceManager {
     }
     
     public int getResourceAmount(String type) {
-        return resources.getOrDefault(type, 0);
+        int amount = resources.getOrDefault(type, 0);
+        System.out.println("Getting resource amount for " + type + ": " + amount);
+        return amount;
     }
     
     public int getMoney() {
@@ -169,7 +177,12 @@ public class ResourceManager {
     }
     
     public void notifyResourceChange() {
-        EventManager.getInstance().fireEvent(new GameEvent("INVENTORY_CHANGED"));
+        System.out.println("\n===== 觸發資源更新事件 =====");
+        EventManager.getInstance().fireEvent(
+            new GameEvent("UPDATE_RESOURCES")
+        );
+        System.out.println("事件已觸發");
+        System.out.println("========================\n");
     }
     
     // 添加購買種子的方法
@@ -197,7 +210,6 @@ public class ResourceManager {
             
             // 確保更新顯示
             notifyResourceChange();
-            notifyInventoryChange();
         }
     }
     
@@ -224,31 +236,19 @@ public class ResourceManager {
         notifyResourceChange();
     }
     
-    public void consumeResource(String type, int amount) {
-        int current = getResourceAmount(type);
-        if (current >= amount) {
-            resources.put(type, current - amount);
-            notifyResourceChange();
-            notifyInventoryChange();
-        } else {
-            System.out.println("Not enough resources: " + type);
-        }
+    public void consumeResource(String resourceKey, int amount) {
+        System.out.println("\n===== 消耗資源 =====");
+        System.out.println("資源類型: " + resourceKey);
+        System.out.println("消耗數量: " + amount);
+        int currentAmount = resources.getOrDefault(resourceKey, 0);
+        resources.put(resourceKey, Math.max(0, currentAmount - amount));
+        
+        // 確保觸發更新事件
+        notifyResourceChange();
     }
     
     public int getResource(String type) {
         return getResourceAmount(type);
-    }
-    
-    public void notifyInventoryChange() {
-        // 發送帶有資源數據的事件
-        EventManager.getInstance().fireEvent(
-            new GameEvent("UPDATE_RESOURCES", 
-                money,  // 金錢
-                getResourceAmount(getCurrentCropType() + "_seeds"),  // 當前作物的種子數量
-                0,  // 水量（如果需要的話）
-                getResourceAmount("fertilizer")  // 肥料數量
-            )
-        );
     }
     
     public void setCurrentCropType(String cropType) {
@@ -264,20 +264,26 @@ public class ResourceManager {
         return CROP_KEY_MAP.get(displayName);
     }
     
-    private boolean isNotifying = false;
-
     public void setResourceAmount(String resourceKey, int amount) {
-        if (isNotifying) return;
+        System.out.println("\n===== 設置資源數量 =====");
+        System.out.println("資源類型: " + resourceKey);
+        System.out.println("設置數量: " + amount);
+        resources.put(resourceKey, amount);
         
-        Integer currentAmount = resources.get(resourceKey);
-        if (currentAmount == null || currentAmount != amount) {
-            isNotifying = true;
-            try {
-                resources.put(resourceKey, amount);
-                EventManager.getInstance().fireEvent(new GameEvent("INVENTORY_CHANGED"));
-            } finally {
-                isNotifying = false;
-            }
-        }
+        // 確保觸發更新事件
+        notifyResourceChange();
+    }
+    
+    public void notifyInventoryChange() {
+        System.out.println("Notifying inventory change...");
+        
+        // Gather inventory data
+        String[] items = resources.keySet().toArray(new String[0]);
+        int[] amounts = resources.values().stream().mapToInt(Integer::intValue).toArray();
+        
+        // Fire an event to update the inventory
+        EventManager.getInstance().fireEvent(
+            new GameEvent("UPDATE_INVENTORY", items, amounts)
+        );
     }
 } 

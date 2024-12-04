@@ -4,13 +4,10 @@ import com.fashionodyssey.controller.FarmController;
 import com.fashionodyssey.event.EventManager;
 import com.fashionodyssey.model.resource.CropStage;
 import com.fashionodyssey.ui.MainFrame;
-import com.fashionodyssey.util.ItemDescription;
 import com.fashionodyssey.util.ResourceManager;
 
 public class GameMain {
     public static void main(String[] args) {
-        ItemDescription.initializeDescriptions();
-        
         FarmController farmController = new FarmController();
         MainFrame mainFrame = new MainFrame();
         ResourceManager resourceManager = ResourceManager.getInstance();

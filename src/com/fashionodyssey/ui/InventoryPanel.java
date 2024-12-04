@@ -292,23 +292,23 @@ public class InventoryPanel extends JPanel {
         
         return switch (itemName) {
             // Fabric types
-            case "布料" -> "fabric";
-            case "白色蕾絲" -> "white_lace";
-            case "紅色蕾絲" -> "red_lace";
-            case "黃色蕾絲" -> "yellow_lace";
-            case "紫色蕾絲" -> "purple_lace";
-            case "粉色蕾絲" -> "pink_lace";
-            // Dye types
-            case "紅色染料" -> "red_dye";
-            case "黃色染料" -> "yellow_dye"; 
-            case "紫色染料" -> "purple_dye";
-            case "粉色染料" -> "pink_dye";
-            // Dyed fabric types
             case "白色布料" -> "white_fabric";
             case "紅色布料" -> "red_fabric";
             case "黃色布料" -> "yellow_fabric";
             case "紫色布料" -> "purple_fabric";
             case "粉色布料" -> "pink_fabric";
+            
+            // Dye types
+            case "紅色染料" -> "red_dye";
+            case "黃色染料" -> "yellow_dye"; 
+            case "紫色染料" -> "purple_dye";
+            case "粉色染料" -> "pink_dye";
+            // Lace types
+            case "白色蕾絲" -> "white_lace";
+            case "紅色蕾絲" -> "red_lace";
+            case "黃色蕾絲" -> "yellow_lace";
+            case "紫色蕾絲" -> "purple_lace";
+            case "粉色蕾絲" -> "pink_lace";
             // Bow types
             case "白色蝴蝶結" -> "white_bow";
             case "紅色蝴蝶結" -> "red_bow";

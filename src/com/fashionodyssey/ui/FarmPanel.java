@@ -48,6 +48,7 @@ public class FarmPanel extends JPanel {
         );
         
         // 通知資源管理器觸發初始更新
+        rm.notifyResourceChange();
         rm.notifyInventoryChange();
     }
     
@@ -159,17 +160,7 @@ public class FarmPanel extends JPanel {
                 ResourceManager rm = ResourceManager.getInstance();
                 int seedCount = rm.getResourceAmount(seedKey);
                 
-                System.out.println("\n資源檢查：");
-                System.out.println("作物鍵值: " + cropKey);
-                System.out.println("種子鍵值: " + seedKey);
-                System.out.println("當前種子數量: " + seedCount);
-                
-                System.out.println("\n所有種子數量：");
-                System.out.println("cotton_seeds: " + rm.getResourceAmount("cotton_seeds"));
-                System.out.println("rose_seeds: " + rm.getResourceAmount("rose_seeds"));
-                System.out.println("sunflower_seeds: " + rm.getResourceAmount("sunflower_seeds"));
-                System.out.println("tulip_pink_seeds: " + rm.getResourceAmount("tulip_pink_seeds"));
-                System.out.println("lavender_seeds: " + rm.getResourceAmount("lavender_seeds"));
+
                 
                 if (seedCount > 0) {
                     System.out.println("\n開始種植：");
