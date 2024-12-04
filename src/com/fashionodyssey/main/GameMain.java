@@ -58,14 +58,12 @@ public class GameMain {
             resourceManager.buySeed(cropType);
         });
         
-        EventManager.getInstance().addEventListener("UPDATE_INVENTORY", event -> {
-            String[] items = (String[]) event.getArgs()[0];
-            int[] amounts = (int[]) event.getArgs()[1];
-            mainFrame.getInventoryPanel().updateInventory(items, amounts);
-        });
-        
         EventManager.getInstance().addEventListener("BUY_FERTILIZER", event -> {
             resourceManager.buyFertilizer();
+        });
+        
+        EventManager.getInstance().addEventListener("UPDATE_INVENTORY", event -> {
+            mainFrame.getInventoryPanel().updateResources();
         });
 
         

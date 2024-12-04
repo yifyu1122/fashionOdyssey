@@ -4,8 +4,6 @@ import com.fashionodyssey.event.EventManager;
 import com.fashionodyssey.util.ItemDescription;
 import com.fashionodyssey.util.ResourceManager;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 
@@ -15,62 +13,42 @@ public class InventoryPanel extends JPanel {
     private ResourceManager resourceManager;
     
     public InventoryPanel() {
-        // 1. 基本設置
         setLayout(new BorderLayout());
         resourceManager = ResourceManager.getInstance();
         
-        // 2. 創建網格面板，修改為固定4列，並計算合適的行數
-        int columns = 4;
-        int totalItems = 31;  // 目前的物品總數
-        int rows = (int) Math.ceil((double) totalItems / columns);  // 計算需要的行數
-        gridPanel = new JPanel(new GridLayout(rows, columns, 5, 5));  // 設置固定行列數
-        
-        // 設置合理的首選大小
-        gridPanel.setPreferredSize(new Dimension(275, 60 * rows + (rows - 1) * 5));  // 每個按鈕60像素高，加上間距
+        // 2. 創建網格面板
+        gridPanel = new JPanel(new GridLayout(0, 4, 5, 5));  // 設置4列，行數自動調整
         gridPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
-        // 添加測試邊框
-        setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.RED, 2),
-            BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(),
-                "庫存",
-                TitledBorder.CENTER,
-                TitledBorder.TOP,
-                new Font("微軟正黑體", Font.BOLD, 16)
-            )
+        // 只保留標題邊框
+        setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createEtchedBorder(),
+            "庫存",
+            TitledBorder.CENTER,
+            TitledBorder.TOP,
+            new Font("微軟正黑體", Font.BOLD, 16)
         ));
-        
-        // 3. 創建物品按鈕
-        initializeItems();
         
         // 4. 設置滾動面板
         scrollPane = new JScrollPane(gridPanel);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        
-        // 5. 添加到主面板
         add(scrollPane, BorderLayout.CENTER);
         
-        // 6. 添加大小變化監聽器用於調試
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                System.out.println("InventoryPanel size: " + getSize());
-                System.out.println("GridPanel size: " + gridPanel.getSize());
-            }
+        // 7. 註冊事件監聽
+        EventManager.getInstance().addEventListener("RESOURCE_CHANGED", event -> {
+            System.out.println("Resource amount changed, updating display...");
+            updateResources();
         });
         
-        // 7. 註冊事件監聽
-        EventManager.getInstance().addEventListener("UPDATE_RESOURCES", event -> {
-            System.out.println("Received UPDATE_RESOURCES event");
-            updateDisplay();
-        });
+        // 初始化顯示
+        updateResources();
     }
     
-    private void initializeItems() {
-        System.out.println("Initializing items...");
+    public void updateResources() {
+        gridPanel.removeAll();
+        ResourceManager rm = ResourceManager.getInstance();
         
-        // 創建物品按鈕
+        // 創建物品按鈕列表
         createItemButton(gridPanel, ItemDescription.FERTILIZER, "fertilizer");
         
         // 種子類
@@ -131,6 +109,8 @@ public class InventoryPanel extends JPanel {
         createItemButton(gridPanel, ItemDescription.PINK_PANTS, "pink_pants");  
         
         System.out.println("Items initialized. Total buttons: " + gridPanel.getComponentCount());
+        gridPanel.revalidate();
+        gridPanel.repaint();
     }
     
     private void createItemButton(JPanel parent, ItemDescription item, String resourceKey) {
@@ -232,138 +212,5 @@ public class InventoryPanel extends JPanel {
         if (item != null) {
             button.setText(item.getName());
         }
-    }
-    
-    public void updateDisplay() {
-        System.out.println("Updating display...");
-        Component view = scrollPane.getViewport().getView();
-        if (view instanceof JPanel) {
-            JPanel panel = (JPanel) view;
-            
-            // 1. 收集所有按鈕並排序
-            java.util.List<JButton> buttons = new java.util.ArrayList<>();
-            for (Component comp : panel.getComponents()) {
-                if (comp instanceof JButton) {
-                    buttons.add((JButton) comp);
-                }
-            }
-            
-            // 2. 根據數量排序（有數量的排前面）
-            buttons.sort((b1, b2) -> {
-                JLabel count1 = (JLabel) b1.getComponent(0);
-                JLabel count2 = (JLabel) b2.getComponent(0);
-                int amount1 = Integer.parseInt(count1.getText());
-                int amount2 = Integer.parseInt(count2.getText());
-                
-                // 數量大的排前面
-                if (amount1 > 0 && amount2 == 0) return -1;
-                if (amount1 == 0 && amount2 > 0) return 1;
-                return 0;  // 保持原有順序
-            });
-            
-            // 3. 清空面板
-            panel.removeAll();
-            
-            // 4. 重新添加排序後的按鈕
-            for (JButton button : buttons) {
-                JLabel countLabel = (JLabel) button.getComponent(0);
-                String tooltip = button.getToolTipText();
-                String resourceKey = getResourceKeyFromDescription(tooltip);
-                if (resourceKey != null) {
-                    updateItemButton(button, countLabel, null, resourceKey);
-                }
-                panel.add(button);
-            }
-            
-            // 5. 重新布局
-            panel.revalidate();
-            panel.repaint();
-        }
-        revalidate();
-        repaint();
-    }
-    
-    private String getResourceKeyFromDescription(String description) {
-        if (description == null) return null;
-        
-        // 先檢查是否包含完整描述，如果是，只取名稱部分
-        int bracketIndex = description.indexOf(" (");
-        String itemName = bracketIndex > 0 ? description.substring(0, bracketIndex) : description;
-        
-        return switch (itemName) {
-            // Fabric types
-            case "白色布料" -> "white_fabric";
-            case "紅色布料" -> "red_fabric";
-            case "黃色布料" -> "yellow_fabric";
-            case "紫色布料" -> "purple_fabric";
-            case "粉色布料" -> "pink_fabric";
-            
-            // Dye types
-            case "紅色染料" -> "red_dye";
-            case "黃色染料" -> "yellow_dye"; 
-            case "紫色染料" -> "purple_dye";
-            case "粉色染料" -> "pink_dye";
-            // Lace types
-            case "白色蕾絲" -> "white_lace";
-            case "紅色蕾絲" -> "red_lace";
-            case "黃色蕾絲" -> "yellow_lace";
-            case "紫色蕾絲" -> "purple_lace";
-            case "粉色蕾絲" -> "pink_lace";
-            // Bow types
-            case "白色蝴蝶結" -> "white_bow";
-            case "紅色蝴蝶結" -> "red_bow";
-            case "黃色蝴蝶結" -> "yellow_bow";
-            case "紫色蝴蝶結" -> "purple_bow";
-            case "粉色蝴蝶結" -> "pink_bow";
-            // Ribbon types
-            case "白色緞帶" -> "white_ribbon";
-            case "紅色緞帶" -> "red_ribbon";
-            case "黃色緞帶" -> "yellow_ribbon";
-            case "紫色緞帶" -> "purple_ribbon";
-            case "粉色緞帶" -> "pink_ribbon";
-            // Dress types
-            case "白色連衣裙" -> "white_dress";
-            case "紅色連衣裙" -> "red_dress";
-            case "黃色連衣裙" -> "yellow_dress";
-            case "紫色連衣裙" -> "purple_dress";
-            case "粉色連衣裙" -> "pink_dress";
-            // Shirt types
-            case "白色襯衫" -> "white_shirt";
-            case "紅色襯衫" -> "red_shirt";
-            case "黃色襯衫" -> "yellow_shirt";
-            case "粉色襯衫" -> "pink_shirt";
-            case "紫色襯衫" -> "purple_shirt";
-            // Pants types
-            case "白色褲子" -> "white_pants";
-            case "紅色褲子" -> "red_pants";
-            case "黃色褲子" -> "yellow_pants";
-            case "粉色褲子" -> "pink_pants";
-            case "紫色褲子" -> "purple_pants";
-
-            // Seeds and fertilizer
-            case "肥料" -> "fertilizer";
-            case "棉花種子" -> "cotton_seeds";
-            case "玫瑰種子" -> "rose_seeds";
-            case "向日葵種子" -> "sunflower_seeds";
-            case "薰衣草種子" -> "lavender_seeds";
-            case "鬱金香(粉)種子" -> "tulip_pink_seeds";
-            // 收穫物品
-            case "棉花" -> "harvested_cotton";
-            case "玫瑰" -> "harvested_rose";
-            case "向日葵" -> "harvested_sunflower";
-            case "薰衣草" -> "harvested_lavender";
-            case "鬱金香(粉)" -> "harvested_tulip_pink";
-            default -> null;
-        };
-    }
-    
-    public void updateInventory(String[] items, int[] amounts) {
-        for (int i = 0; i < items.length; i++) {
-            String resourceKey = getResourceKeyFromDescription(items[i]);
-            if (resourceKey != null) {
-                resourceManager.setResourceAmount(resourceKey, amounts[i]);
-            }
-        }
-        updateDisplay();
     }
 } 
