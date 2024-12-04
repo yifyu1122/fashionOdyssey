@@ -29,10 +29,7 @@ public class GameMain {
             farmController.setCurrentPosition(row, col);
         });
         
-        EventManager.getInstance().addEventListener("UPDATE_STATUS", event -> {
-            String message = (String) event.getData();
-            mainFrame.updateStatus(message);
-        });
+    
         
         EventManager.getInstance().addEventListener("UPDATE_RESOURCES", event -> {
             Object[] resourceArgs = event.getArgs();

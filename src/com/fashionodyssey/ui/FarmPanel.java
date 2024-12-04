@@ -22,6 +22,7 @@ public class FarmPanel extends JPanel {
     private JLabel harvestCountLabel;
     private JPanel resourcePanel;
     private JLabel statusLabel;
+    private JLabel farmStatusLabel;
     
     public FarmPanel() {
         setLayout(new BorderLayout());
@@ -53,8 +54,20 @@ public class FarmPanel extends JPanel {
     }
     
     private void initComponents() {
+        // 初始化農場狀態標籤
+        farmStatusLabel = new JLabel("這塊地正期待著新生命的到來！");
+        farmStatusLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
+        farmStatusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        // 創建控制面板
+        JPanel controlPanel = new JPanel(new BorderLayout());
+        JPanel buttonPanel = new JPanel();  // 用於放置按鈕的面板
+        
+        // 將農場狀態標籤添加到控制面板的頂部
+        controlPanel.add(farmStatusLabel, BorderLayout.NORTH);
+        controlPanel.add(buttonPanel, BorderLayout.CENTER);
+        
         // 作物選擇區
-        JPanel controlPanel = new JPanel();
         String[] crops = {
             CropType.cotton.getDisplayName(),
             CropType.rose.getDisplayName(),
@@ -83,7 +96,7 @@ public class FarmPanel extends JPanel {
         harvestButton.setFont(buttonFont);
         
         // 商店按鈕
-        JButton shopButton = new JButton("商");
+        JButton shopButton = new JButton("商店");
         shopButton.setFont(buttonFont);
         shopButton.addActionListener(e -> {
             ShopDialog shop = new ShopDialog(SwingUtilities.getWindowAncestor(this));
@@ -93,16 +106,16 @@ public class FarmPanel extends JPanel {
         JLabel cropLabel = new JLabel("選擇作物:");
         cropLabel.setFont(labelFont);
         
-        controlPanel.add(cropLabel);
-        controlPanel.add(cropSelector);
-        controlPanel.add(shopButton);
-        controlPanel.add(plantButton);
-        controlPanel.add(waterButton);
-        controlPanel.add(fertilizeButton);
-        controlPanel.add(harvestButton);
+        buttonPanel.add(cropLabel);
+        buttonPanel.add(cropSelector);
+        buttonPanel.add(shopButton);
+        buttonPanel.add(plantButton);
+        buttonPanel.add(waterButton);
+        buttonPanel.add(fertilizeButton);
+        buttonPanel.add(harvestButton);
         
         // 設置控制面板的邊距
-        controlPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
         add(controlPanel, BorderLayout.NORTH);
         
@@ -113,6 +126,7 @@ public class FarmPanel extends JPanel {
         
         Dimension buttonSize = new Dimension(120, 120);
         Font gridFont = new Font("微軟正黑體", Font.BOLD, 14);  // 格子字體
+        
         
         for (int slotIndex = 0; slotIndex < GRID_SIZE * GRID_SIZE; slotIndex++) {
             final int index = slotIndex;
@@ -140,11 +154,17 @@ public class FarmPanel extends JPanel {
             farmGrid.add(farmSlots[index]);
         }
         
-        JScrollPane scrollPane = new JScrollPane(farmGrid);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        // 創建一個新的面板來包含農場格子和狀態標籤
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(farmGrid, BorderLayout.CENTER);
         
-        add(scrollPane, BorderLayout.CENTER);
+        // 創建一個面板來放置狀態標籤，並將其靠左對齊
+        JPanel statusPanel = new JPanel(new BorderLayout());
+        statusPanel.add(farmStatusLabel, BorderLayout.WEST);
+        
+        centerPanel.add(statusPanel, BorderLayout.SOUTH);
+        
+        add(centerPanel, BorderLayout.CENTER);
         
         plantButton.addActionListener(e -> {
             System.out.println("\n===== 種植按鈕點擊事件 =====");
@@ -240,18 +260,10 @@ public class FarmPanel extends JPanel {
         
         add(resourceScrollPane, BorderLayout.WEST);
         
-        // 在控制面板下方添加狀態標籤
-        statusLabel = new JLabel("歡迎來到農場！");
-        statusLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
-        statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        statusLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
-        add(statusLabel, BorderLayout.SOUTH);
-        
         // 註冊事件監聽器
         EventManager.getInstance().addEventListener("UPDATE_STATUS", event -> {
             String message = (String) event.getData();
-            statusLabel.setText(message);
+            updateFarmStatus(message);
         });
     }
 
@@ -261,40 +273,46 @@ public class FarmPanel extends JPanel {
 
     public void updateSlotStatus(int index, String cropType, CropStage stage) {
         if (index >= 0 && index < farmSlots.length) {
-            String status = "一個空地";  // Default status
-            String tooltip = "點擊選擇此格子";
-            Color bgColor = null;  // Default background color
+            String status = "一個空地";
+            String message = "這塊地正期待著新生命的到來！";
+            Color bgColor = null;
             
-            if (cropType != null) {  // If there's a crop, show its status
+            if (cropType != null) {
                 String displayName = getChineseCropName(cropType);
                 
                 switch (stage) {
-                    case SEEDED:
+                    case SEEDED -> {
                         status = displayName + " (種子)";
-                        tooltip = "需要水";
-                        bgColor = new Color(233, 236, 239);  // Light gray
-                        break;
-                    case WATERED:
+                        message = "植物寶寶需要水，快去澆水吧！";
+                        bgColor = new Color(233, 236, 239);
+                    }
+                    case WATERED -> {
                         status = displayName + " (已澆水)";
-                        tooltip = "需施肥";
-                        bgColor = new Color(209, 231, 221);  // Light green
-                        break;
-                    case FERTILIZED:
+                        message = "喝飽水的植物需要營養，快去施肥吧！";
+                        bgColor = new Color(209, 231, 221);
+                    }
+                    case FERTILIZED -> {
                         status = displayName + " (已施肥)";
-                        tooltip = "等待成熟";
-                        bgColor = new Color(255, 243, 205);  // Light yellow
-                        break;
-                    case MATURE:
+                        message = "植物正在努力成長中，讓我們耐心等待～";
+                        bgColor = new Color(255, 243, 205);
+                    }
+                    case MATURE -> {
                         status = displayName + " (已成熟)";
-                        tooltip = "可以收割";
-                        bgColor = new Color(255, 228, 181);  // Light orange
-                        break;
+                        message = switch (cropType.toLowerCase()) {
+                            case "cotton" -> "這裡有一團軟綿綿的白色小可愛，可以收成啦！";
+                            case "rose" -> "哇！玫瑰的香氣撲鼻而來，趕快收成吧！";
+                            case "sunflower" -> "向日葵朝著你露出燦爛的笑容，該收成啦！";
+                            case "tulip_pink" -> "優雅的粉色鬱金香在跟你打招呼，可以收成了！";
+                            case "lavender" -> "空氣中瀰漫著薰衣草的香氣，該收成囉！";
+                            default -> "作物已經成熟，可以收成了！";
+                        };
+                        bgColor = new Color(255, 228, 181);
+                    }
                 }
-                tooltip += "\n" + getCropDescription(displayName);
             }
             
-            farmSlots[index].setText("<html><center>" + status + "</center></html>");
-            farmSlots[index].setToolTipText(tooltip);
+            farmSlots[index].setText("<html><center>" + status + "<br>" + 
+                                   "<font size='2'>" + message + "</font></center></html>");
             farmSlots[index].setBackground(bgColor);
         }
     }
@@ -391,5 +409,10 @@ public class FarmPanel extends JPanel {
             case "tulip_pink" -> "鬱金香(粉)";
             default -> cropType;
         };
+    }
+
+    // 更新農場狀態的方法
+    private void updateFarmStatus(String message) {
+        farmStatusLabel.setText(message);
     }
 } 

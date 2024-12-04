@@ -147,7 +147,6 @@ public class ProcessingPanel extends JPanel {
         craftButton.addActionListener(e -> {
             if (selectedRecipe != null) {
                 String productId = getProductId(selectedRecipe);
-                System.out.println("選擇的產品 ID: " + productId);
                 if (controller.canCraft(productId)) {
                     controller.craftProduct(productId);
                     showSuccess(selectedRecipe + "製作成功！");
@@ -200,13 +199,6 @@ public class ProcessingPanel extends JPanel {
         }
     }
 
-    private void attemptCrafting(String recipe) {
-        String productId = getProductId(recipe);
-        if (controller.canCraft(productId)) {
-            controller.craftProduct(productId);
-            showSuccess(recipe + "製作成功！");
-        }
-    }
 
     private String getProductId(String recipeName) {
         return switch(recipeName) {
@@ -294,30 +286,18 @@ public class ProcessingPanel extends JPanel {
         categoryPanel.add(Box.createVerticalStrut(20));
 
         // 創建類別按鈕
+        JPanel buttonGrid = new JPanel(new GridLayout(4, 2, 10, 10));
+        buttonGrid.setAlignmentX(Component.LEFT_ALIGNMENT);
+        buttonGrid.setMaximumSize(new Dimension(410, 200));
+        
         for (int i = 0; i < pageNames.length; i++) {
             JButton categoryBtn = new JButton(pageNames[i]);
             categoryBtn.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
-            categoryBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
-            categoryBtn.setMaximumSize(new Dimension(200, 40));
-
+            
             final int index = i;
             categoryBtn.addActionListener(e -> {
                 currentPage = index;
                 updateResources();
-
-                // 更新按鈕外觀
-                for (Component c : categoryPanel.getComponents()) {
-                    if (c instanceof JButton) {
-                        JButton btn = (JButton) c;
-                        if (btn == categoryBtn) {
-                            btn.setBackground(new Color(70, 130, 180));
-                            btn.setForeground(Color.WHITE);
-                        } else {
-                            btn.setBackground(null);
-                            btn.setForeground(Color.BLACK);
-                        }
-                    }
-                }
             });
 
             // 設置初始選中狀態
@@ -326,9 +306,12 @@ public class ProcessingPanel extends JPanel {
                 categoryBtn.setForeground(Color.WHITE);
             }
 
-            categoryPanel.add(categoryBtn);
-            categoryPanel.add(Box.createVerticalStrut(10));
+            // 將按鈕加入網格面板，而不是 categoryPanel
+            buttonGrid.add(categoryBtn);
         }
+
+        // 將網格面板加入 categoryPanel
+        categoryPanel.add(buttonGrid);
 
         contentPanel.add(categoryPanel);
         contentPanel.add(Box.createVerticalStrut(20));
@@ -344,52 +327,52 @@ public class ProcessingPanel extends JPanel {
                 updateRecipeButtons(new int[]{0, 1});
             }
             case 1 -> { // 染料
-                String[] items = {"紅色染料", "黃色染料", "紫色染料", "粉色染料"};
-                String[] keys = {"red_dye", "yellow_dye", "purple_dye", "pink_dye"};
+                String[] items = {"玫瑰", "向日葵", "鬱金香(粉)", "薰衣草", "紅色染料", "黃色染料", "紫色染料", "粉色染料"};
+                String[] keys = {"rose", "sunflower", "tulip_pink", "lavender", "red_dye", "yellow_dye", "purple_dye", "pink_dye"};
                 addResourceList(contentPanel, items, keys, rm);
                 updateRecipeButtons(new int[]{2, 3, 4, 5});
             }
             case 2 -> { // 布料
-                String[] items = {"白色布料", "紅色布料", "黃色布料", "紫色布料", "粉色布料"};
-                String[] keys = {"white_fabric", "red_fabric", "yellow_fabric", "purple_fabric", "pink_fabric"};
+                String[] items = {"白色布料","紅色染料", "紅色布料", "黃色染料", "黃色布料", "紫色染料", "紫色布料", "粉色染料", "粉色布料"};
+                String[] keys = {"white_fabric", "red_dye", "red_fabric", "yellow_dye", "yellow_fabric", "purple_dye", "purple_fabric", "pink_dye", "pink_fabric"};
                 addResourceList(contentPanel, items, keys, rm);
                 updateRecipeButtons(new int[]{0, 6, 7, 8, 9});
             }
             case 3 -> { // 蝴蝶結
-                String[] items = {"白色蝴蝶結", "紅色蝴蝶結", "黃色蝴蝶結", "紫色蝴蝶結", "粉色蝴蝶結"};
-                String[] keys = {"white_bow", "red_bow", "yellow_bow", "purple_bow", "pink_bow"};
+                String[] items = {"白色布料", "白色蝴蝶結", "紅色布料", "紅色蝴蝶結", "黃色布料", "黃色蝴蝶結", "紫色布料", "紫色蝴蝶結", "粉色布料", "粉色蝴蝶結"};
+                String[] keys = {"white_fabric", "white_bow", "red_fabric", "red_bow", "yellow_fabric", "yellow_bow", "purple_fabric", "purple_bow", "pink_fabric", "pink_bow"};
                 addResourceList(contentPanel, items, keys, rm);
                 updateRecipeButtons(new int[]{10, 11, 12, 13, 14});
             }
             case 4 -> { // 緞帶
-                String[] items = {"白色緞帶", "紅色緞帶", "黃色緞帶", "紫色緞帶", "粉色緞帶"};
-                String[] keys = {"white_ribbon", "red_ribbon", "yellow_ribbon", "purple_ribbon", "pink_ribbon"};
+                String[] items = {"白色布料", "白色緞帶", "紅色布料", "紅色緞帶", "黃色布料", "黃色緞帶", "紫色布料", "紫色緞帶", "粉色布料", "粉色緞帶"};
+                String[] keys = {"white_fabric", "white_ribbon", "red_fabric", "red_ribbon", "yellow_fabric", "yellow_ribbon", "purple_fabric", "purple_ribbon", "pink_fabric", "pink_ribbon"};
                 addResourceList(contentPanel, items, keys, rm);
                 updateRecipeButtons(new int[]{15, 16, 17, 18, 19});
             }
             case 5 -> { // 連衣裙     
-                String[] items = {"白色連衣裙", "紅色連衣裙", "黃色連衣裙", "紫色連衣裙", "粉色連衣裙"};
-                String[] keys = {"white_dress", "red_dress", "yellow_dress", "purple_dress", "pink_dress"};
+                String[] items = {"白色布料", "白色連衣裙", "紅色布料", "紅色連衣裙", "黃色布料", "黃色連衣裙", "紫色布料", "紫色連衣裙", "粉色布料", "粉色連衣裙"};
+                String[] keys = {"white_fabric", "white_dress", "red_fabric", "red_dress", "yellow_fabric", "yellow_dress", "purple_fabric", "purple_dress", "pink_fabric", "pink_dress"};
                 addResourceList(contentPanel, items, keys, rm);
                 updateRecipeButtons(new int[]{20, 21, 22, 23, 24});
             }
             case 6 -> { // 襯衫
-                String[] items = {"白色襯衫", "紅色襯衫", "黃色襯衫", "粉色襯衫", "紫色襯衫"};
-                String[] keys = {"white_shirt", "red_shirt", "yellow_shirt", "pink_shirt", "purple_shirt"};
+                String[] items = {"白色布料", "白色襯衫", "紅色布料", "紅色襯衫", "黃色布料", "黃色襯衫", "紫色布料", "紫色襯衫", "粉色布料", "粉色襯衫"};
+                String[] keys = {"white_fabric", "white_shirt", "red_fabric", "red_shirt", "yellow_fabric", "yellow_shirt", "purple_fabric", "purple_shirt", "pink_fabric", "pink_shirt"};
                 addResourceList(contentPanel, items, keys, rm);
                 updateRecipeButtons(new int[]{25, 26, 27, 28, 29});
             }
             case 7 -> { // 褲子
-                String[] items = {"白色褲子", "紅色褲子", "黃色褲子", "粉色褲子", "紫色褲子"};
-                String[] keys = {"white_pants", "red_pants", "yellow_pants", "pink_pants", "purple_pants"};
+                String[] items = {"白色布料", "白色褲子", "紅色布料", "紅色褲子", "黃色布料", "黃色褲子", "紫色布料", "紫色褲子", "粉色布料", "粉色褲子"};
+                String[] keys = {"white_fabric", "white_pants", "red_fabric", "red_pants", "yellow_fabric", "yellow_pants", "purple_fabric", "purple_pants", "pink_fabric", "pink_pants"};
                 addResourceList(contentPanel, items, keys, rm);
                 updateRecipeButtons(new int[]{30, 31, 32, 33, 34});
             }
             case 8 -> { // 蕾絲
-                String[] items = {"白色蕾絲", "紅色蕾絲", "黃色蕾絲", "紫色蕾絲", "粉色蕾絲"};
-                String[] keys = {"white_lace", "red_lace", "yellow_lace", "purple_lace", "pink_lace"};
+                String[] items = {"白色蕾絲", "紅色染料", "紅色蕾絲", "黃色染料", "黃色蕾絲", "紫色染料", "紫色蕾絲", "粉色染料", "粉色蕾絲"};
+                String[] keys = {"white_lace", "red_dye", "red_lace", "yellow_dye", "yellow_lace", "purple_dye", "purple_lace", "pink_dye", "pink_lace"};
                 addResourceList(contentPanel, items, keys, rm);
-                updateRecipeButtons(new int[]{1, 35, 36, 37, 38});
+                updateRecipeButtons(new int[]{35, 36, 37, 38});
             }
         }
 
