@@ -38,7 +38,6 @@ public class GameMain {
         EventManager.getInstance().addEventListener("UPDATE_RESOURCES", event -> {
             Object[] resourceArgs = event.getArgs();
             if (resourceArgs != null && resourceArgs.length >= 4) {
-                int money = (Integer) resourceArgs[0];
                 int seeds = (Integer) resourceArgs[1];
                 int water = (Integer) resourceArgs[2];
                 int fertilizer = (Integer) resourceArgs[3];

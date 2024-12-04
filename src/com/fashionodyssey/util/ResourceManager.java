@@ -2,6 +2,7 @@ package com.fashionodyssey.util;
 
 import com.fashionodyssey.event.EventManager;
 import com.fashionodyssey.event.GameEvent;
+import com.fashionodyssey.model.design.Design;
 import com.fashionodyssey.model.resource.CropType;
 import java.util.HashMap;
 import java.util.Map;
@@ -241,17 +242,6 @@ public class ResourceManager {
         notifyResourceChange();
     }
     
-    public void consumeResource(String resourceKey, int amount) {
-        System.out.println("\n===== 消耗資源 =====");
-        System.out.println("資源類型: " + resourceKey);
-        System.out.println("消耗數量: " + amount);
-        int currentAmount = resources.getOrDefault(resourceKey, 0);
-        resources.put(resourceKey, Math.max(0, currentAmount - amount));
-        
-        // 確保觸發更新事件
-        notifyResourceChange();
-    }
-    
     public int getResource(String type) {
         return getResourceAmount(type);
     }
@@ -290,5 +280,62 @@ public class ResourceManager {
         EventManager.getInstance().fireEvent(
             new GameEvent("UPDATE_INVENTORY", items, amounts)
         );
+    }
+    
+    public boolean hasEnoughMaterials(String baseItem, String decoration, int count) {
+        // 檢查基礎服裝是否足夠
+        String baseItemKey = convertToResourceKey(baseItem);
+        if (getResourceAmount(baseItemKey) < 1) {
+            return false;
+        }
+        
+        // 檢查裝飾品是否足夠
+        String decorationKey = convertToResourceKey(decoration);
+        return getResourceAmount(decorationKey) >= count;
+    }
+    
+    public void consumeMaterials(String baseItem, String decoration, int count) {
+        // 消耗基礎服裝
+        String baseItemKey = convertToResourceKey(baseItem);
+        useResource(baseItemKey, 1);
+        
+        // 消耗裝飾品
+        String decorationKey = convertToResourceKey(decoration);
+        useResource(decorationKey, count);
+    }
+    
+    public void addDesign(Design design) {
+        String designKey = "design_" + design.getName().toLowerCase().replace(" ", "_");
+        addResource(designKey, 1);
+        notifyInventoryChange();
+    }
+    
+    private String convertToResourceKey(String displayName) {
+        return switch (displayName) {
+            case "紅色連衣裙" -> "red_dress";
+            case "藍色連衣裙" -> "blue_dress";
+            case "黃色上衣" -> "yellow_shirt";
+            case "綠色褲子" -> "green_pants";
+            case "蕾絲" -> "lace";
+            case "緞帶" -> "ribbon";
+            case "蝴蝶結" -> "bow";
+            default -> displayName.toLowerCase().replace(" ", "_");
+        };
+    }
+    
+    public boolean hasResource(String type) {
+        return resources.getOrDefault(type, 0) > 0;
+    }
+    
+    public boolean hasResource(String type, int amount) {
+        return resources.getOrDefault(type, 0) >= amount;
+    }
+    
+    public void consumeResource(String type, int amount) {
+        int current = resources.getOrDefault(type, 0);
+        if (current >= amount) {
+            resources.put(type, current - amount);
+            notifyResourceChange();
+        }
     }
 } 
