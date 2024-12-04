@@ -64,7 +64,7 @@ public enum ItemDescription {
     public static void initializeDescriptions() {
         for (ItemDescription item : values()) {
             item.description = getDefaultDescription(item);
-            item.acquiredDescription = getAcquiredDescription(item);
+            item.acquiredDescription = item.getAcquiredDescription();
         }
     }
 
@@ -123,8 +123,8 @@ public enum ItemDescription {
         };
     }
 
-    private static String getAcquiredDescription(ItemDescription item) {
-        return switch (item) {
+    public String getAcquiredDescription() {
+        return switch (this) {
             case FERTILIZER -> "獲取方法：商店購買，20元/5個";
             case COTTON_SEED -> "獲取方法：商店購買，8元/10個";
             case ROSE_SEED -> "獲取方法：商店購買，10元/10個";
@@ -177,14 +177,17 @@ public enum ItemDescription {
             case PURPLE_PANTS -> "獲取方法：於加工場合成取得，2塊紫色布料即可製作";
         };
     }
-    
+
+    public String getDescription() {
+        return description;
+    }
+
     public String getName() {
         return name;
     }
-    
+
     public String getFullDescription() {
-        return name + "\n" + 
-               "----------------------------------------------\n" +
+        return "----------------------------------------------\n" +
                acquiredDescription + "\n" + 
                description;
     }

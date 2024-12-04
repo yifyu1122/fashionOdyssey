@@ -4,21 +4,30 @@ import com.fashionodyssey.event.EventManager;
 import com.fashionodyssey.util.ItemDescription;
 import com.fashionodyssey.util.ResourceManager;
 import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+
+
 
 public class InventoryPanel extends JPanel {
     private JPanel gridPanel;
     private JScrollPane scrollPane;
     private ResourceManager resourceManager;
+    private boolean isLongPress = false;
     
     public InventoryPanel() {
         setLayout(new BorderLayout());
         resourceManager = ResourceManager.getInstance();
         
-        // 2. 創建網格面板
-        gridPanel = new JPanel(new GridLayout(0, 4, 5, 5));  // 設置4列，行數自動調整
-        gridPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // 初始化物品描述
+        ItemDescription.initializeDescriptions();
+        
+        // 創建網格面板
+        gridPanel = new JPanel(new GridLayout(0, 3, 5, 5));
+        gridPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         
         // 只保留標題邊框
         setBorder(BorderFactory.createTitledBorder(
@@ -32,11 +41,52 @@ public class InventoryPanel extends JPanel {
         // 4. 設置滾動面板
         scrollPane = new JScrollPane(gridPanel);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER); // 隱藏垂直滾動條
+
+        // 添加滑動事件監聽
+        gridPanel.addMouseListener(new MouseAdapter() {
+            private Timer timer;
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                timer = new Timer(500, event -> {
+                    isLongPress = true;
+                    gridPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                });
+                timer.setRepeats(false);
+                timer.start();
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (timer != null) {
+                    timer.stop();
+                }
+                if (isLongPress) {
+                    gridPanel.setCursor(Cursor.getDefaultCursor());
+                    isLongPress = false;
+                }
+            }
+        });
+
+        gridPanel.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (isLongPress) {
+                    JViewport viewport = scrollPane.getViewport();
+                    Point viewPosition = viewport.getViewPosition();
+                    viewPosition.translate(0, -e.getY());
+                    gridPanel.scrollRectToVisible(new Rectangle(viewPosition, viewport.getSize()));
+                }
+            }
+        });
+
         add(scrollPane, BorderLayout.CENTER);
         
-        // 7. 註冊事件監聽
-        EventManager.getInstance().addEventListener("RESOURCE_CHANGED", event -> {
-            System.out.println("Resource amount changed, updating display...");
+
+        // 註冊事件監聽
+        EventManager.getInstance().addEventListener("UPDATE_RESOURCES", event -> {
+            System.out.println("資源數量變化，更新顯示...");
             updateResources();
         });
         
@@ -48,67 +98,64 @@ public class InventoryPanel extends JPanel {
         gridPanel.removeAll();
         ResourceManager rm = ResourceManager.getInstance();
         
-        // 創建物品按鈕列表
-        createItemButton(gridPanel, ItemDescription.FERTILIZER, "fertilizer");
-        
-        // 種子類
-        createItemButton(gridPanel, ItemDescription.COTTON_SEED, "cotton_seeds");
-        createItemButton(gridPanel, ItemDescription.ROSE_SEED, "rose_seeds");
-        createItemButton(gridPanel, ItemDescription.SUNFLOWER_SEED, "sunflower_seeds");
-        createItemButton(gridPanel, ItemDescription.LAVENDER_SEED, "lavender_seeds");
-        createItemButton(gridPanel, ItemDescription.TULIP_PINK_SEED, "tulip_pink_seeds");
-        
-        // 收穫物品
-        createItemButton(gridPanel, ItemDescription.COTTON, "harvested_cotton");
-        createItemButton(gridPanel, ItemDescription.ROSE, "harvested_rose");
-        createItemButton(gridPanel, ItemDescription.SUNFLOWER, "harvested_sunflower");
-        createItemButton(gridPanel, ItemDescription.LAVENDER, "harvested_lavender");
-        createItemButton(gridPanel, ItemDescription.TULIP_PINK, "harvested_tulip_pink");
+        // 收集物品及其數量
+        List<ItemEntry> items = new ArrayList<>();
+        items.add(new ItemEntry(ItemDescription.FERTILIZER, "fertilizer"));
+        items.add(new ItemEntry(ItemDescription.COTTON_SEED, "cotton_seeds"));
+        items.add(new ItemEntry(ItemDescription.ROSE_SEED, "rose_seeds"));
+        items.add(new ItemEntry(ItemDescription.SUNFLOWER_SEED, "sunflower_seeds"));
+        items.add(new ItemEntry(ItemDescription.LAVENDER_SEED, "lavender_seeds"));
+        items.add(new ItemEntry(ItemDescription.TULIP_PINK_SEED, "tulip_pink_seeds"));
+        items.add(new ItemEntry(ItemDescription.COTTON, "harvested_cotton"));
+        items.add(new ItemEntry(ItemDescription.ROSE, "harvested_rose"));
+        items.add(new ItemEntry(ItemDescription.SUNFLOWER, "harvested_sunflower"));
+        items.add(new ItemEntry(ItemDescription.LAVENDER, "harvested_lavender"));
+        items.add(new ItemEntry(ItemDescription.TULIP_PINK, "harvested_tulip_pink"));
+        items.add(new ItemEntry(ItemDescription.WHITE_FABRIC, "white_fabric"));
+        items.add(new ItemEntry(ItemDescription.RED_FABRIC, "red_fabric"));
+        items.add(new ItemEntry(ItemDescription.YELLOW_FABRIC, "yellow_fabric"));
+        items.add(new ItemEntry(ItemDescription.PURPLE_FABRIC, "purple_fabric"));
+        items.add(new ItemEntry(ItemDescription.PINK_FABRIC, "pink_fabric"));
+        items.add(new ItemEntry(ItemDescription.WHITE_LACE, "white_lace"));
+        items.add(new ItemEntry(ItemDescription.RED_LACE, "red_lace"));
+        items.add(new ItemEntry(ItemDescription.YELLOW_LACE, "yellow_lace"));
+        items.add(new ItemEntry(ItemDescription.PURPLE_LACE, "purple_lace"));
+        items.add(new ItemEntry(ItemDescription.PINK_LACE, "pink_lace"));
+        items.add(new ItemEntry(ItemDescription.WHITE_BOW, "white_bow"));
+        items.add(new ItemEntry(ItemDescription.RED_BOW, "red_bow"));
+        items.add(new ItemEntry(ItemDescription.YELLOW_BOW, "yellow_bow"));
+        items.add(new ItemEntry(ItemDescription.PURPLE_BOW, "purple_bow"));
+        items.add(new ItemEntry(ItemDescription.PINK_BOW, "pink_bow"));
+        items.add(new ItemEntry(ItemDescription.WHITE_RIBBON, "white_ribbon"));
+        items.add(new ItemEntry(ItemDescription.RED_RIBBON, "red_ribbon"));
+        items.add(new ItemEntry(ItemDescription.YELLOW_RIBBON, "yellow_ribbon"));
+        items.add(new ItemEntry(ItemDescription.PURPLE_RIBBON, "purple_ribbon"));
+        items.add(new ItemEntry(ItemDescription.PINK_RIBBON, "pink_ribbon"));
+        items.add(new ItemEntry(ItemDescription.WHITE_DRESS, "white_dress"));
+        items.add(new ItemEntry(ItemDescription.RED_DRESS, "red_dress"));
+        items.add(new ItemEntry(ItemDescription.YELLOW_DRESS, "yellow_dress"));
+        items.add(new ItemEntry(ItemDescription.PURPLE_DRESS, "purple_dress"));
+        items.add(new ItemEntry(ItemDescription.PINK_DRESS, "pink_dress"));
+        items.add(new ItemEntry(ItemDescription.WHITE_SHIRT, "white_shirt"));
+        items.add(new ItemEntry(ItemDescription.RED_SHIRT, "red_shirt"));
+        items.add(new ItemEntry(ItemDescription.YELLOW_SHIRT, "yellow_shirt"));
+        items.add(new ItemEntry(ItemDescription.PURPLE_SHIRT, "purple_shirt"));
+        items.add(new ItemEntry(ItemDescription.PINK_SHIRT, "pink_shirt"));
+        items.add(new ItemEntry(ItemDescription.WHITE_PANTS, "white_pants"));
+        items.add(new ItemEntry(ItemDescription.RED_PANTS, "red_pants"));
+        items.add(new ItemEntry(ItemDescription.YELLOW_PANTS, "yellow_pants"));
+        items.add(new ItemEntry(ItemDescription.PURPLE_PANTS, "purple_pants"));
+        items.add(new ItemEntry(ItemDescription.PINK_PANTS, "pink_pants"));
 
-        // 其他物品
-        createItemButton(gridPanel, ItemDescription.WHITE_FABRIC, "white_fabric");
-        createItemButton(gridPanel, ItemDescription.RED_FABRIC, "red_fabric");
-        createItemButton(gridPanel, ItemDescription.YELLOW_FABRIC, "yellow_fabric");
-        createItemButton(gridPanel, ItemDescription.PURPLE_FABRIC, "purple_fabric");
-        createItemButton(gridPanel, ItemDescription.PINK_FABRIC, "pink_fabric");
+        // 按數量降序排序
+        items.sort((entry1, entry2) -> Integer.compare(rm.getResourceAmount(entry2.resourceKey), rm.getResourceAmount(entry1.resourceKey)));
 
-        createItemButton(gridPanel, ItemDescription.WHITE_LACE, "white_lace");
-        createItemButton(gridPanel, ItemDescription.RED_LACE, "red_lace");
-        createItemButton(gridPanel, ItemDescription.YELLOW_LACE, "yellow_lace");
-        createItemButton(gridPanel, ItemDescription.PURPLE_LACE, "purple_lace");
-        createItemButton(gridPanel, ItemDescription.PINK_LACE, "pink_lace");
+        // 按排序順序創建按鈕
+        for (ItemEntry entry : items) {
+            createItemButton(gridPanel, entry.itemDescription, entry.resourceKey);
+        }
 
-        createItemButton(gridPanel, ItemDescription.WHITE_BOW, "white_bow");
-        createItemButton(gridPanel, ItemDescription.RED_BOW, "red_bow");
-        createItemButton(gridPanel, ItemDescription.YELLOW_BOW, "yellow_bow");
-        createItemButton(gridPanel, ItemDescription.PURPLE_BOW, "purple_bow");
-        createItemButton(gridPanel, ItemDescription.PINK_BOW, "pink_bow");
-
-        createItemButton(gridPanel, ItemDescription.WHITE_RIBBON, "white_ribbon");
-        createItemButton(gridPanel, ItemDescription.RED_RIBBON, "red_ribbon");
-        createItemButton(gridPanel, ItemDescription.YELLOW_RIBBON, "yellow_ribbon");
-        createItemButton(gridPanel, ItemDescription.PURPLE_RIBBON, "purple_ribbon");
-        createItemButton(gridPanel, ItemDescription.PINK_RIBBON, "pink_ribbon");
-
-        createItemButton(gridPanel, ItemDescription.WHITE_DRESS, "white_dress");
-        createItemButton(gridPanel, ItemDescription.RED_DRESS, "red_dress");
-        createItemButton(gridPanel, ItemDescription.YELLOW_DRESS, "yellow_dress");
-        createItemButton(gridPanel, ItemDescription.PURPLE_DRESS, "purple_dress");
-        createItemButton(gridPanel, ItemDescription.PINK_DRESS, "pink_dress");
-
-        createItemButton(gridPanel, ItemDescription.WHITE_SHIRT, "white_shirt");
-        createItemButton(gridPanel, ItemDescription.RED_SHIRT, "red_shirt");
-        createItemButton(gridPanel, ItemDescription.YELLOW_SHIRT, "yellow_shirt");
-        createItemButton(gridPanel, ItemDescription.PURPLE_SHIRT, "purple_shirt");
-        createItemButton(gridPanel, ItemDescription.PINK_SHIRT, "pink_shirt");
-
-        createItemButton(gridPanel, ItemDescription.WHITE_PANTS, "white_pants");
-        createItemButton(gridPanel, ItemDescription.RED_PANTS, "red_pants");
-        createItemButton(gridPanel, ItemDescription.YELLOW_PANTS, "yellow_pants");
-        createItemButton(gridPanel, ItemDescription.PURPLE_PANTS, "purple_pants");
-        createItemButton(gridPanel, ItemDescription.PINK_PANTS, "pink_pants");  
-        
-        System.out.println("Items initialized. Total buttons: " + gridPanel.getComponentCount());
+        System.out.println("物品初始化完成。總按鈕數量: " + gridPanel.getComponentCount());
         gridPanel.revalidate();
         gridPanel.repaint();
     }
@@ -117,7 +164,7 @@ public class InventoryPanel extends JPanel {
         JButton button = new JButton() {
             @Override
             public Dimension getPreferredSize() {
-                return new Dimension(60, 60);
+                return new Dimension(80, 80);
             }
             
             @Override
@@ -131,11 +178,11 @@ public class InventoryPanel extends JPanel {
             }
         };
         
-        // 設置按鈕外觀
+        // Set button appearance
         button.setBackground(Color.WHITE);
         button.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         
-        // 創建數量標籤
+        // Create quantity label
         JLabel countLabel = new JLabel("0");
         countLabel.setFont(new Font("微軟正黑體", Font.BOLD, 12));
         countLabel.setForeground(Color.WHITE);
@@ -146,55 +193,62 @@ public class InventoryPanel extends JPanel {
         button.setLayout(null);
         button.add(countLabel);
         
-        // 設置工具提示和名稱
-        button.setToolTipText(item.getFullDescription());
+        // Set tooltip and name
+        button.setToolTipText("<html>" + item.getFullDescription().replace("\n", "<br>") + "</html>");
         button.setText(item.getName());
         
-        // 添加點擊事件
+        // Add click event
         button.addActionListener(e -> {
-            // 創建一個對話框來顯示物品描述
-            JDialog dialog = new JDialog((Frame)SwingUtilities.getWindowAncestor(this), "物品資訊", true);
-            dialog.setLayout(new BorderLayout(10, 10));
-            
-            // 創建標題面板
+            // Create a dialog to display item information
+            JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "物品資訊", true);
+            dialog.setLayout(new BorderLayout(10, 5));
+
+            // Create title panel
             JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            titlePanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
             JLabel titleLabel = new JLabel(item.getName());
             titleLabel.setFont(new Font("微軟正黑體", Font.BOLD, 16));
             titlePanel.add(titleLabel);
-            
-            // 創建描述面板
+
+            // Create description panel
             JPanel descPanel = new JPanel(new BorderLayout(10, 10));
-            descPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-            
-            // 獲取物品數量
+            descPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 5, 20));
+
+            // Get item amount
             int amount = resourceManager.getResourceAmount(resourceKey);
-            
-            // 創建描述文本
-            String description = "<html>" + 
-                item.getFullDescription().replace("(", "<br>(") + 
-                "<br><br>目前擁有：" + amount + " 個" +
-                "</html>";
-            
-            JLabel descLabel = new JLabel(description);
-            descLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 14));
-            descPanel.add(descLabel, BorderLayout.CENTER);
-            
-            // 添加關閉按鈕
+
+            // Create description text
+            String description = item.getAcquiredDescription() + "\n\n" + item.getDescription() + "\n\n目前擁有：" + amount + " 個";
+
+            // Use JTextArea for text display
+            JTextArea descTextArea = new JTextArea(description);
+            descTextArea.setFont(new Font("微軟正黑體", Font.PLAIN, 12));
+            descTextArea.setLineWrap(true);
+            descTextArea.setWrapStyleWord(true);
+            descTextArea.setEditable(false);
+
+            // Add JTextArea to JScrollPane
+            JScrollPane scrollPane = new JScrollPane(descTextArea);
+            scrollPane.setPreferredSize(new Dimension(300, 150));
+
+            descPanel.add(scrollPane, BorderLayout.CENTER);
+
+            // Add close button
             JButton closeButton = new JButton("關閉");
             closeButton.addActionListener(event -> dialog.dispose());
-            
-            // 將所有元件添加到對話框
+
+            // Add components to dialog
             dialog.add(titlePanel, BorderLayout.NORTH);
             dialog.add(descPanel, BorderLayout.CENTER);
             dialog.add(closeButton, BorderLayout.SOUTH);
-            
-            // 設置對話框大小和位置
-            dialog.setSize(300, 200);
+
+            // Set dialog size and position
+            dialog.setSize(350, 250);
             dialog.setLocationRelativeTo(button);
             dialog.setVisible(true);
         });
         
-        // 更新按鈕狀態
+        // Update button state
         updateItemButton(button, countLabel, item, resourceKey);
         
         parent.add(button);
@@ -207,10 +261,21 @@ public class InventoryPanel extends JPanel {
         
         countLabel.setText(String.valueOf(amount));
         countLabel.setVisible(amount > 0);
-        button.setEnabled(amount > 0);
+        button.setEnabled(true);  // Keep button enabled to allow clicking
+        button.setBackground(amount > 0 ? Color.WHITE : Color.LIGHT_GRAY);  // Change color if quantity is 0
         
         if (item != null) {
             button.setText(item.getName());
+        }
+    }
+
+    private static class ItemEntry {
+        ItemDescription itemDescription;
+        String resourceKey;
+
+        ItemEntry(ItemDescription itemDescription, String resourceKey) {
+            this.itemDescription = itemDescription;
+            this.resourceKey = resourceKey;
         }
     }
 } 

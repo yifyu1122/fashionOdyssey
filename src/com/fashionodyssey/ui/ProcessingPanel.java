@@ -106,8 +106,8 @@ public class ProcessingPanel extends JPanel {
             recipeButton.setForeground(Color.BLACK);
 
             recipeButton.addActionListener(e -> {
-                // 如果這個配方已經被選中，則取消選擇
                 if (recipe[0].equals(selectedRecipe)) {
+                    // 如果已選擇，則取消選擇
                     selectedRecipe = null;
                     recipeButton.setBackground(null);
                     recipeButton.setForeground(Color.BLACK);
@@ -146,7 +146,14 @@ public class ProcessingPanel extends JPanel {
 
         craftButton.addActionListener(e -> {
             if (selectedRecipe != null) {
-                attemptCrafting(selectedRecipe);
+                String productId = getProductId(selectedRecipe);
+                System.out.println("選擇的產品 ID: " + productId);
+                if (controller.canCraft(productId)) {
+                    controller.craftProduct(productId);
+                    showSuccess(selectedRecipe + "製作成功！");
+                } else {
+                    processMessage.setText("材料不足，無法製作！");
+                }
             } else {
                 processMessage.setText("請先選擇要製作的配方！");
             }

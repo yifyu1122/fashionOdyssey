@@ -226,7 +226,7 @@ public class ResourceManager {
             money -= fertilizerCost;
             addResource("fertilizer", 5);  // 一次購買5個肥料
             EventManager.getInstance().fireEvent(
-                new GameEvent("UPDATE_STATUS", "成功購買5個肥料")
+                new GameEvent("UPDATE_STATUS", "成功購買5肥料")
             );
         } else {
             EventManager.getInstance().fireEvent(
