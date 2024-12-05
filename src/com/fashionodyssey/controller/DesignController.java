@@ -4,6 +4,12 @@ import com.fashionodyssey.event.EventManager;
 import com.fashionodyssey.event.GameEvent;
 import com.fashionodyssey.model.design.Design;
 import com.fashionodyssey.util.ResourceManager;
+import java.awt.Image;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import javax.imageio.ImageIO;
 
 public class DesignController {
     private static DesignController instance;
@@ -11,11 +17,58 @@ public class DesignController {
     private String currentBaseItem;
     private String currentDecoration;
     private int decorationCount;
+    private Map<String, Image> baseItemImages;
     
     private DesignController() {
         this.resourceManager = ResourceManager.getInstance();
-        initializeResources();
+        this.baseItemImages = new HashMap<>();
         setupEventListeners();
+        loadBaseItemImages();  // 添加這行
+    }
+    
+    private void loadBaseItemImages() {
+        String[] colors = {"white", "red", "yellow", "pink", "purple"};
+        String[] types = {"dress", "shirt", "pants"};
+        
+        for (String color : colors) {
+            for (String type : types) {
+                String key = color + "_" + type;
+                File file = new File("src/main/resources/images/base/" + key + ".png");
+                try {
+                    if (!file.exists()) {
+                        System.err.println("File not found: " + file.getAbsolutePath());
+                        continue;
+                    }
+                    Image img = ImageIO.read(file);
+                    baseItemImages.put(key, img);
+                    System.out.println("Successfully loaded: " + key);
+                } catch (IOException e) {
+                    System.err.println("Failed to load base item image: " + file.getAbsolutePath());
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public Image getBaseItemImage(String baseItem) {
+        if (baseItem == null) return null;
+        
+        // 轉換中文到英文的鍵值
+        String itemKey = baseItem.toLowerCase()
+            .replace("連衣裙", "_dress")
+            .replace("襯衫", "_shirt")
+            .replace("褲子", "_pants")
+            .replace("白色", "white")
+            .replace("紅色", "red")
+            .replace("黃色", "yellow")
+            .replace("粉色", "pink")
+            .replace("紫色", "purple");
+            
+        Image img = baseItemImages.get(itemKey);
+        if (img == null) {
+            System.err.println("找不到圖片: " + itemKey);
+        }
+        return img;
     }
     
     public static DesignController getInstance() {
@@ -25,33 +78,8 @@ public class DesignController {
         return instance;
     }
     
-    private void initializeResources() {
-        // 初始化基礎服裝資源
-        resourceManager.addResource("white_dress", 5);
-        resourceManager.addResource("red_dress", 5);
-        resourceManager.addResource("yellow_dress", 5);
-        resourceManager.addResource("pink_dress", 5);
-        resourceManager.addResource("purple_dress", 5);
-        
-        // 初始化裝飾品資源
-        resourceManager.addResource("white_lace", 10);
-        resourceManager.addResource("red_lace", 10);
-        resourceManager.addResource("yellow_lace", 10);
-        resourceManager.addResource("pink_lace", 10);
-        resourceManager.addResource("purple_lace", 10);
-        
-        resourceManager.addResource("white_ribbon", 10);
-        resourceManager.addResource("red_ribbon", 10);
-        resourceManager.addResource("yellow_ribbon", 10);
-        resourceManager.addResource("pink_ribbon", 10);
-        resourceManager.addResource("purple_ribbon", 10);
-        
-        resourceManager.addResource("white_bow", 10);
-        resourceManager.addResource("red_bow", 10);
-        resourceManager.addResource("yellow_bow", 10);
-        resourceManager.addResource("pink_bow", 10);
-        resourceManager.addResource("purple_bow", 10);
-    }
+    
+    
     
     private void setupEventListeners() {
         EventManager eventManager = EventManager.getInstance();
@@ -114,7 +142,7 @@ public class DesignController {
     public void createDesign(String designName) {
         if (currentBaseItem == null || currentDecoration == null) {
             EventManager.getInstance().fireEvent(
-                new GameEvent("SHOW_MESSAGE", "請先選擇基礎服裝和裝飾品")
+                new GameEvent("SHOW_MESSAGE", "請先選���基礎服裝和裝飾品")
             );
             return;
         }

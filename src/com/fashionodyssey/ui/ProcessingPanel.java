@@ -12,7 +12,7 @@ public class ProcessingPanel extends JPanel {
     private String selectedRecipe;    // 當前選擇的配方
     private JButton[] recipeButtons;  // 配方按鈕
     private int currentPage = 0;
-    private final String[] pageNames = {"基本", "染料", "布料", "蝴蝶結", "緞帶", "連衣裙", "襯衫", "褲子"};
+    private final String[] pageNames = {"基本", "染料", "布料", "蝴蝶結", "緞帶", "連衣裙", "襯衫", "褲子", "蕾絲"};
     private ProcessingController controller;
     private JLabel moneyLabel;
 
@@ -94,7 +94,11 @@ public class ProcessingPanel extends JPanel {
             {"紅色褲子", "1個紅色布料 → 1個紅色褲子"},
             {"黃色褲子", "1個黃色布料 → 1個黃色褲子"},
             {"粉色褲子", "1個粉色布料 → 1個粉色褲子"},
-            {"紫色褲子", "1個紫色布料 → 1個紫色褲子"}
+            {"紫色褲子", "1個紫色布料 → 1個紫色褲子"},
+            {"紅色蕾絲", "1個白色蕾絲 + 1個紅色染料 → 1個紅色蕾絲"},
+            {"黃色蕾絲", "1個白色蕾絲 + 1個黃色染料 → 1個黃色蕾絲"},
+            {"紫色蕾絲", "1個白色蕾絲 + 1個紫色染料 → 1個紫色蕾絲"},
+            {"粉色蕾絲", "1個白色蕾絲 + 1個粉色染料 → 1個粉色蕾絲"}
         };
 
         recipeButtons = new JButton[recipes.length];
@@ -298,7 +302,7 @@ public class ProcessingPanel extends JPanel {
         categoryPanel.add(Box.createVerticalStrut(20));
 
         // 創建類別按鈕
-        JPanel buttonGrid = new JPanel(new GridLayout(4, 2, 10, 10));
+        JPanel buttonGrid = new JPanel(new GridLayout(5, 2, 10, 10));
         buttonGrid.setAlignmentX(Component.LEFT_ALIGNMENT);
         buttonGrid.setMaximumSize(new Dimension(410, 200));
         

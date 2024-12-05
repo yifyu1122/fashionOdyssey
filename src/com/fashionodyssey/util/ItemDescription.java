@@ -165,16 +165,16 @@ public enum ItemDescription {
             case YELLOW_DRESS -> "獲取方法：於加工場合成取得，2塊黃色布料即可製作";
             case PINK_DRESS -> "獲取方法：於加工場合成取得，2塊粉色布料即可製作";
             case PURPLE_DRESS -> "獲取方法：於加工場合成取得，2塊紫色布料即可製作";
-            case WHITE_SHIRT -> "獲取方法：於加工場合成取得，2塊白色布料即可製作";
-            case RED_SHIRT -> "獲取方法：於加工場合成取得，2塊紅色布料即可製作";
-            case YELLOW_SHIRT -> "獲取方法：於加工場合成取得，2塊黃色布料即可製作";
-            case PINK_SHIRT -> "獲取方法：於加工場合成取得，2塊粉色布料即可製作";
-            case PURPLE_SHIRT -> "獲取方法：於加工場合成取得，2塊紫色布料即可製作";
-            case WHITE_PANTS -> "獲取方法：於加工場合成取得，2塊白色布料即可製作";
-            case RED_PANTS -> "獲取方法：於加工場合成取得，2塊紅色布料即可製作";
-            case YELLOW_PANTS -> "獲取方法：於加工場合成取得，2塊黃色布料即可製作";
-            case PINK_PANTS -> "獲取方法：於加工場合成取得，2塊粉色布料即可製作";
-            case PURPLE_PANTS -> "獲取方法：於加工場合成取得，2塊紫色布料即可製作";
+            case WHITE_SHIRT -> "獲取方法：於加工場合成取得，1塊白色布料即可製作";
+            case RED_SHIRT -> "獲取方法：於加工場合成取得，1塊紅色布料即可製作";
+            case YELLOW_SHIRT -> "獲取方法：於加工場合成取得，1塊黃色布料即可製作";
+            case PINK_SHIRT -> "獲取方法：於加工場合成取得，1塊粉色布料即可製作";
+            case PURPLE_SHIRT -> "獲取方法：於加工場合成取得，1塊紫色布料即可製作";
+            case WHITE_PANTS -> "獲取方法：於加工場合成取得，1塊白色布料即可製作";
+            case RED_PANTS -> "獲取方法：於加工場合成取得，1塊紅色布料即可製作";
+            case YELLOW_PANTS -> "獲取方法：於加工場合成取得，1塊黃色布料即可製作";
+            case PINK_PANTS -> "獲取方法：於加工場合成取得，1塊粉色布料即可製作";
+            case PURPLE_PANTS -> "獲取方法：於加工場合成取得，1塊紫色布料即可製作";
         };
     }
 

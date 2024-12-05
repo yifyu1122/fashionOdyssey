@@ -282,46 +282,11 @@ public class ResourceManager {
         );
     }
     
-    public boolean hasEnoughMaterials(String baseItem, String decoration, int count) {
-        // 檢查基礎服裝是否足夠
-        String baseItemKey = convertToResourceKey(baseItem);
-        if (getResourceAmount(baseItemKey) < 1) {
-            return false;
-        }
-        
-        // 檢查裝飾品是否足夠
-        String decorationKey = convertToResourceKey(decoration);
-        return getResourceAmount(decorationKey) >= count;
-    }
+
+
+
     
-    public void consumeMaterials(String baseItem, String decoration, int count) {
-        // 消耗基礎服裝
-        String baseItemKey = convertToResourceKey(baseItem);
-        useResource(baseItemKey, 1);
-        
-        // 消耗裝飾品
-        String decorationKey = convertToResourceKey(decoration);
-        useResource(decorationKey, count);
-    }
-    
-    public void addDesign(Design design) {
-        String designKey = "design_" + design.getName().toLowerCase().replace(" ", "_");
-        addResource(designKey, 1);
-        notifyInventoryChange();
-    }
-    
-    private String convertToResourceKey(String displayName) {
-        return switch (displayName) {
-            case "紅色連衣裙" -> "red_dress";
-            case "藍色連衣裙" -> "blue_dress";
-            case "黃色上衣" -> "yellow_shirt";
-            case "綠色褲子" -> "green_pants";
-            case "蕾絲" -> "lace";
-            case "緞帶" -> "ribbon";
-            case "蝴蝶結" -> "bow";
-            default -> displayName.toLowerCase().replace(" ", "_");
-        };
-    }
+
     
     public boolean hasResource(String type) {
         return resources.getOrDefault(type, 0) > 0;
@@ -337,5 +302,13 @@ public class ResourceManager {
             resources.put(type, current - amount);
             notifyResourceChange();
         }
+    }
+    
+    public void addDesign(Design design) {
+        // 觸發設計完成事件
+        EventManager.getInstance().fireEvent(
+            new GameEvent("DESIGN_CREATED", design)
+        );
+        notifyInventoryChange();
     }
 } 

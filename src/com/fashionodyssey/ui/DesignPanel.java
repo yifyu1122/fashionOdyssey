@@ -1,9 +1,6 @@
 package com.fashionodyssey.ui;
 
 import com.fashionodyssey.controller.DesignController;
-import com.fashionodyssey.event.EventManager;
-import com.fashionodyssey.event.GameEvent;
-import com.fashionodyssey.model.design.Design;
 import com.fashionodyssey.util.ResourceManager;
 import java.awt.*;
 import javax.swing.*;
@@ -23,12 +20,12 @@ public class DesignPanel extends JPanel {
         resourceManager = ResourceManager.getInstance();
         initComponents();
         
-        designButton.addActionListener(e -> {
-            String designName = nameField.getText().trim();
-            EventManager.getInstance().fireEvent(
-                new GameEvent("CREATE_DESIGN", designName)
-            );
-        });
+        designButton.addActionListener(e -> createDesign());
+
+        // 更新製作按鈕狀態 
+        baseItemSelector.addActionListener(e -> updateDesignButtonState());
+        decorationSelector.addActionListener(e -> updateDesignButtonState());
+        decorationCount.addChangeListener(e -> updateDesignButtonState());
     }
     
     private void initComponents() {
@@ -95,9 +92,16 @@ public class DesignPanel extends JPanel {
         confirmButton.addActionListener(e -> {
             String color = (String) colorSelector.getSelectedItem();
             String type = (String) typeSelector.getSelectedItem();
-            EventManager.getInstance().fireEvent(
-                new GameEvent("SELECT_BASE_ITEM", color, type)
-            );
+            designController.selectBaseItem(color, type);
+            
+            // 更新 baseItemSelector 的選項
+            String baseItemName = color + type;  // 例如："白色連衣裙"
+            baseItemSelector.removeAllItems();
+            baseItemSelector.addItem(baseItemName);
+            baseItemSelector.setSelectedItem(baseItemName);
+            
+            // 重新繪製預覽畫面
+            previewPanel.repaint();
         });
         section.add(confirmButton);
 
@@ -183,7 +187,13 @@ public class DesignPanel extends JPanel {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                drawDesignPreview(g);
+                // 先填充灰色背景
+                g.setColor(new Color(240, 240, 240));  // 淺灰色
+                g.fillRect(0, 0, getWidth(), getHeight());
+                // 確保在正確的位置繪製
+                if (this.getParent() != null) {
+                    drawDesignPreview((Graphics2D)g);
+                }
             }
         };
         panel.setPreferredSize(new Dimension(400, 400));
@@ -191,6 +201,8 @@ public class DesignPanel extends JPanel {
             BorderFactory.createTitledBorder("預覽"),
             BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
+        // 設置不透明以確保正確繪製
+        panel.setOpaque(true);
         return panel;
     }
     
@@ -209,25 +221,16 @@ public class DesignPanel extends JPanel {
         }
         
         // 檢查材料是否足夠
-        if (!checkMaterials(baseItem, decoration, count)) {
-            JOptionPane.showMessageDialog(this, 
-                "材料不足，無法製作！", 
-                "提示", 
-                JOptionPane.WARNING_MESSAGE);
+        if (!resourceManager.hasResource(baseItem, 1) || !resourceManager.hasResource(decoration, count)) {
+            JOptionPane.showMessageDialog(this,
+                "材料不足！請確認材料數量。",
+                "錯誤",
+                JOptionPane.ERROR_MESSAGE);
             return;
         }
         
-        // 消耗材料
-        consumeMaterials(baseItem, decoration, count);
-        
-        // 創建新設計並添加到倉庫
-        Design newDesign = new Design(designName, baseItem, decoration, count);
-        resourceManager.addDesign(newDesign);
-        
-        // 通知更新
-        EventManager.getInstance().fireEvent(
-            new GameEvent("DESIGN_CREATED", newDesign)
-        );
+        // 使用 DesignController 處理設計邏輯
+        designController.createDesign(designName);
         
         // 重置輸入
         nameField.setText("");
@@ -239,37 +242,21 @@ public class DesignPanel extends JPanel {
             JOptionPane.INFORMATION_MESSAGE);
     }
     
-    private boolean checkMaterials(String baseItem, String decoration, int count) {
-        return resourceManager.hasEnoughMaterials(baseItem, decoration, count);
-    }
-    
-    private void consumeMaterials(String baseItem, String decoration, int count) {
-        resourceManager.consumeMaterials(baseItem, decoration, count);
-    }
-    
     private void drawDesignPreview(Graphics g) {
-        // 繪製預覽圖的邏輯
-        if (baseItemSelector != null && decorationSelector != null) {
+        // 清空背景
+        g.setColor(Color.GRAY);
+        g.fillRect(0, 0, previewPanel.getWidth(), previewPanel.getHeight());
+        
+        if (baseItemSelector.getSelectedItem() != null) {
             String baseItem = (String) baseItemSelector.getSelectedItem();
-            String decoration = (String) decorationSelector.getSelectedItem();
-            int count = (Integer) decorationCount.getValue();
-            
-            // 繪製基礎服裝
-            drawBaseItem(g, baseItem);
-            
-            // 繪製裝飾品
-            for (int i = 0; i < count; i++) {
-                drawDecoration(g, decoration, i);
+            Image img = designController.getBaseItemImage(baseItem);
+            if (img != null) {
+                // 計算中心位置
+                int x = (previewPanel.getWidth() - img.getWidth(null)) / 2;
+                int y = (previewPanel.getHeight() - img.getHeight(null)) / 2;
+                g.drawImage(img, x, y, null);
             }
         }
-    }
-    
-    private void drawBaseItem(Graphics g, String baseItem) {
-        // ... 繪製基礎服裝的具體實現 ...
-    }
-    
-    private void drawDecoration(Graphics g, String decoration, int position) {
-        // ... 繪製裝飾品的具體實現 ...
     }
     
     private void updateDesignButtonState() {
@@ -278,8 +265,7 @@ public class DesignPanel extends JPanel {
         int count = (Integer) decorationCount.getValue();
         
         if(baseItem != null && decoration != null) {
-            boolean hasEnoughMaterials = resourceManager.hasEnoughMaterials(
-                baseItem, decoration, count);
+            boolean hasEnoughMaterials = resourceManager.hasResource(baseItem, count) && resourceManager.hasResource(decoration, count);
             designButton.setEnabled(hasEnoughMaterials);
         } else {
             designButton.setEnabled(false);

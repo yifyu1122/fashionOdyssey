@@ -1,5 +1,6 @@
 package com.fashionodyssey.main;
 
+import com.fashionodyssey.controller.DesignController;
 import com.fashionodyssey.controller.FarmController;
 import com.fashionodyssey.event.EventManager;
 import com.fashionodyssey.model.resource.CropStage;
@@ -9,6 +10,7 @@ import com.fashionodyssey.util.ResourceManager;
 public class GameMain {
     public static void main(String[] args) {
         FarmController farmController = new FarmController();
+        DesignController designController = DesignController.getInstance();
         MainFrame mainFrame = new MainFrame();
         ResourceManager resourceManager = ResourceManager.getInstance();
         
@@ -65,6 +67,7 @@ public class GameMain {
         EventManager.getInstance().addEventListener("UPDATE_INVENTORY", event -> {
             mainFrame.getInventoryPanel().updateResources();
         });
+ 
 
         
         mainFrame.setVisible(true);
