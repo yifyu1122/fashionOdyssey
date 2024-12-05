@@ -302,6 +302,10 @@ public class ProcessingController {
         }
         
         boolean canCraft(ResourceManager rm) {
+            if (ingredients.length != amounts.length) {
+                throw new IllegalStateException("Ingredients and amounts arrays must have the same length");
+            }
+            
             for (int i = 0; i < ingredients.length; i++) {
                 if (rm.getResourceAmount(ingredients[i]) < amounts[i]) {
                     return false;

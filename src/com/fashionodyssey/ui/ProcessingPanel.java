@@ -253,10 +253,10 @@ public class ProcessingPanel extends JPanel {
             case "紫色蕾絲" -> "purple_lace";
             case "粉色蕾絲" -> "pink_lace";
             case "棉花" -> "harvested_cotton";
-            case "玫瑰" -> "rose";
-            case "向日葵" -> "sunflower";
-            case "鬱金香(粉)" -> "tulip_pink";
-            case "薰衣草" -> "lavender";
+            case "玫瑰" -> "harvested_rose";
+            case "向日葵" -> "harvested_sunflower";
+            case "鬱金香(粉)" -> "harvested_tulip_pink";
+            case "薰衣草" -> "harvested_lavender";
             default -> "";
         };
     }

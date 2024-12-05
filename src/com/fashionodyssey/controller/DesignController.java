@@ -29,7 +29,7 @@ public class DesignController {
     }
 
     public void addDecoration(String decoration, int count) {
-        selectedDecorations.put(decoration, selectedDecorations.getOrDefault(decoration, 0) + count);
+        currentDecorations.put(decoration, currentDecorations.getOrDefault(decoration, 0) + count);
     }
 
     public void updateDecoration(String decoration, int count) {
