@@ -1,6 +1,7 @@
 package com.fashionodyssey.ui;
 
 import com.fashionodyssey.controller.DesignController;
+import com.fashionodyssey.model.cost.ItemCost;
 import com.fashionodyssey.util.ResourceManager;
 import java.awt.*;
 import java.util.Map;
@@ -106,7 +107,6 @@ public class DesignPanel extends JPanel {
     private void addListeners() {
         baseItemSelector.addActionListener(e -> updatePreviewAndMaterials());
         for (int i = 0; i < 3; i++) {
-            int index = i;
             decorationSelectors[i].addActionListener(e -> updateMaterialsList());
             decorationCounts[i].addChangeListener(e -> updateMaterialsList());
         }
@@ -114,7 +114,7 @@ public class DesignPanel extends JPanel {
     }
 
     private void updateMaterialsList() {
-        designController.clearDecorations(); // Clear previous selections
+        designController.clearDecorations();
         for (int i = 0; i < 3; i++) {
             String selectedDecoration = (String) decorationSelectors[i].getSelectedItem();
             int count = (Integer) decorationCounts[i].getValue();
@@ -125,15 +125,25 @@ public class DesignPanel extends JPanel {
         
         Map<String, Integer> materials = designController.getRequiredMaterials();
         
+        // Use an array to hold the total cost
+        final double[] totalCost = {0.0};
         StringBuilder builder = new StringBuilder("<html>");
+        
+        // Add materials list
+        builder.append("<div><b>需要材料：</b></div>");
         materials.forEach((name, required) -> {
             int available = resourceManager.getResourceAmount(name);
             String color = available < required ? "red" : "black";
             String displayName = getDisplayName(name);
+            double itemCost = ItemCost.calculateCost(name) * required;
+            totalCost[0] += itemCost;
             builder.append(String.format(
-                "<div><span style='color:%s'>%s (需要: %d, 擁有: %d)</span></div>",
-                color, displayName, required, available));
+                "<div><span style='color:%s'>%s (需要: %d, 擁有: %d) - 成本: %.2f金幣</span></div>",
+                color, displayName, required, available, itemCost));
         });
+        
+        // Add total cost
+        builder.append(String.format("<div style='margin-top:10px'><b>總成本：%.2f金幣</b></div>", totalCost[0]));
         builder.append("</html>");
 
         // Update the materials label
@@ -150,6 +160,8 @@ public class DesignPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "請為您的設計命名！", "提示", JOptionPane.WARNING_MESSAGE);
             return;
         }
+
+        designController.setBaseItem(mapToKey(baseItem));
 
         if (designController.canCraft()) {
             designController.craftDesign();
@@ -180,7 +192,7 @@ public class DesignPanel extends JPanel {
     }
 
     private String mapToKey(String item) {
-        // 將基礎服裝名稱轉換為資源ID
+        // 將服裝名稱轉換為資源ID
         return item.toLowerCase()
                    .replace("白色", "white_")
                    .replace("紅色", "red_")

@@ -14,8 +14,6 @@ public class ResourceManager {
     private String currentCropType = "棉花";  // 添加這個成員變量
     
     // 資源類型常量
-    private static final String FERTILIZER = "fertilizer";
-    private static final String SEEDS_SUFFIX = "_seeds";
     private static final String HARVESTED_PREFIX = "harvested_";
     
     // 作物類型映射
@@ -149,6 +147,13 @@ public class ResourceManager {
         String seedType = cropType + "_seeds";
         if (getResourceAmount(seedType) > 0) {
             useResource(seedType, 1);  // 消耗一個種子
+        }
+
+    }
+    public void consumeResource(String type, int amount) {
+        int current = resources.getOrDefault(type, 0);
+        if (current >= amount) {
+            useResource(type, amount);  // 消耗資源
         }
     }
     
@@ -296,13 +301,7 @@ public class ResourceManager {
         return resources.getOrDefault(type, 0) >= amount;
     }
     
-    public void consumeResource(String type, int amount) {
-        int current = resources.getOrDefault(type, 0);
-        if (current >= amount) {
-            resources.put(type, current - amount);
-            notifyResourceChange();
-        }
-    }
+    
     
     public void addDesign(Design design) {
         // 觸發設計完成事件

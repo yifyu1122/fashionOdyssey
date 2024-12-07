@@ -41,7 +41,7 @@ public class ProcessingController {
             1
         ));
         requirements.put("pink_dye", new CraftingRequirement(
-            new String[]{"harvested_tulip"},
+            new String[]{"harvested_tulip_pink"},
             new int[]{1},
             "pink_dye",
             1

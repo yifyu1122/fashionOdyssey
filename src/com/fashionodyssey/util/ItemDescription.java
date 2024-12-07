@@ -156,8 +156,8 @@ public enum ItemDescription {
             case PINK_RIBBON -> "獲取方法：於加工場合成取得，1個粉色布料即可製作";
             case PURPLE_RIBBON -> "獲取方法：於加工場合成取得，1個紫色布料即可製作";
             case WHITE_LACE -> "獲取方法：於加工場合成取得，1朵棉花即可製作";
-            case RED_LACE -> "獲取方法：於加工場合成取得，1個白色蕾絲+1個紅色染料=1個紅色蕾絲";
-            case YELLOW_LACE -> "獲取方法：於加工場合成取得，1個白色蕾絲+1個黃色染料=1個黃色蕾絲";
+            case RED_LACE -> "獲取方法：於加工場合成取得，1個白色蕾絲+1個紅色染料即可製作";
+            case YELLOW_LACE -> "獲取方法：於加工場合成取得，1個白色蕾絲+1個黃色染料即可製作";
             case PINK_LACE -> "獲取方法：於加工場合成取得，1個白色蕾絲+1個粉色染料即可製作";
             case PURPLE_LACE -> "獲取方法：於加工場合成取得，1個白色蕾絲+1個紫色染料即可製作";
             case WHITE_DRESS -> "獲取方法：於加工場合成取得，2塊白色布料即可製作";

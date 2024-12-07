@@ -13,14 +13,13 @@ public class FarmController {
     private int currentRow = 0;
     private int currentCol = 0;
     private int harvestCount = 0;
-    private CropStage currentStage = CropStage.EMPTY;
     private int fertilizingRow = -1;
     private int fertilizingCol = -1;
 
     public FarmController() {
         this.resourceManager = ResourceManager.getInstance();
         this.farmGrid = new Grid[GRID_SIZE][GRID_SIZE];
-        this.currentStage = CropStage.EMPTY;
+        
         
         for (int i = 0; i < GRID_SIZE; i++) {
             for (int j = 0; j < GRID_SIZE; j++) {
@@ -256,10 +255,6 @@ public class FarmController {
     }
 
     public void setCurrentPosition(int row, int col) {
-        // 添加調試輸出
-        System.out.println("\n===== 設置當前位置 =====");
-        System.out.println("輸入標: row=" + row + ", col=" + col);
-        
         if (row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE) {
             this.currentRow = row;
             this.currentCol = col;
