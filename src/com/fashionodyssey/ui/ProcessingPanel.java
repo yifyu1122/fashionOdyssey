@@ -337,7 +337,7 @@ public class ProcessingPanel extends JPanel {
             processMessage.setText("材料充足，可以製作！");
             processMessage.setForeground(new Color(46, 139, 87));
         } else {
-            processMessage.setText("材料不足，無��製作！");
+            processMessage.setText("材料不足，無法製作！");
             processMessage.setForeground(new Color(178, 34, 34));
         }
     }

@@ -1,6 +1,8 @@
 package com.fashionodyssey.ui;
 
 import com.fashionodyssey.controller.DesignController;
+import com.fashionodyssey.event.EventManager;
+import com.fashionodyssey.event.GameEvent;
 import com.fashionodyssey.model.cost.ItemCost;
 import com.fashionodyssey.util.ResourceManager;
 import java.awt.*;
@@ -69,6 +71,9 @@ public class DesignPanel extends JPanel {
         controlPanel.add(createFinalizeSection());
 
         add(controlPanel, BorderLayout.CENTER);
+
+        // 修改：初始化後立即更新材料列表和按鈕狀態
+        SwingUtilities.invokeLater(this::updateMaterialsList);
     }
 
     private JPanel createBaseItemSection() {
@@ -111,6 +116,13 @@ public class DesignPanel extends JPanel {
             decorationCounts[i].addChangeListener(e -> updateMaterialsList());
         }
         designButton.addActionListener(e -> createDesign());
+        
+        // 新增：監聽名稱欄位的變更
+        nameField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { updateMaterialsList(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { updateMaterialsList(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { updateMaterialsList(); }
+        });
     }
 
     private void updateMaterialsList() {
@@ -150,6 +162,9 @@ public class DesignPanel extends JPanel {
         materialsLabel.setText(builder.toString());
         materialsLabel.revalidate();
         materialsLabel.repaint();
+
+        // Enable or disable the design button based on conditions
+        designButton.setEnabled(!nameField.getText().trim().isEmpty() && designController.canCraft());
     }
 
     private void createDesign() {
@@ -162,9 +177,18 @@ public class DesignPanel extends JPanel {
         }
 
         designController.setBaseItem(mapToKey(baseItem));
+        designController.setDesignName(name);
 
         if (designController.canCraft()) {
             designController.craftDesign();
+            
+            EventManager.getInstance().fireEvent(
+                new GameEvent("UPDATE_RESOURCES", Map.of(
+                    "designName", name,
+                    "baseItem", baseItem
+                ))
+            );
+            
             JOptionPane.showMessageDialog(this, "設計成功！", "提示", JOptionPane.INFORMATION_MESSAGE);
             nameField.setText("");
             for (JSpinner spinner : decorationCounts) {

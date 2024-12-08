@@ -249,13 +249,13 @@ public class ProcessingController {
         // 蕾絲類
         requirements.put("red_lace", new CraftingRequirement(
             new String[]{"white_lace", "red_dye"},
-            new int[]{1},
+            new int[]{1, 1},
             "red_lace",
             1
         ));         
         requirements.put("yellow_lace", new CraftingRequirement(
             new String[]{"white_lace", "yellow_dye"},
-            new int[]{1},
+            new int[]{1, 1},
             "yellow_lace",
             1
         ));
@@ -267,7 +267,7 @@ public class ProcessingController {
         ));
         requirements.put("purple_lace", new CraftingRequirement(
             new String[]{"white_lace", "purple_dye"},
-            new int[]{1},
+            new int[]{1, 1},
             "purple_lace",
             1
         ));

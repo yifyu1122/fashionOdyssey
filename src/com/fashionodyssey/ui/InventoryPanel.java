@@ -6,7 +6,9 @@ import com.fashionodyssey.util.ResourceManager;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 
@@ -17,6 +19,7 @@ public class InventoryPanel extends JPanel {
     private JScrollPane scrollPane;
     private ResourceManager resourceManager;
     private boolean isLongPress = false;
+    private Map<String, String> customDesignNames = new HashMap<>();
     
     public InventoryPanel() {
         setLayout(new BorderLayout());
@@ -86,6 +89,16 @@ public class InventoryPanel extends JPanel {
 
         // 註冊事件監聽
         EventManager.getInstance().addEventListener("UPDATE_RESOURCES", event -> {
+            if (event.getData() instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, String> data = (Map<String, String>) event.getData();
+                String designName = data.get("designName");
+                String baseItem = data.get("baseItem");
+                if (designName != null && baseItem != null) {
+                    // 儲存自訂名稱
+                    customDesignNames.put(baseItem.toLowerCase(), designName);
+                }
+            }
             System.out.println("資源數量變化，更新顯示...");
             updateResources();
         });
@@ -194,8 +207,10 @@ public class InventoryPanel extends JPanel {
         button.add(countLabel);
         
         // Set tooltip and name
-        button.setToolTipText("<html>" + item.getFullDescription().replace("\n", "<br>") + "</html>");
-        button.setText(item.getName());
+        String displayName = customDesignNames.getOrDefault(resourceKey, item.getName());
+        button.setText(displayName);
+        button.setToolTipText("<html>" + displayName + "<br>" + 
+                             item.getFullDescription().replace("\n", "<br>") + "</html>");
         
         // Add click event
         button.addActionListener(e -> {
@@ -252,12 +267,10 @@ public class InventoryPanel extends JPanel {
         updateItemButton(button, countLabel, item, resourceKey);
         
         parent.add(button);
-        System.out.println("Created button for: " + item.getName());
     }
     
     private void updateItemButton(JButton button, JLabel countLabel, ItemDescription item, String resourceKey) {
         int amount = resourceManager.getResourceAmount(resourceKey);
-        System.out.println("Updating " + resourceKey + ": " + amount);
         
         countLabel.setText(String.valueOf(amount));
         countLabel.setVisible(amount > 0);

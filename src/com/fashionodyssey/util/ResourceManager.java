@@ -128,9 +128,8 @@ public class ResourceManager {
         return false;
     }
     
-    public int getResourceAmount(String type) {
+    public int getResourceAmount(String type) { // 取得資源數量
         int amount = resources.getOrDefault(type, 0);
-        System.out.println("Getting resource amount for " + type + ": " + amount);
         return amount;
     }
     

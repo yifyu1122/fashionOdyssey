@@ -10,6 +10,7 @@ public class DesignController {
     private Map<String, Integer> currentDecorations; // 當前選擇的裝飾品及其數量
     private String currentBaseItem; // 當前選擇的基礎服裝
     private Map<String, Integer> selectedDecorations = new HashMap<>();
+    private String designName;
 
     private DesignController() {
         resourceManager = ResourceManager.getInstance();
@@ -103,5 +104,13 @@ public class DesignController {
 
     public Map<String, Integer> getSelectedDecorations() {
         return new HashMap<>(selectedDecorations);
+    }
+
+    public void setDesignName(String name) {
+        this.designName = name;
+    }
+
+    public String getDesignName() {
+        return designName;
     }
 }
