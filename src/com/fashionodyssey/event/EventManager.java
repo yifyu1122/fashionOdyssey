@@ -21,6 +21,10 @@ public class EventManager {
         System.out.println("\n===== 事件管理器：添加監聽器 =====");
         System.out.println("事件類型: " + eventType);
         
+        if (listeners.containsKey(eventType) && listeners.get(eventType).contains(listener)) {
+            System.out.println("事件已經存在: " + eventType);
+            return;
+        }
         listeners.computeIfAbsent(eventType, k -> new ArrayList<>()).add(listener);
         
         System.out.println("當前監聽器數量: " + listeners.get(eventType).size());

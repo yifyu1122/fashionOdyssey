@@ -27,7 +27,7 @@ public class MainFrame extends JFrame {
         statusLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
         
         // 初始化資金標籤
-        moneyLabel = new JLabel("資金: $" + ResourceManager.getInstance().getMoney());
+        moneyLabel = new JLabel(String.format("資金: $%.2f", ResourceManager.getInstance().getMoney()));
         moneyLabel.setFont(new Font("微軟正黑體", Font.BOLD, 16));
         
         // 創建頂部面板，包含狀態標籤和資金標籤
@@ -55,7 +55,7 @@ public class MainFrame extends JFrame {
         contentPanel.add(salesPanel, "銷售");
         
         // 創建底部按鈕面板，使用 GridLayout 確保按鈕等寬
-        buttonPanel = new JPanel(new GridLayout(1, 4, 1, 0));  // 1行4列，水平間距1像素
+        buttonPanel = new JPanel(new GridLayout(1, 4, 1, 0));  // 1行4列，水平���距1像素
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(11, 0, 10, 0));  // 頂部加一個像素的邊距
         Font buttonFont = new Font("微軟正黑體", Font.BOLD, 20);
         
@@ -77,7 +77,7 @@ public class MainFrame extends JFrame {
         
         // 註冊資金更新事件
         EventManager.getInstance().addEventListener("UPDATE_MONEY", event -> {
-            int amount = (Integer) event.getData();
+            double amount = (Double) event.getData();
             updateMoney(amount);
         });
     }
@@ -115,7 +115,7 @@ public class MainFrame extends JFrame {
         String welcomeMessage = switch (name) {
             case "農場" -> "歡迎來到夢想農場！今天也要好好照顧作物喔～";
             case "加工" -> "織布機已經準備就緒，讓我們開始創造奇蹟吧！";
-            case "設計" -> "靈感來襲！讓我們一起創造最閃耀的時尚作品～";
+            case "設計" -> "靈感來襲！讓我們一起創造最閃耀的時尚���品～";
             case "銷售" -> "展示櫥窗整理好了！準備好要驚艷全世界了嗎？";
             default -> "歡迎來到時尚創夢家！";
         };
@@ -131,8 +131,8 @@ public class MainFrame extends JFrame {
         statusLabel.setText(message);
     }
     
-    public void updateMoney(int amount) {
-        moneyLabel.setText("資金: $" + amount);
+    public void updateMoney(double amount) {
+        moneyLabel.setText(String.format("資金: $%.2f", amount));
     }
     
     public FarmPanel getFarmPanel() {

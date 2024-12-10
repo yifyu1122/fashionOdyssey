@@ -26,16 +26,28 @@ public class ProcessingPanel extends JPanel {
         resourcePanel.setLayout(new BoxLayout(resourcePanel, BoxLayout.Y_AXIS));
         resourcePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         
+        // 初始化 moneyLabel
+        moneyLabel = new JLabel(String.format("資金: $%.2f", 
+            ResourceManager.getInstance().getMoney()));
+        moneyLabel.setFont(new Font("微軟正黑體", Font.BOLD, 16));
+        
+        // 添加到面板
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        topPanel.add(moneyLabel);
+        add(topPanel, BorderLayout.NORTH);
+        
+        // 註冊金錢更新事件監聽器
+        EventManager.getInstance().addEventListener("UPDATE_MONEY", event -> {
+            if (event.getData() instanceof Double) {
+                double amount = (Double) event.getData();
+                updateMoney(amount);
+            }
+        });
+        
         initComponents();
         
         // 監聽資源更新
         EventManager.getInstance().addEventListener("UPDATE_RESOURCES", event -> updateResources());
-        
-        // 添加資金更新監聽
-        EventManager.getInstance().addEventListener("UPDATE_MONEY", event -> {
-            int amount = (Integer) event.getData();
-            moneyLabel.setText("資金: $" + amount);
-        });
     }
 
     private void initComponents() {
@@ -249,7 +261,7 @@ public class ProcessingPanel extends JPanel {
         String[][] recipes = {
             {"白色連衣裙", "2個白色布料 → 1個白色連衣裙"},
             {"紅色連衣裙", "2個紅色布料 → 1個紅色連衣裙"},
-            {"黃色連衣裙", "2個黃色��料 → 1個黃色連衣裙"},
+            {"黃色連衣裙", "2個黃色布料 → 1個黃色連衣裙"},
             {"粉色連衣裙", "2個粉色布料 → 1個粉色連衣裙"},
             {"紫色連衣裙", "2個紫色布料 → 1個紫色連衣裙"}
         };
@@ -400,7 +412,7 @@ public class ProcessingPanel extends JPanel {
         // 不重置選擇狀態，只更新源顯示
         updateResources();
 
-        // 檢查是否還能繼續製作
+        // 檢查否還能繼續製作
         if (selectedRecipe != null) {
             checkRecipeAvailability(selectedRecipe);
         }
@@ -431,7 +443,7 @@ public class ProcessingPanel extends JPanel {
                 updateRecipeButtons(new int[]{0, 1});
             }
             case 1 -> { // 染料
-                String[] items = {"玫瑰", "向日葵", "鬱金香(粉)", "薰衣草", "紅色染料", "黃色染料", "紫色染料", "粉色染料"};
+                String[] items = {"玫瑰", "向日葵", "鬱���香(粉)", "薰衣草", "紅色染料", "黃色染料", "紫色染料", "粉色染料"};
                 String[] keys = {
                     "harvested_rose",      
                     "harvested_sunflower", 
@@ -513,7 +525,7 @@ public class ProcessingPanel extends JPanel {
                 updateRecipeButtons(new int[]{20, 21, 22, 23, 24});
             }
             case 6 -> { // 襯衫
-                String[] items = {"白色布料", "白色襯衫", "紅色布料", "紅色襯衫", "黃色布料", "黃色襯衫", "紫色布料", "紫色襯衫", "粉色布料", "粉色襯衫"};
+                String[] items = {"白色布料", "白色襯衫", "紅色布料", "紅色襯衫", "黃色布���", "黃色襯衫", "紫色布料", "紫色襯衫", "粉色布料", "粉色襯衫"};
                 String[] keys = {
                     "white_fabric", 
                     "white_shirt", 
@@ -573,7 +585,7 @@ public class ProcessingPanel extends JPanel {
         for (int i = 0; i < names.length; i++) {
             JLabel label = new JLabel(String.format("%s: %d", 
                 names[i], rm.getResourceAmount(keys[i])));
-            label.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
+            label.setFont(new Font("���軟正黑體", Font.PLAIN, 16));
             label.setAlignmentX(Component.LEFT_ALIGNMENT);
             panel.add(label);
             panel.add(Box.createVerticalStrut(10));
@@ -605,5 +617,11 @@ public class ProcessingPanel extends JPanel {
         // 重新驗證面板
         buttonPanel.revalidate();
         buttonPanel.repaint();
+    }
+
+    private void updateMoney(double amount) {
+        if (moneyLabel != null) {  // 添加空值檢查
+            moneyLabel.setText(String.format("資金: $%.2f", amount));
+        }
     }
 }

@@ -1,7 +1,10 @@
 package com.fashionodyssey.controller;
 
+import com.fashionodyssey.model.design.Design;
 import com.fashionodyssey.util.ResourceManager;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DesignController {
@@ -9,8 +12,8 @@ public class DesignController {
     private final ResourceManager resourceManager;
     private Map<String, Integer> currentDecorations; // 當前選擇的裝飾品及其數量
     private String currentBaseItem; // 當前選擇的基礎服裝
-    private Map<String, Integer> selectedDecorations = new HashMap<>();
     private String designName;
+    private List<Design> availableDesigns = new ArrayList<>();
 
     private DesignController() {
         resourceManager = ResourceManager.getInstance();
@@ -30,7 +33,13 @@ public class DesignController {
     }
 
     public void addDecoration(String decoration, int count) {
-        currentDecorations.put(decoration, currentDecorations.getOrDefault(decoration, 0) + count);
+        if (count > 0) {
+            currentDecorations.put(decoration, count); // 直接設置數量，而不是累加
+            System.out.println("設置裝飾品: " + decoration + " 數量: " + count);
+            System.out.println("當前所有裝飾品: " + currentDecorations);
+        } else {
+            currentDecorations.remove(decoration);
+        }
     }
 
     public void updateDecoration(String decoration, int count) {
@@ -48,7 +57,6 @@ public class DesignController {
 
     public void clearDecorations() {
         currentDecorations.clear();
-        selectedDecorations.clear();
     }
 
     public boolean canCraft() {
@@ -64,18 +72,41 @@ public class DesignController {
         return true;
     }
     
-    public void craftDesign() {
+    public void craftDesign(double totalCost) {
+        System.out.println("開始製作設計");
+        System.out.println("當前裝飾品列表: " + currentDecorations);
+        
         if (canCraft()) {
             // 消耗基礎服裝
-            resourceManager.consumeResource(currentBaseItem, 1);
+            if (!resourceManager.consumeResource(currentBaseItem, 1)) {
+                System.out.println("基礎服裝消耗失敗: " + currentBaseItem);
+                return;
+            }
             
             // 消耗所有裝飾品
             for (Map.Entry<String, Integer> entry : currentDecorations.entrySet()) {
-                resourceManager.consumeResource(entry.getKey(), entry.getValue());
+                String decorationKey = entry.getKey();
+                int count = entry.getValue();
+                System.out.println("嘗試消耗裝飾品: " + decorationKey + " 數量: " + count);
+                if (!"無".equals(decorationKey) && count > 0) {
+                    boolean success = resourceManager.consumeResource(decorationKey, count);
+                    System.out.println("消耗裝飾品結果: " + success);
+                    if (!success) {
+                        System.out.println("裝飾品消耗失敗: " + decorationKey);
+                        // 如果消耗失敗，恢復已消耗的基礎服裝
+                        resourceManager.addResource(currentBaseItem, 1);
+                        return;
+                    }
+                }
             }
             
-            // 生成設計品
             String designId = generateDesignId();
+            Map<String, Integer> rawMaterials = new HashMap<>();
+            rawMaterials.put(currentBaseItem, 1);
+            rawMaterials.putAll(currentDecorations);
+            
+            Design newDesign = new Design(designName, currentBaseItem, currentDecorations, rawMaterials, designId);
+            availableDesigns.add(newDesign);
             resourceManager.addResource(designId, 1);
             resourceManager.notifyResourceChange();
         }
@@ -102,15 +133,23 @@ public class DesignController {
         return materials;
     }
 
-    public Map<String, Integer> getSelectedDecorations() {
-        return new HashMap<>(selectedDecorations);
-    }
-
     public void setDesignName(String name) {
         this.designName = name;
     }
 
     public String getDesignName() {
         return designName;
+    }
+
+    public List<Design> getAvailableDesigns() {
+        return new ArrayList<>(availableDesigns);
+    }
+
+    public String getCurrentBaseItem() {
+        return currentBaseItem;
+    }
+
+    public Map<String, Integer> getCurrentDecorations() {
+        return new HashMap<>(currentDecorations);
     }
 }

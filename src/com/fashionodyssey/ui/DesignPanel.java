@@ -30,16 +30,16 @@ public class DesignPanel extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // Initialize baseItemSelector
+        
         baseItemSelector = new JComboBox<>(new String[]{
-            "白色連衣裙", "紅色連衣裙", "黃色連衣裙", "粉色連衣裙", "紫色連衣裙", 
+            "無", "白色連衣裙", "紅色連衣裙", "黃色連衣裙", "粉色連衣裙", "紫色連衣裙", 
             "白色襯衫", "紅色襯衫", "黃色襯衫", "粉色襯衫", "紫色襯衫",
             "白色褲子", "紅色褲子", "黃色褲子", "粉色褲子", "紫色褲子"
         });
 
-        // Initialize decorationSelectors and decorationCounts
-        decorationSelectors = new JComboBox[3]; // Example with 3 decoration slots
-        decorationCounts = new JSpinner[3];
+          
+        decorationSelectors = new JComboBox[4];  
+        decorationCounts = new JSpinner[4];     
         String[] decorations = {
             "無", "白色蕾絲", "紅色蕾絲", "黃色蕾絲", "粉色蕾絲", "紫色蕾絲",
             "白色蝴蝶結", "紅色蝴蝶結", "黃色蝴蝶結", "粉色蝴蝶結", "紫色蝴蝶結",
@@ -47,16 +47,16 @@ public class DesignPanel extends JPanel {
         };
 
         JPanel decorationPanel = new JPanel();
-        decorationPanel.setLayout(new GridLayout(3, 2, 5, 5)); // 3 rows, 2 columns
+        decorationPanel.setLayout(new GridLayout(4, 2, 5, 5)); // 4 rows, 2 columns
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
             decorationSelectors[i] = new JComboBox<>(decorations);
             decorationCounts[i] = new JSpinner(new SpinnerNumberModel(0, 0, 99, 1)); // Start at 0
             decorationPanel.add(decorationSelectors[i]);
             decorationPanel.add(decorationCounts[i]);
         }
 
-        // Add components to the main panel
+        // 設計控制台
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
         controlPanel.setBorder(BorderFactory.createTitledBorder("設計控制台"));
@@ -111,7 +111,7 @@ public class DesignPanel extends JPanel {
 
     private void addListeners() {
         baseItemSelector.addActionListener(e -> updatePreviewAndMaterials());
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
             decorationSelectors[i].addActionListener(e -> updateMaterialsList());
             decorationCounts[i].addChangeListener(e -> updateMaterialsList());
         }
@@ -127,11 +127,13 @@ public class DesignPanel extends JPanel {
 
     private void updateMaterialsList() {
         designController.clearDecorations();
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < decorationSelectors.length; i++) {
             String selectedDecoration = (String) decorationSelectors[i].getSelectedItem();
             int count = (Integer) decorationCounts[i].getValue();
             if (!"無".equals(selectedDecoration) && count > 0) {
-                designController.addDecoration(mapToKey(selectedDecoration), count);
+                String decorationKey = mapToKey(selectedDecoration);
+                designController.addDecoration(decorationKey, count);
+                System.out.println("添加裝飾品: " + decorationKey + " 數量: " + count);
             }
         }
         
@@ -168,36 +170,40 @@ public class DesignPanel extends JPanel {
     }
 
     private void createDesign() {
-        String baseItem = (String) baseItemSelector.getSelectedItem();
-        String name = nameField.getText().trim();
-
-        if (name.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "請為您的設計命名！", "提示", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        designController.setBaseItem(mapToKey(baseItem));
-        designController.setDesignName(name);
-
         if (designController.canCraft()) {
-            designController.craftDesign();
+            double totalCost = calculateTotalCost();
+            System.out.println("開始製作設計，總成本: " + totalCost);
+            
+            // Set the design name in the controller
+            designController.setDesignName(nameField.getText().trim());
+            
+            designController.craftDesign(totalCost);
             
             EventManager.getInstance().fireEvent(
                 new GameEvent("UPDATE_RESOURCES", Map.of(
-                    "designName", name,
-                    "baseItem", baseItem
+                    "designName", nameField.getText(),
+                    "baseItem", (String) baseItemSelector.getSelectedItem(),
+                    "totalCost", totalCost
                 ))
             );
             
-            JOptionPane.showMessageDialog(this, "設計成功！", "提示", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "設計成功！已新增至您的設計列表中，請前往銷售頁面刷新查看。", "提示", JOptionPane.INFORMATION_MESSAGE);
             nameField.setText("");
             for (JSpinner spinner : decorationCounts) {
-                spinner.setValue(0); // Reset to 0
+                spinner.setValue(0);
             }
             updateMaterialsList();
         } else {
             JOptionPane.showMessageDialog(this, "材料不足！", "錯誤", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private double calculateTotalCost() {
+        double baseCost = ItemCost.calculateCost(designController.getCurrentBaseItem());
+        double decorationCost = designController.getCurrentDecorations().entrySet().stream()
+            .mapToDouble(entry -> ItemCost.calculateCost(entry.getKey()) * entry.getValue())
+            .sum();
+        return baseCost + decorationCost;
     }
 
     private String getDisplayName(String key) {

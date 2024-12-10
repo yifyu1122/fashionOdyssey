@@ -88,6 +88,18 @@ public class ItemCost {
             return totalCost;
         }
         
+        // 如果是設計品，計算所有組件成本
+        if (itemId.startsWith("design_")) {
+            String[] components = itemId.split("_");
+            double totalCost = 0.0;
+            for (int i = 1; i < components.length; i++) {
+                if (!components[i].equals("無")) {
+                    totalCost += calculateCost(components[i]);
+                }
+            }
+            return totalCost;
+        }
+        
         return 0.0; // 未知物品
     }
 } 

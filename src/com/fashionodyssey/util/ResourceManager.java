@@ -10,7 +10,7 @@ import java.util.Map;
 public class ResourceManager {
     private static ResourceManager instance;
     private Map<String, Integer> resources;
-    private int money;
+    private double money;
     private String currentCropType = "棉花";  // 添加這個成員變量
     
     // 資源類型常量
@@ -27,7 +27,7 @@ public class ResourceManager {
     
     private ResourceManager() {
         resources = new HashMap<>();
-        money = 1000; // 初始資金
+        money = 1000.0; // 初始資金
         initializeResources();
     }
     
@@ -109,17 +109,24 @@ public class ResourceManager {
         return false;
     }
     
-    public void addMoney(int amount) {
+    public void addMoney(double amount) {
+        System.out.println("Adding money: " + amount);  // 添加調試信息
         money += amount;
+        System.out.println("New money amount: " + money);  // 添加調試信息
+        
+        // 觸發金錢更新事件
         EventManager.getInstance().fireEvent(new GameEvent("UPDATE_MONEY", money));
+        
+        // 同時觸發資源更新事件
+        notifyResourceChange();
     }
     
-    public void spendMoney(int amount) {
+    public void spendMoney(double amount) {
         money -= amount;
         EventManager.getInstance().fireEvent(new GameEvent("UPDATE_MONEY", money));
     }
     
-    public boolean useMoney(int amount) {
+    public boolean useMoney(double amount) {
         if (money >= amount) {
             money -= amount;
             notifyResourceChange();
@@ -133,7 +140,7 @@ public class ResourceManager {
         return amount;
     }
     
-    public int getMoney() {
+    public double getMoney() {
         return money;
     }
     
@@ -149,10 +156,15 @@ public class ResourceManager {
         }
 
     }
-    public void consumeResource(String type, int amount) {
+    public boolean consumeResource(String type, int amount) {
         int current = resources.getOrDefault(type, 0);
         if (current >= amount) {
-            useResource(type, amount);  // 消耗資源
+            resources.put(type, current - amount);
+            notifyResourceChange();
+            return true;
+        } else {
+            System.out.println("Not enough resources to consume: " + type + ", required: " + amount + ", available: " + current);
+            return false;
         }
     }
     
@@ -187,12 +199,10 @@ public class ResourceManager {
     }
     
     public void notifyResourceChange() {
-        System.out.println("\n===== 觸發資源更新事件 =====");
-        EventManager.getInstance().fireEvent(
-            new GameEvent("UPDATE_RESOURCES")
-        );
-        System.out.println("事件已觸發");
-        System.out.println("========================\n");
+        // 分別觸發不同的事件
+        EventManager.getInstance().fireEvent(new GameEvent("UPDATE_MONEY", money));
+        EventManager.getInstance().fireEvent(new GameEvent("UPDATE_RESOURCES", resources));
+        notifyInventoryChange();
     }
     
     // 添加購買種子的方法

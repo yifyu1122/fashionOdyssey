@@ -124,6 +124,10 @@ public class InventoryPanel extends JPanel {
         items.add(new ItemEntry(ItemDescription.SUNFLOWER, "harvested_sunflower"));
         items.add(new ItemEntry(ItemDescription.LAVENDER, "harvested_lavender"));
         items.add(new ItemEntry(ItemDescription.TULIP_PINK, "harvested_tulip_pink"));
+        items.add(new ItemEntry(ItemDescription.RED_DYE, "red_dye"));
+        items.add(new ItemEntry(ItemDescription.YELLOW_DYE, "yellow_dye"));
+        items.add(new ItemEntry(ItemDescription.PURPLE_DYE, "purple_dye"));
+        items.add(new ItemEntry(ItemDescription.PINK_DYE, "pink_dye"));
         items.add(new ItemEntry(ItemDescription.WHITE_FABRIC, "white_fabric"));
         items.add(new ItemEntry(ItemDescription.RED_FABRIC, "red_fabric"));
         items.add(new ItemEntry(ItemDescription.YELLOW_FABRIC, "yellow_fabric"));
