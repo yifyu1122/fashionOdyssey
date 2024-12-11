@@ -13,6 +13,12 @@ import com.fashionodyssey.util.ResourceManager;
 
 public class FarmPanel extends JPanel {
     private static final int GRID_SIZE = 2;
+    private static final Color PINK_THEME = new Color(255, 182, 193);
+    private static final Color LIGHT_PINK = new Color(255, 218, 224);
+    private static final Color SOFT_YELLOW = new Color(255, 245, 200);
+    private static final Color MINT_GREEN = new Color(200, 255, 214);
+    private static final Color TEXT_COLOR = new Color(80, 80, 80);
+
     private JButton[] farmSlots;
     private JComboBox<String> cropSelector;
     private JButton plantButton;
@@ -21,24 +27,23 @@ public class FarmPanel extends JPanel {
     private JButton fertilizeButton;
     private JLabel harvestCountLabel;
     private JPanel resourcePanel;
-    private JLabel statusLabel;
     private JLabel farmStatusLabel;
     
     public FarmPanel() {
         setLayout(new BorderLayout());
+        setBackground(LIGHT_PINK);
+        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         
         initComponents();
         
         // 監聽資源更新事件
         EventManager.getInstance().addEventListener("UPDATE_RESOURCES", event -> {
-            System.out.println("收到資源更新事件");  // 除錯訊息
             ResourceManager rm = ResourceManager.getInstance();
             updateResources(
                 rm.getResourceAmount(rm.getCurrentCropType() + "_seeds"),
                 0,
                 rm.getResourceAmount("fertilizer")
             );
-            System.out.println("資源面板已更新");  // 除錯訊息
         });
         
         // 在初始化後立即觸發資源更新
@@ -55,18 +60,25 @@ public class FarmPanel extends JPanel {
     }
     
     private void initComponents() {
+        // 修改控制面板樣式
+        JPanel controlPanel = new JPanel();
+        controlPanel.setLayout(new BorderLayout());
+        controlPanel.setBackground(LIGHT_PINK);
+        controlPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(PINK_THEME, 1),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+        
         // 初始化農場狀態標籤
         farmStatusLabel = new JLabel("這塊地正期待著新生命的到來！");
         farmStatusLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
         farmStatusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        farmStatusLabel.setBackground(LIGHT_PINK);
+        farmStatusLabel.setOpaque(true);
         
         // 創建控制面板
-        JPanel controlPanel = new JPanel(new BorderLayout());
-        JPanel buttonPanel = new JPanel();  // 用於放置按鈕的面板
-        
-        // 將農場狀態標籤添加到控制面板的頂部
-        controlPanel.add(farmStatusLabel, BorderLayout.NORTH);
-        controlPanel.add(buttonPanel, BorderLayout.CENTER);
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(LIGHT_PINK);
         
         // 作物選擇區
         String[] crops = {
@@ -77,28 +89,19 @@ public class FarmPanel extends JPanel {
             CropType.tulip_pink.getDisplayName()
         };
         
-        // 設置大字體
         Font buttonFont = new Font("微軟正黑體", Font.BOLD, 16);
         Font labelFont = new Font("微軟正黑體", Font.PLAIN, 16);
         
         cropSelector = new JComboBox<>(crops);
         cropSelector.setFont(buttonFont);
         
-        // 設置按鈕字體
-        plantButton = new JButton("種植");
-        waterButton = new JButton("澆水");
-        fertilizeButton = new JButton("施肥");
-        harvestButton = new JButton("收穫");
+        // 設置按鈕字體和樣式
+        plantButton = createStyledButton("種植", buttonFont);
+        waterButton = createStyledButton("澆水", buttonFont);
+        fertilizeButton = createStyledButton("施肥", buttonFont);
+        harvestButton = createStyledButton("收穫", buttonFont);
         
-        // 設置按鈕字體
-        plantButton.setFont(buttonFont);
-        waterButton.setFont(buttonFont);
-        fertilizeButton.setFont(buttonFont);
-        harvestButton.setFont(buttonFont);
-        
-        // 商店按鈕
-        JButton shopButton = new JButton("商店");
-        shopButton.setFont(buttonFont);
+        JButton shopButton = createStyledButton("商店", buttonFont);
         shopButton.addActionListener(e -> {
             ShopDialog shop = new ShopDialog(SwingUtilities.getWindowAncestor(this));
             shop.setVisible(true);
@@ -115,33 +118,37 @@ public class FarmPanel extends JPanel {
         buttonPanel.add(fertilizeButton);
         buttonPanel.add(harvestButton);
         
-        // 設置控制面板的邊距
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
+        controlPanel.add(buttonPanel, BorderLayout.CENTER);
         add(controlPanel, BorderLayout.NORTH);
         
         // 農場格子
         JPanel farmGrid = new JPanel(new GridLayout(GRID_SIZE, GRID_SIZE, 5, 5));
         farmGrid.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        farmGrid.setBackground(LIGHT_PINK);
         farmSlots = new JButton[GRID_SIZE * GRID_SIZE];
         
         Dimension buttonSize = new Dimension(120, 120);
-        Font gridFont = new Font("微軟正黑體", Font.BOLD, 14);  // 格子字體
+        Font gridFont = new Font("微軟正黑體", Font.BOLD, 18);
         
         for (int i = 0; i < GRID_SIZE; i++) {
             for (int j = 0; j < GRID_SIZE; j++) {
                 final int index = i * GRID_SIZE + j;
-                farmSlots[index] = new JButton("一個空地");
+                String status = "一個空地";
+                String message = "這塊地正期待著新生命的到來！";
+                farmSlots[index] = new JButton("<html><center><font size='4'>" + status + "</font><br>" + 
+                                               "<font size='3'>" + message + "</font></center></html>");
                 farmSlots[index].setFont(gridFont);
                 farmSlots[index].setPreferredSize(buttonSize);
                 farmSlots[index].setMinimumSize(buttonSize);
                 farmSlots[index].setMaximumSize(buttonSize);
+                farmSlots[index].setBackground(new Color(210, 180, 140));
+                farmSlots[index].setBorder(BorderFactory.createLineBorder(PINK_THEME, 1));
                 
-                // 設置點擊事件
                 final int row = i;
                 final int col = j;
                 farmSlots[index].addActionListener(e -> {
-                    System.out.println("點擊格子：" + row + "," + col);
                     EventManager.getInstance().fireEvent(
                         new GameEvent("SELECT_FARM_SLOT", row, col)
                     );
@@ -151,28 +158,22 @@ public class FarmPanel extends JPanel {
             }
         }
         
-        // 創建一個新的面板來包含農場格子和狀態標籤
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.add(farmGrid, BorderLayout.CENTER);
         
-        // 創建一個面板來放置狀態標籤，並將其靠左對齊
         JPanel statusPanel = new JPanel(new BorderLayout());
+        statusPanel.setBackground(LIGHT_PINK);
         statusPanel.add(farmStatusLabel, BorderLayout.WEST);
         
-        // 設置狀態標籤的邊距
-        farmStatusLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));  // 上, 左, 下, 右
+        farmStatusLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
         
         centerPanel.add(statusPanel, BorderLayout.SOUTH);
         
         add(centerPanel, BorderLayout.CENTER);
         
         plantButton.addActionListener(e -> {
-            System.out.println("\n===== 種植按鈕點擊事件 =====");
-            this.requestFocusInWindow();
             String selectedCrop = (String) cropSelector.getSelectedItem();
-            System.out.println("選擇的作物: " + selectedCrop);
             CropType cropType = CropType.fromDisplayName(selectedCrop);
-            System.out.println("轉換後的作物類型: " + cropType);
             
             if (cropType != null) {
                 String cropKey = ResourceManager.CROP_KEY_MAP.get(selectedCrop);
@@ -180,58 +181,36 @@ public class FarmPanel extends JPanel {
                 ResourceManager rm = ResourceManager.getInstance();
                 int seedCount = rm.getResourceAmount(seedKey);
                 
-
-                
                 if (seedCount > 0) {
-                    System.out.println("\n開始種植：");
-                    System.out.println("觸發種植事件: PLANT_CROP, " + cropKey);
                     EventManager.getInstance().fireEvent(
                         new GameEvent("PLANT_CROP", cropKey)
                     );
                 } else {
-                    System.out.println("\n種植失敗：種子數量不足");
+                    JOptionPane.showMessageDialog(this, "種子數量不足", "錯誤", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
-                System.out.println("\n種植失敗：作物類型轉換失敗");
+                JOptionPane.showMessageDialog(this, "作物類型轉換失敗", "錯誤", JOptionPane.ERROR_MESSAGE);
             }
-            System.out.println("===== 種植事件結束 =====\n");
         });
         
         harvestButton.addActionListener(e -> {
-            System.out.println("\n===== 收穫按鈕點擊事件 =====");
-            requestFocusInWindow();
-            
-            // 獲取當前選中的作物類型
             ResourceManager rm = ResourceManager.getInstance();
             String currentCrop = rm.getCurrentCropType();
-            System.out.println("當前作物：" + currentCrop);
             
-            // 檢查收穫前的資源數量
             String harvestKey = "harvested_" + ResourceManager.CROP_KEY_MAP.get(currentCrop).toLowerCase();
-            System.out.println("收穫前數量檢查：");
-            System.out.println("收穫鍵值：" + harvestKey);
-            System.out.println("當前收穫數量：" + rm.getResourceAmount(harvestKey));
             
-            // 觸發收穫事件
             EventManager.getInstance().fireEvent(
                 new GameEvent("HARVEST_CROP", null)
             );
-            
-            // 檢查收穫後的資源數量
-            System.out.println("收穫後數量檢查：");
-            System.out.println("收穫數量：" + rm.getResourceAmount(harvestKey));
-            System.out.println("===== 收穫事件結束 =====\n");
         });
         
         waterButton.addActionListener(e -> {
-            requestFocusInWindow();
             EventManager.getInstance().fireEvent(
                 new GameEvent("WATER_CROP", null)
             );
         });
         
         fertilizeButton.addActionListener(e -> {
-            requestFocusInWindow();
             EventManager.getInstance().fireEvent(
                 new GameEvent("FERTILIZE_CROP", null)
             );
@@ -246,13 +225,11 @@ public class FarmPanel extends JPanel {
         resourcePanel = new JPanel();
         resourcePanel.setLayout(new BoxLayout(resourcePanel, BoxLayout.Y_AXIS));
         resourcePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        resourcePanel.setPreferredSize(new Dimension(200, 0));  // 設置固定寬度
-        resourcePanel.setBackground(new Color(240, 240, 240));  // 設置背景色
+        resourcePanel.setPreferredSize(new Dimension(200, 0));
+        resourcePanel.setBackground(Color.WHITE);
         
-        // 確保所有標籤左對齊
         resourcePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        // 將資源面板添加到左側
         JScrollPane resourceScrollPane = new JScrollPane(resourcePanel);
         resourceScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         resourceScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -260,13 +237,35 @@ public class FarmPanel extends JPanel {
         
         add(resourceScrollPane, BorderLayout.WEST);
         
-        // 註冊事件監聽器
         EventManager.getInstance().addEventListener("UPDATE_STATUS", event -> {
             String message = (String) event.getData();
             updateFarmStatus(message);
         });
     }
-
+    
+    private JButton createStyledButton(String text, Font font) {
+        JButton button = new JButton(text);
+        button.setFont(font);
+        button.setBackground(SOFT_YELLOW);
+        button.setForeground(TEXT_COLOR);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            new RoundedBorder(15, PINK_THEME),
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(MINT_GREEN);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(SOFT_YELLOW);
+            }
+        });
+        
+        return button;
+    }
+    
     public void updateHarvestCount(int count) {
         harvestCountLabel.setText("收穫數量: " + count);
     }
@@ -276,7 +275,7 @@ public class FarmPanel extends JPanel {
         if (index >= 0 && index < farmSlots.length) {
             String status = "一個空地";
             String message = "這塊地正期待著新生命的到來！";
-            Color bgColor = null;
+            Color bgColor = new Color(210, 180, 140);
             
             if (cropType != null) {
                 String displayName = getChineseCropName(cropType);
@@ -294,13 +293,13 @@ public class FarmPanel extends JPanel {
                     }
                     case FERTILIZED -> {
                         status = displayName + " (施肥)";
-                        message = "植物正在努力成長中，讓我們耐心等待～";
+                        message = "植物正在努力成長讓我們耐心等待～";
                         bgColor = new Color(255, 243, 205);
                     }
                     case MATURE -> {
                         status = displayName + " (已成熟)";
                         message = switch (cropType.toLowerCase()) {
-                            case "cotton" -> "這裡有一團軟綿綿的白色小可愛，可以收成啦！";
+                            case "cotton" -> "這裡有一團綿綿的白色小可愛，可以收成啦！";
                             case "rose" -> "哇！玫瑰的香氣撲鼻而來，趕快收成吧！";
                             case "sunflower" -> "向日葵朝著你露出燦爛的笑容，該收成啦！";
                             case "tulip_pink" -> "優雅的粉色鬱金香在跟你打招呼，可以收成了！";
@@ -312,56 +311,42 @@ public class FarmPanel extends JPanel {
                 }
             }
             
-            farmSlots[index].setText("<html><center>" + status + "<br>" + 
-                                   "<font size='2'>" + message + "</font></center></html>");
+            farmSlots[index].setText("<html><center><font size='4'>" + status + "</font><br>" + 
+                                   "<font size='3'>" + message + "</font></center></html>");
             farmSlots[index].setBackground(bgColor);
         }
     }
     
-    private String getCropDescription(String cropType) {
-        if (cropType == null) return "空地";
-        
-        for (CropType type : CropType.values()) {
-            if (type.getDisplayName().equals(cropType)) {
-                return type.getDescription() + 
-                    "\n種子成本: $" + type.getSeedCost();
-            }
+    private String getChineseCropName(String cropType) {
+        switch (cropType.toLowerCase()) {
+            case "cotton":
+                return "棉花";
+            case "rose":
+                return "玫瑰";
+            case "sunflower":
+                return "向日葵";
+            case "tulip_pink":
+                return "粉色鬱金香";
+            case "lavender":
+                return "薰衣草";
+            default:
+                return cropType; // Return the original if no match is found
         }
-        return cropType;
     }
     
-
-
     public void updateResources(int seeds, int water, int fertilizer) {
         resourcePanel.removeAll();
         
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        contentPanel.setBackground(Color.WHITE);
         
-        // 設置標題
-        JLabel titleLabel = new JLabel("農場資源");
-        titleLabel.setFont(new Font("微軟正黑體", Font.BOLD, 20));
-        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        contentPanel.add(titleLabel);
-        contentPanel.add(Box.createVerticalStrut(20));
-        
-        ResourceManager rm = ResourceManager.getInstance();
-        
-        // 顯示肥料數量
-        JLabel fertilizerLabel = new JLabel(String.format("肥料: %d", fertilizer));
-        fertilizerLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
-        fertilizerLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        contentPanel.add(fertilizerLabel);
-        contentPanel.add(Box.createVerticalStrut(20));
-        
-        // 顯示種子數量
         JLabel seedTitle = new JLabel("種子數量：");
         seedTitle.setFont(new Font("微軟正黑體", Font.BOLD, 16));
         seedTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         contentPanel.add(seedTitle);
         
-        // 使用 CropType enum 來遍歷所有作物
+        ResourceManager rm = ResourceManager.getInstance();
         for (CropType crop : CropType.values()) {
             String seedCount = String.format("%s種子: %d", 
                 crop.getDisplayName(), 
@@ -375,44 +360,14 @@ public class FarmPanel extends JPanel {
             contentPanel.add(Box.createVerticalStrut(5));
         }
         
-        // 顯示收穫數量
         contentPanel.add(Box.createVerticalStrut(20));
-        JLabel harvestTitle = new JLabel("收穫數量：");
-        harvestTitle.setFont(new Font("微軟正黑體", Font.BOLD, 16));
-        harvestTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
-        contentPanel.add(harvestTitle);
         
-        // 同樣使用 CropType enum 來顯示收穫數量
-        for (CropType crop : CropType.values()) {
-            String harvestCount = String.format("收穫的%s: %d", 
-                crop.getDisplayName(), 
-                rm.getResourceAmount("harvested_" + crop.name().toLowerCase())
-            );
-            
-            JLabel harvestLabel = new JLabel(harvestCount);
-            harvestLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
-            harvestLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            contentPanel.add(harvestLabel);
-            contentPanel.add(Box.createVerticalStrut(5));
-        }
         
         resourcePanel.add(contentPanel);
         resourcePanel.revalidate();
         resourcePanel.repaint();
     }
 
-    private String getChineseCropName(String cropType) {
-        return switch (cropType.toLowerCase()) {
-            case "cotton" -> "棉花";
-            case "rose" -> "玫瑰";
-            case "sunflower" -> "向日葵";
-            case "lavender" -> "薰衣草";
-            case "tulip_pink" -> "鬱金香(粉)";
-            default -> cropType;
-        };
-    }
-
-    // 更新農場狀態的方法
     private void updateFarmStatus(String message) {
         farmStatusLabel.setText(message);
     }

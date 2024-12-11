@@ -5,12 +5,18 @@ import com.fashionodyssey.util.ResourceManager;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 
 public class ShopDialog extends JDialog {
     private ResourceManager resourceManager;
     private JPanel itemsPanel;
     private JLabel moneyLabel;
     private JLabel messageLabel;  // 新增提示訊息標籤
+    
+    private static final Color PRIMARY_COLOR = new Color(51, 122, 183);
+    private static final Color BACKGROUND_COLOR = new Color(255, 218, 224);
+    private static final Color BORDER_COLOR = new Color(255, 182, 193);
     
     public ShopDialog(Window parent) {
         super(parent, "歡迎光臨小店鋪～", ModalityType.APPLICATION_MODAL);
@@ -26,11 +32,14 @@ public class ShopDialog extends JDialog {
     }
     
     private void initComponents() {
+        getContentPane().setBackground(BACKGROUND_COLOR);
+        
         setLayout(new BorderLayout(10, 10));
         
         // 創建商品面板
         itemsPanel = new JPanel(new GridLayout(0, 1, 5, 5));
         itemsPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        itemsPanel.setBackground(BACKGROUND_COLOR);
         
         // 添加肥料商品
         JPanel fertilizerPanel = createItemPanel(
@@ -76,21 +85,127 @@ public class ShopDialog extends JDialog {
                     updateItemCounts();
                 }
             );
+            seedPanel.setBackground(new Color(255, 245, 200));
             itemsPanel.add(seedPanel);
         }
         
         // 添加捲軸
         JScrollPane scrollPane = new JScrollPane(itemsPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(255, 182, 193), 1));  // 保留粉色邊框
+        
+        // 自定義滾動軸
+        JScrollBar verticalBar = scrollPane.getVerticalScrollBar();
+        verticalBar.setUI(new BasicScrollBarUI() {
+            @Override
+            protected void configureScrollBarColors() {
+                this.thumbColor = new Color(255, 182, 193);  // 粉紅色滑塊
+                this.trackColor = new Color(255, 240, 245);  // 淺粉色軌道
+            }
+            
+            @Override
+            protected JButton createDecreaseButton(int orientation) {
+                return createZeroButton();
+            }
+            
+            @Override
+            protected JButton createIncreaseButton(int orientation) {
+                return createZeroButton();
+            }
+            
+            private JButton createZeroButton() {
+                JButton button = new JButton();
+                button.setPreferredSize(new Dimension(0, 0));
+                return button;
+            }
+            
+            @Override
+            protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
+                if (thumbBounds.isEmpty() || !scrollbar.isEnabled()) {
+                    return;
+                }
+                
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // 繪製圓角矩形滑塊
+                g2.setColor(thumbColor);
+                g2.fillRoundRect(thumbBounds.x, thumbBounds.y, 
+                                thumbBounds.width, thumbBounds.height, 
+                                10, 10);  // 圓角半徑
+                
+                g2.dispose();
+            }
+            
+            @Override
+            protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // 繪製圓角矩形軌道
+                g2.setColor(trackColor);
+                g2.fillRoundRect(trackBounds.x, trackBounds.y,
+                                trackBounds.width, trackBounds.height,
+                                10, 10);  // 圓角半徑
+                
+                g2.dispose();
+            }
+        });
+        
         add(scrollPane, BorderLayout.CENTER);
         
         // 添加金錢顯示
         JPanel topPanel = new JPanel(new BorderLayout());
-        moneyLabel = new JLabel("目前資金: $" + resourceManager.getMoney());
-        moneyLabel.setFont(new Font("微軟正黑體", Font.BOLD, 16));
+        moneyLabel = new JLabel("目前資金: $" + resourceManager.getMoney()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // 繪製背景
+                g2d.setColor(BACKGROUND_COLOR);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+                
+                String text = getText();
+                FontMetrics fm = g2d.getFontMetrics();
+                int x = 10;
+                int y = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
+        
+                g2d.setColor(new Color(70, 130, 180));
+                g2d.drawString(text, x, y);
+                
+                g2d.dispose();
+            }
+        };
+        moneyLabel.setFont(new Font("微軟正黑體", Font.BOLD, 18));
         moneyLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         
-        messageLabel = new JLabel("歡迎光臨！今天想買點什麼呢？");
-        messageLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 14));
+        messageLabel = new JLabel("歡迎光臨！今天想買點什麼呢？") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // 繪製背景
+                g2d.setColor(BACKGROUND_COLOR);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+                
+                String text = getText();
+                g2d.setFont(new Font("微軟正黑體", Font.BOLD, 18));
+                FontMetrics fm = g2d.getFontMetrics();
+                int x = (getWidth() - fm.stringWidth(text)) / 2;
+                int y = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
+                
+                // 直接繪製深粉色文字，不加邊框
+                g2d.setColor(new Color(255, 105, 180));  // Hot Pink 色
+                g2d.drawString(text, x, y);
+                
+                g2d.dispose();
+            }
+        };
+        messageLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
+        messageLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         
         topPanel.add(moneyLabel, BorderLayout.WEST);
@@ -99,16 +214,40 @@ public class ShopDialog extends JDialog {
         
         // 添加關閉按鈕
         JButton closeButton = new JButton("離開商店");
+        closeButton.setFont(new Font("微軟正黑體", Font.BOLD, 16));
+        closeButton.setBackground(new Color(70, 130, 180));  // 與購買按鈕相同的藍色
+        closeButton.setForeground(Color.WHITE);
+        closeButton.setBorder(new RoundedBorder(10));
+        closeButton.setPreferredSize(new Dimension(120, 40));  // 設置固定大小
+        
+        // 創建一個面板來容納按鈕，使其置中
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(BACKGROUND_COLOR);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        buttonPanel.add(closeButton);
+        
         closeButton.addActionListener(e -> dispose());
-        add(closeButton, BorderLayout.SOUTH);
+        
+        // 滑鼠懸停效果
+        closeButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                closeButton.setBackground(new Color(100, 149, 237));  // 較亮的藍色
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                closeButton.setBackground(new Color(70, 130, 180));  // 原始藍色
+            }
+        });
+        
+        add(buttonPanel, BorderLayout.SOUTH);
     }
     
     private JPanel createItemPanel(String name, String description, int price, int count, java.awt.event.ActionListener buyAction) {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createEmptyBorder(5, 5, 5, 5),
-            BorderFactory.createEtchedBorder()
+            BorderFactory.createLineBorder(BORDER_COLOR, 1)
         ));
+        panel.setBackground(new Color(255, 245, 200));
         
         // 加大字體
         Font nameFont = new Font("微軟正黑體", Font.BOLD, 18);
@@ -117,19 +256,27 @@ public class ShopDialog extends JDialog {
         
         // 左側：名稱和描述
         JPanel infoPanel = new JPanel(new GridLayout(2, 1));
-        JLabel nameLabel = new JLabel(name + " - $" + price + " (一次購買5個)");
+        infoPanel.setBackground(new Color(255, 245, 200));
+        JLabel nameLabel = new JLabel(name + " - $" + price + " (一次購買10個)");
         nameLabel.setFont(nameFont);
+        nameLabel.setBackground(new Color(255, 245, 200));
         JLabel descLabel = new JLabel(description);
         descLabel.setFont(descFont);
-        descLabel.setForeground(Color.GRAY);
+        descLabel.setForeground(PRIMARY_COLOR);
+        descLabel.setBackground(new Color(255, 245, 200));
         
         infoPanel.add(nameLabel);
         infoPanel.add(descLabel);
         
         // 右側：數量和購買按鈕
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        actionPanel.setBackground(new Color(255, 245, 200));
         JLabel countLabel = new JLabel("現有: " + count);
         JButton buyButton = new JButton("購買");
+        buyButton.setBackground(new Color(70, 130, 180));
+        buyButton.setForeground(Color.WHITE);
+        buyButton.setFont(buttonFont);
+        buyButton.setBorder(new RoundedBorder(10));
         
         actionPanel.add(countLabel);
         actionPanel.add(buyButton);
@@ -152,12 +299,11 @@ public class ShopDialog extends JDialog {
     
     private void showMessage(String message, Color color) {
         messageLabel.setText(message);
-        // 改用較柔和的顏色
         messageLabel.setForeground(new Color(46, 139, 87));  // 海綠色
         // 3秒後恢復默認訊息
         new Timer(3000, e -> {
             messageLabel.setText("歡迎光臨！今天想買點什麼呢？");
-            messageLabel.setForeground(new Color(105, 105, 105));  // 深灰色
+            messageLabel.setForeground(new Color(46, 139, 87));  // 海綠色
         }).start();
     }
     
@@ -192,8 +338,8 @@ public class ShopDialog extends JDialog {
                 case "棉花" -> "軟綿綿的白色精靈，織出夢想的布料";
                 case "玫瑰" -> "紅色的愛情使者，染出心動的顏色";
                 case "向日葵" -> "永遠追逐陽光的開朗寶貝";
-                case "鬱金香(粉)" -> "優雅的粉色精靈，染出甜美的顏色";
                 case "薰衣草" -> "紫色的香氣精靈，讓整個農場都香香的";
+                case "鬱金香(粉)" -> "優雅的粉色精靈，染出甜美的顏色";
                 default -> "";
             };
             
@@ -212,6 +358,7 @@ public class ShopDialog extends JDialog {
                     updateItemCounts();
                 }
             );
+            seedPanel.setBackground(new Color(255, 245, 200));
             itemsPanel.add(seedPanel);
         }
         
@@ -223,7 +370,6 @@ public class ShopDialog extends JDialog {
     private void showBuyAnimation(JButton buyButton) {
         // 保存原始顏色大小
         Color originalColor = buyButton.getBackground();
-        Dimension originalSize = buyButton.getSize();
         Font originalFont = buyButton.getFont();
         
         // 創建動畫計時器
@@ -332,5 +478,28 @@ public class ShopDialog extends JDialog {
         });
         
         timer.start();
+    }
+}
+
+class RoundedBorder implements Border {
+    private int radius;
+
+    RoundedBorder(int radius) {
+        this.radius = radius;
+    }
+
+    @Override
+    public Insets getBorderInsets(Component c) {
+        return new Insets(this.radius + 1, this.radius + 1, this.radius + 2, this.radius);
+    }
+
+    @Override
+    public boolean isBorderOpaque() {
+        return true;
+    }
+
+    @Override
+    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+        g.drawRoundRect(x, y, width - 1, height - 1, radius, radius);
     }
 } 

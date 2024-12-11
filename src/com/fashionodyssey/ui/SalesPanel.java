@@ -18,8 +18,9 @@ public class SalesPanel extends JPanel {
     private DefaultTableModel model;
     private JLabel salesLabel;
     private double totalSales = 0.0;
-    private static final Color THEME_COLOR = new Color(70, 130, 180); // 鋼藍色
-    private static final Color LIGHT_THEME_COLOR = new Color(176, 196, 222); // 淺鋼藍色
+    private static final Color PRIMARY_COLOR = new Color(51, 122, 183);
+    private static final Color BACKGROUND_COLOR = new Color(248, 249, 250);
+    private static final Color BORDER_COLOR = new Color(222, 226, 230);
     
     public SalesPanel() {
         setLayout(new BorderLayout(10, 10)); // 增加間距
@@ -30,6 +31,9 @@ public class SalesPanel extends JPanel {
     }
     
     private void initComponents() {
+        setBackground(BACKGROUND_COLOR);
+        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        
         // 修改列名，移除利潤欄位
         String[] columnNames = {"商品", "數量", "成本", "原材料", "銷售價格", "操作"};
         model = new DefaultTableModel(columnNames, 0) {
@@ -65,12 +69,12 @@ public class SalesPanel extends JPanel {
         productTable.setRowHeight(30);
         productTable.setFont(new Font("微軟正黑體", Font.PLAIN, 14));
         productTable.getTableHeader().setFont(new Font("微軟正黑體", Font.BOLD, 14));
-        productTable.getTableHeader().setBackground(THEME_COLOR);
+        productTable.getTableHeader().setBackground(PRIMARY_COLOR);
         productTable.getTableHeader().setForeground(Color.WHITE);
-        productTable.setSelectionBackground(LIGHT_THEME_COLOR);
+        productTable.setSelectionBackground(BACKGROUND_COLOR);
         productTable.setSelectionForeground(Color.BLACK);
         productTable.setShowGrid(true);
-        productTable.setGridColor(new Color(220, 220, 220));
+        productTable.setGridColor(BORDER_COLOR);
         
         // 設置列寬
         productTable.getColumnModel().getColumn(0).setPreferredWidth(150); // 商品名稱
@@ -97,7 +101,7 @@ public class SalesPanel extends JPanel {
             }
         });
         
-        // 設置銷售價格欄位的渲染器
+        // 設置銷售價格���位的渲染器
         productTable.getColumnModel().getColumn(5).setCellRenderer(new ButtonRenderer());
         productTable.getColumnModel().getColumn(5).setCellEditor(new ButtonEditor(new JCheckBox()));
         
@@ -105,7 +109,7 @@ public class SalesPanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(productTable);
         scrollPane.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createEmptyBorder(0, 0, 10, 0),
-            BorderFactory.createLineBorder(THEME_COLOR, 1)
+            BorderFactory.createLineBorder(BORDER_COLOR, 1)
         ));
         
         // 控制面板
@@ -113,14 +117,14 @@ public class SalesPanel extends JPanel {
         controlPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 5));
         controlPanel.setBackground(Color.WHITE);
         controlPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(1, 0, 0, 0, THEME_COLOR),
+            BorderFactory.createMatteBorder(1, 0, 0, 0, PRIMARY_COLOR),
             BorderFactory.createEmptyBorder(10, 0, 0, 0)
         ));
         
         // 銷售額標籤
         salesLabel = new JLabel("總銷售額: $" + totalSales);
         salesLabel.setFont(new Font("微軟正黑體", Font.BOLD, 16));
-        salesLabel.setForeground(THEME_COLOR);
+        salesLabel.setForeground(PRIMARY_COLOR);
         
         // 更新按鈕
         JButton updateButton = createStyledButton("更新庫存");
@@ -137,16 +141,16 @@ public class SalesPanel extends JPanel {
         JButton button = new JButton(text);
         button.setFont(new Font("微軟正黑體", Font.BOLD, 14));
         button.setForeground(Color.WHITE);
-        button.setBackground(THEME_COLOR);
+        button.setBackground(PRIMARY_COLOR);
         button.setFocusPainted(false);
         button.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
         
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(LIGHT_THEME_COLOR);
+                button.setBackground(BACKGROUND_COLOR);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(THEME_COLOR);
+                button.setBackground(PRIMARY_COLOR);
             }
         });
         
@@ -159,7 +163,7 @@ public class SalesPanel extends JPanel {
             setOpaque(true);
             setFont(new Font("微軟正黑體", Font.BOLD, 12));
             setForeground(Color.WHITE);
-            setBackground(THEME_COLOR);
+            setBackground(PRIMARY_COLOR);
             setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
             setFocusPainted(false);
         }
@@ -168,9 +172,9 @@ public class SalesPanel extends JPanel {
         public Component getTableCellRendererComponent(JTable table, Object value,
                                                      boolean isSelected, boolean hasFocus, int row, int column) {
             if (isSelected) {
-                setBackground(LIGHT_THEME_COLOR);
+                setBackground(BACKGROUND_COLOR);
             } else {
-                setBackground(THEME_COLOR);
+                setBackground(PRIMARY_COLOR);
             }
             setText("賣出");
             return this;
@@ -189,7 +193,7 @@ public class SalesPanel extends JPanel {
             button.setOpaque(true);
             button.setFont(new Font("微軟正黑體", Font.BOLD, 12));
             button.setForeground(Color.WHITE);
-            button.setBackground(THEME_COLOR);
+            button.setBackground(PRIMARY_COLOR);
             button.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
             button.setFocusPainted(false);
             
@@ -387,7 +391,7 @@ public class SalesPanel extends JPanel {
                 .toString().replace("$", ""));
             String itemName = (String) productTable.getValueAt(row, 0);
             
-            System.out.println("嘗試銷售商品：" + itemName);
+            System.out.println("嘗試銷售��品：" + itemName);
             System.out.println("銷售價格：" + salePrice);
             System.out.println("成本：" + cost);
             

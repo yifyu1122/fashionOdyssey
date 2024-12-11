@@ -2,10 +2,20 @@ package com.fashionodyssey.ui;
 
 import com.fashionodyssey.event.EventManager;
 import com.fashionodyssey.util.ResourceManager;
+import com.fashionodyssey.ui.RoundedBorder;
+import com.fashionodyssey.ui.ProcessingPanel;
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.border.AbstractBorder;
 
 public class MainFrame extends JFrame {
+    // 定義配色方案
+    private static final Color PINK_THEME = new Color(255, 182, 193);    // 淺粉色
+    private static final Color LIGHT_PINK = new Color(255, 218, 224);    // 更淺的粉色
+    private static final Color SOFT_YELLOW = new Color(255, 245, 200);   // 柔和的黃色
+    private static final Color MINT_GREEN = new Color(200, 255, 214);    // 薄荷綠
+    private static final Color TEXT_COLOR = new Color(80, 80, 80);       // 深灰色文字
+    
     private JPanel contentPanel;  // 用於顯示內容的面板
     private JPanel buttonPanel;   // 用於放置按鈕的面板
     private FarmPanel farmPanel;           // 農場面板
@@ -17,22 +27,33 @@ public class MainFrame extends JFrame {
     private JLabel moneyLabel;             // 資金顯示標籤
     
     public MainFrame() {
-        setTitle("時尚創夢家 Fashion Odyssey");
+        setTitle("✨ 時尚創夢家 Fashion Odyssey ✨");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1200, 800);
         setLocationRelativeTo(null);
         
+        // 設置整體背景色
+        getContentPane().setBackground(LIGHT_PINK);
+        
         // 初始化標籤，使用更大的字體
-        statusLabel = new JLabel("歡迎來到夢想農場！今天也要好好照顧作物喔～");
-        statusLabel.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
+        statusLabel = new JLabel("★ 歡迎來到夢想農場！今天也要好好照顧作物喔～ ★");
+        statusLabel.setFont(new Font("微軟正黑體", Font.BOLD, 18));
+        statusLabel.setForeground(TEXT_COLOR);
+        statusLabel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(PINK_THEME, 2, true),
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
         
         // 初始化資金標籤
         moneyLabel = new JLabel(String.format("資金: $%.2f", ResourceManager.getInstance().getMoney()));
-        moneyLabel.setFont(new Font("微軟正黑體", Font.BOLD, 16));
+        moneyLabel.setFont(new Font("微軟正黑體", Font.BOLD, 18));
+        moneyLabel.setForeground(TEXT_COLOR);
         
         // 創建頂部面板，包含狀態標籤和資金標籤
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BorderLayout(15, 0));
+        topPanel.setBackground(LIGHT_PINK);
+        topPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
         topPanel.add(statusLabel, BorderLayout.CENTER);
         topPanel.add(moneyLabel, BorderLayout.EAST);
         add(topPanel, BorderLayout.NORTH);
@@ -55,8 +76,9 @@ public class MainFrame extends JFrame {
         contentPanel.add(salesPanel, "銷售");
         
         // 創建底部按鈕面板，使用 GridLayout 確保按鈕等寬
-        buttonPanel = new JPanel(new GridLayout(1, 4, 1, 0));  // 1行4列，水平���距1像素
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(11, 0, 10, 0));  // 頂部加一個像素的邊距
+        buttonPanel = new JPanel(new GridLayout(1, 4, 1, 0));  // 1行4列，水平距1像素
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        buttonPanel.setBackground(LIGHT_PINK);
         Font buttonFont = new Font("微軟正黑體", Font.BOLD, 20);
         
         String[] buttonNames = {"農場", "加工", "設計", "銷售"};
@@ -83,26 +105,35 @@ public class MainFrame extends JFrame {
     }
     
     private JButton createNavButton(String name, Font font) {
-        JButton button = new JButton(name);
-        button.setFont(font);
-        button.setFocusPainted(false);  // 移除焦點邊框
-        button.setBorderPainted(true);   // 顯示邊框
-        button.setBackground(new Color(245, 245, 245));  // 設置淺灰色背景
-        button.setForeground(new Color(50, 50, 50));    // 設置深灰色文字
+        // 使用更基本的符號
+        String symbol = switch (name) {
+            case "農場" -> "◆";
+            case "加工" -> "◇"; 
+            case "設計" -> "△";  
+            case "銷售" -> "★";  
+            default -> "★";
+        };
         
-        // 設置邊框為淺灰色
+        JButton button = new JButton(symbol + " " + name);
+        button.setFont(font);
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setBackground(SOFT_YELLOW);
+        button.setForeground(TEXT_COLOR);
+        
+        // 圓角邊框
         button.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(200, 200, 200)),  // 右邊框
-            BorderFactory.createEmptyBorder(10, 0, 10, 0)  // 內邊距
+            new RoundedBorder(15, PINK_THEME),
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
         ));
         
-        // 添加滑鼠事件
+        // 滑鼠效果
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(235, 235, 235));
+                button.setBackground(MINT_GREEN);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(245, 245, 245));
+                button.setBackground(SOFT_YELLOW);
             }
         });
         
@@ -113,11 +144,11 @@ public class MainFrame extends JFrame {
     private void showPanel(String name) {
         // 根據不同位置顯示不同的歡迎語
         String welcomeMessage = switch (name) {
-            case "農場" -> "歡迎來到夢想農場！今天也要好好照顧作物喔～";
-            case "加工" -> "織布機已經準備就緒，讓我們開始創造奇蹟吧！";
-            case "設計" -> "靈感來襲！讓我們一起創造最閃耀的時尚���品～";
-            case "銷售" -> "展示櫥窗整理好了！準備好要驚艷全世界了嗎？";
-            default -> "歡迎來到時尚創夢家！";
+            case "農場" -> "★ 歡迎來到夢想農場！今天也要好好照顧作物喔～ ★";
+            case "加工" -> "◇ 織布機已經準備就緒，讓我們開始創造奇蹟吧！";
+            case "設計" -> "● 靈感來襲！讓我們一起創造最閃耀的時尚品～";
+            case "銷售" -> "☆ 展示櫥窗整理好了！準備好要驚艷全世界了嗎？";
+            default -> "★ 歡迎來到時尚創夢家！";
         };
         
         statusLabel.setText(welcomeMessage);
@@ -149,5 +180,41 @@ public class MainFrame extends JFrame {
     
     public ProcessingPanel getProcessingPanel() {
         return processingPanel;
+    }
+}
+
+// 添加圓角邊框類
+class RoundedBorder extends AbstractBorder {
+    private int radius;
+    private Color color;
+    
+    RoundedBorder(int radius, Color color) {
+        this.radius = radius;
+        this.color = color;
+    }
+    
+    @Override
+    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setColor(color);
+        g2.drawRoundRect(x, y, width - 1, height - 1, radius, radius);
+        g2.dispose();
+    }
+    
+    @Override
+    public Insets getBorderInsets(Component c) {
+        return new Insets(radius, radius, radius, radius);
+    }
+
+    @Override
+    public Insets getBorderInsets(Component c, Insets insets) {
+        insets.left = insets.right = insets.top = insets.bottom = radius;
+        return insets;
+    }
+    
+    @Override
+    public boolean isBorderOpaque() {
+        return false;
     }
 }

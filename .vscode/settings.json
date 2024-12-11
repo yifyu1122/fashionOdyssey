@@ -4,5 +4,6 @@
     "java.project.referencedLibraries": [
         "lib/**/*.jar"
     ],
-    "window.title": "時尚創夢家 Fashion Odyssey - ${activeEditorShort}"
+    "window.title": "時尚創夢家 Fashion Odyssey - ${activeEditorShort}",
+    "java.debug.settings.onBuildFailureProceed": true
 } 

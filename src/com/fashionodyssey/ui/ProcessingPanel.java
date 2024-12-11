@@ -7,6 +7,13 @@ import java.awt.*;
 import javax.swing.*;
 
 public class ProcessingPanel extends JPanel {
+    // 定義配色方案（與MainFrame一致）
+    private static final Color PINK_THEME = new Color(255, 182, 193);    // 淺粉色
+    private static final Color LIGHT_PINK = new Color(255, 218, 224);    // 更淺的粉色
+    private static final Color SOFT_YELLOW = new Color(255, 245, 200);   // 柔和的黃色
+    private static final Color MINT_GREEN = new Color(200, 255, 214);    // 薄荷綠
+    private static final Color TEXT_COLOR = new Color(80, 80, 80);       // 深灰色文字
+
     private JPanel resourcePanel;     // 資源面板
     private JLabel processMessage;    // 提示訊息
     private String selectedRecipe;    // 當前選擇的配方
@@ -14,35 +21,27 @@ public class ProcessingPanel extends JPanel {
     private int currentPage = 0;
     private final String[] pageNames = {"基本", "染料", "布料", "蝴蝶結", "緞帶", "連衣裙", "襯衫", "褲子", "蕾絲"};
     private ProcessingController controller;
-    private JLabel moneyLabel;
     private JPanel buttonPanel; // 用於顯示配方按鈕的面板
 
     public ProcessingPanel() {
         controller = new ProcessingController();
         setLayout(new BorderLayout());
+        setBackground(LIGHT_PINK);  // 設置背景色
         
         // 初始化資源面板
         resourcePanel = new JPanel();
         resourcePanel.setLayout(new BoxLayout(resourcePanel, BoxLayout.Y_AXIS));
         resourcePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        resourcePanel.setBackground(LIGHT_PINK);  // 設置背景色
         
-        // 初始化 moneyLabel
-        moneyLabel = new JLabel(String.format("資金: $%.2f", 
-            ResourceManager.getInstance().getMoney()));
-        moneyLabel.setFont(new Font("微軟正黑體", Font.BOLD, 16));
         
-        // 添加到面板
+        // 美化頂部面板
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        topPanel.add(moneyLabel);
+        topPanel.setBackground(LIGHT_PINK);
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(topPanel, BorderLayout.NORTH);
         
-        // 註冊金錢更新事件監聽器
-        EventManager.getInstance().addEventListener("UPDATE_MONEY", event -> {
-            if (event.getData() instanceof Double) {
-                double amount = (Double) event.getData();
-                updateMoney(amount);
-            }
-        });
+
         
         initComponents();
         
@@ -68,6 +67,7 @@ public class ProcessingPanel extends JPanel {
         // 配方標題
         JLabel recipeTitle = new JLabel("配方書", SwingConstants.CENTER);
         recipeTitle.setFont(new Font("微軟正黑體", Font.BOLD, 24));
+        recipeTitle.setForeground(TEXT_COLOR);
         recipeTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         recipePanel.add(recipeTitle);
         recipePanel.add(Box.createVerticalStrut(20));
@@ -86,6 +86,23 @@ public class ProcessingPanel extends JPanel {
         // 添加製作按鈕
         JButton craftButton = new JButton("開始製作");
         craftButton.setFont(new Font("微軟正黑體", Font.BOLD, 20));
+        craftButton.setBackground(SOFT_YELLOW);
+        craftButton.setForeground(TEXT_COLOR);
+        craftButton.setBorder(BorderFactory.createCompoundBorder(
+            new RoundedBorder(15, PINK_THEME),
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
+        
+        // 滑鼠效果
+        craftButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                craftButton.setBackground(MINT_GREEN);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                craftButton.setBackground(SOFT_YELLOW);
+            }
+        });
+        
         craftButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         craftButton.setMaximumSize(new Dimension(200, 50));
         
@@ -156,16 +173,32 @@ public class ProcessingPanel extends JPanel {
         for (int i = 0; i < pageNames.length; i++) {
             JButton btn = new JButton(pageNames[i]);
             btn.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
-            final int index = i;
+            btn.setBackground(SOFT_YELLOW);
+            btn.setForeground(TEXT_COLOR);
+            btn.setBorder(BorderFactory.createCompoundBorder(
+                new RoundedBorder(10, PINK_THEME),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+            ));
             
-            // 設置當前頁面按鈕的顏色
+            // 當前選中的按鈕使用不同顏色
             if (i == currentPage) {
-                btn.setBackground(new Color(70, 130, 180));
-                btn.setForeground(Color.WHITE);
-            } else {
-                btn.setBackground(null);
-                btn.setForeground(Color.BLACK);
+                btn.setBackground(MINT_GREEN);
             }
+            
+            // 滑鼠效果
+            final int index = i;
+            btn.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    if (index != currentPage) {
+                        btn.setBackground(MINT_GREEN);
+                    }
+                }
+                public void mouseExited(java.awt.event.MouseEvent evt) {
+                    if (index != currentPage) {
+                        btn.setBackground(SOFT_YELLOW);
+                    }
+                }
+            });
             
             btn.addActionListener(e -> showPage(index));
             categoryButtons.add(btn);
@@ -304,17 +337,31 @@ public class ProcessingPanel extends JPanel {
         for (String[] recipe : recipes) {
             JButton recipeButton = new JButton(recipe[1]);
             recipeButton.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
-            recipeButton.setPreferredSize(new Dimension(380, 50));
-            recipeButton.setMaximumSize(new Dimension(380, 50));
-            recipeButton.setMinimumSize(new Dimension(380, 50));
-            recipeButton.setHorizontalAlignment(SwingConstants.LEFT);
-            recipeButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+            recipeButton.setBackground(SOFT_YELLOW);
+            recipeButton.setForeground(TEXT_COLOR);
+            recipeButton.setBorder(BorderFactory.createCompoundBorder(
+                new RoundedBorder(10, PINK_THEME),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+            ));
             
             // 設置按鈕狀態
             if (recipe[0].equals(selectedRecipe)) {
-                recipeButton.setBackground(new Color(70, 130, 180));
-                recipeButton.setForeground(Color.WHITE);
+                recipeButton.setBackground(MINT_GREEN);
             }
+            
+            // 滑鼠效果
+            recipeButton.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    if (!recipe[0].equals(selectedRecipe)) {
+                        recipeButton.setBackground(MINT_GREEN);
+                    }
+                }
+                public void mouseExited(java.awt.event.MouseEvent evt) {
+                    if (!recipe[0].equals(selectedRecipe)) {
+                        recipeButton.setBackground(SOFT_YELLOW);
+                    }
+                }
+            });
             
             recipeButton.addActionListener(e -> {
                 if (recipe[0].equals(selectedRecipe)) {
@@ -585,7 +632,7 @@ public class ProcessingPanel extends JPanel {
         for (int i = 0; i < names.length; i++) {
             JLabel label = new JLabel(String.format("%s: %d", 
                 names[i], rm.getResourceAmount(keys[i])));
-            label.setFont(new Font("���軟正黑體", Font.PLAIN, 16));
+            label.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
             label.setAlignmentX(Component.LEFT_ALIGNMENT);
             panel.add(label);
             panel.add(Box.createVerticalStrut(10));
@@ -619,9 +666,5 @@ public class ProcessingPanel extends JPanel {
         buttonPanel.repaint();
     }
 
-    private void updateMoney(double amount) {
-        if (moneyLabel != null) {  // 添加空值檢查
-            moneyLabel.setText(String.format("資金: $%.2f", amount));
-        }
-    }
+
 }

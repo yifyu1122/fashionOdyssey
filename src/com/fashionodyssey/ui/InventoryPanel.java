@@ -21,8 +21,14 @@ public class InventoryPanel extends JPanel {
     private boolean isLongPress = false;
     private Map<String, String> customDesignNames = new HashMap<>();
     
+    // Define color scheme similar to MainFrame
+    private static final Color PINK_THEME = new Color(255, 182, 193);
+    private static final Color LIGHT_PINK = new Color(255, 218, 224);
+    private static final Color SOFT_YELLOW = new Color(255, 245, 200);
+    
     public InventoryPanel() {
         setLayout(new BorderLayout());
+        setBackground(LIGHT_PINK);
         resourceManager = ResourceManager.getInstance();
         
         // 初始化物品描述
@@ -31,10 +37,11 @@ public class InventoryPanel extends JPanel {
         // 創建網格面板
         gridPanel = new JPanel(new GridLayout(0, 3, 5, 5));
         gridPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        gridPanel.setBackground(LIGHT_PINK);
         
         // 只保留標題邊框
         setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createEtchedBorder(),
+            BorderFactory.createLineBorder(PINK_THEME),
             "庫存",
             TitledBorder.CENTER,
             TitledBorder.TOP,
@@ -103,7 +110,7 @@ public class InventoryPanel extends JPanel {
             updateResources();
         });
         
-        // 初始化顯示
+        // ���始化顯示
         updateResources();
     }
     
@@ -196,8 +203,11 @@ public class InventoryPanel extends JPanel {
         };
         
         // Set button appearance
-        button.setBackground(Color.WHITE);
-        button.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        button.setBackground(SOFT_YELLOW);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            new RoundedBorder(10, PINK_THEME),
+            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
         
         // Create quantity label
         JLabel countLabel = new JLabel("0");
@@ -279,7 +289,7 @@ public class InventoryPanel extends JPanel {
         countLabel.setText(String.valueOf(amount));
         countLabel.setVisible(amount > 0);
         button.setEnabled(true);  // Keep button enabled to allow clicking
-        button.setBackground(amount > 0 ? Color.WHITE : Color.LIGHT_GRAY);  // Change color if quantity is 0
+        button.setBackground(amount > 0 ? SOFT_YELLOW : Color.LIGHT_GRAY);  // Change color if quantity is 0
         
         if (item != null) {
             button.setText(item.getName());
