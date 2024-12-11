@@ -2,11 +2,8 @@ package com.fashionodyssey.ui;
 
 import com.fashionodyssey.event.EventManager;
 import com.fashionodyssey.util.ResourceManager;
-import com.fashionodyssey.ui.RoundedBorder;
-import com.fashionodyssey.ui.ProcessingPanel;
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.border.AbstractBorder;
 
 public class MainFrame extends JFrame {
     // 定義配色方案
@@ -180,41 +177,5 @@ public class MainFrame extends JFrame {
     
     public ProcessingPanel getProcessingPanel() {
         return processingPanel;
-    }
-}
-
-// 添加圓角邊框類
-class RoundedBorder extends AbstractBorder {
-    private int radius;
-    private Color color;
-    
-    RoundedBorder(int radius, Color color) {
-        this.radius = radius;
-        this.color = color;
-    }
-    
-    @Override
-    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setColor(color);
-        g2.drawRoundRect(x, y, width - 1, height - 1, radius, radius);
-        g2.dispose();
-    }
-    
-    @Override
-    public Insets getBorderInsets(Component c) {
-        return new Insets(radius, radius, radius, radius);
-    }
-
-    @Override
-    public Insets getBorderInsets(Component c, Insets insets) {
-        insets.left = insets.right = insets.top = insets.bottom = radius;
-        return insets;
-    }
-    
-    @Override
-    public boolean isBorderOpaque() {
-        return false;
     }
 }
