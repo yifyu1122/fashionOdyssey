@@ -368,7 +368,7 @@ public class DesignPanel extends JPanel {
     }
 
     private String getDisplayName(String key) {
-        // 將資源ID轉換為顯示名���
+        // 將資源ID轉換為顯示名稱
         return key.replace("white_", "白色")
                  .replace("red_", "紅色")
                  .replace("yellow_", "黃色")

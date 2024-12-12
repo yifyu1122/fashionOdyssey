@@ -2,6 +2,7 @@ package com.fashionodyssey.ui;
 
 import com.fashionodyssey.event.EventManager;
 import com.fashionodyssey.util.ResourceManager;
+import com.fashionodyssey.story.dialog.DialogManager;
 import java.awt.*;
 import javax.swing.*;
 
@@ -99,6 +100,10 @@ public class MainFrame extends JFrame {
             double amount = (Double) event.getData();
             updateMoney(amount);
         });
+        
+        // 初始化並顯示歡迎對話框
+        DialogManager.getInstance().initialize(this);
+        DialogManager.getInstance().showWelcomeDialog();
     }
     
     private JButton createNavButton(String name, Font font) {
