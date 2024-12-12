@@ -3,18 +3,27 @@ package com.fashionodyssey.ui;
 import com.fashionodyssey.controller.ProcessingController;
 import com.fashionodyssey.event.EventManager;
 import com.fashionodyssey.util.ResourceManager;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicScrollBarUI;
 
 public class ProcessingPanel extends JPanel {
-    // 定義配色方案（與MainFrame一致）
+    // 使用與 DesignPanel 一致的配色和字體
     private static final Color PINK_THEME = new Color(255, 182, 193);    // 淺粉色
     private static final Color LIGHT_PINK = new Color(255, 218, 224);    // 更淺的粉色
     private static final Color SOFT_YELLOW = new Color(255, 245, 200);   // 柔和的黃色
     private static final Color MINT_GREEN = new Color(200, 255, 214);    // 薄荷綠
     private static final Color TEXT_COLOR = new Color(80, 80, 80);       // 深灰色文字
-
+    
+    private static final Font CHINESE_FONT = new Font("微軟正黑體", Font.BOLD, 16);
+    private static final Font EMOJI_FONT = new Font("Segoe UI Emoji", Font.PLAIN, 16);
+    private static final Font COMBINED_FONT = new Font(
+        CHINESE_FONT.getName() + ", " + EMOJI_FONT.getName(), 
+        Font.BOLD, 
+        16
+    );
+    private static final Font CONTENT_FONT = new Font("微軟正黑體", Font.PLAIN, 16);
+    
     private JPanel resourcePanel;     // 資源面板
     private JLabel processMessage;    // 提示訊息
     private String selectedRecipe;    // 當前選擇的配方
@@ -24,14 +33,18 @@ public class ProcessingPanel extends JPanel {
     private ProcessingController controller;
     private JPanel buttonPanel; // 用於顯示配方按鈕的面板
 
-    private static final Font EMOJI_FONT = new Font("Segoe UI Emoji", Font.PLAIN, 16);
-    private static final Font TITLE_FONT = new Font("微軟正黑體", Font.BOLD, 28);
-    private static final Font CONTENT_FONT = new Font("微軟正黑體", Font.PLAIN, 16);
-
     public ProcessingPanel() {
         controller = new ProcessingController();
         setLayout(new BorderLayout());
         setBackground(LIGHT_PINK);  // 設置背景色
+        
+        // 初始化 buttonPanel
+        buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        buttonPanel.setBackground(LIGHT_PINK);
+        
+        // 初始化 recipeButtons
+        recipeButtons = new JButton[40];  // 根據您的配方數量調整
         
         // 初始化資源面板
         resourcePanel = new JPanel();
@@ -49,187 +62,107 @@ public class ProcessingPanel extends JPanel {
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(topPanel, BorderLayout.NORTH);
         
-
-        
         initComponents();
+        
+        // 初始顯示第一個頁面
+        showPage(0);
         
         // 監聽資源更新
         EventManager.getInstance().addEventListener("UPDATE_RESOURCES", event -> updateResources());
     }
 
     private void initComponents() {
-        setLayout(new BorderLayout(20, 0));  // 添加水平間距20像素
+        setLayout(new BorderLayout(20, 0));
         
-        // 初始化 recipeButtons 數組為最大可能的大小
-        recipeButtons = new JButton[40];  // 設置一個足夠大的初始大小
+        // 創建主面板，使用 GridBagLayout
+        JPanel mainPanel = new JPanel(new GridBagLayout());
+        mainPanel.setBorder(BorderFactory.createCompoundBorder(
+            new RoundedBorder(15, PINK_THEME),
+            BorderFactory.createEmptyBorder(15, 15, 15, 15)
+        ));
+        mainPanel.setBackground(LIGHT_PINK);
         
-        // 創建主面板，添加邊距
-        JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));  // 添加內邊距
-        mainPanel.setBackground(LIGHT_PINK);  // 設置背景色
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
         
-        // 創建配方書面板
-        JPanel recipePanel = new JPanel();
-        recipePanel.setLayout(new BoxLayout(recipePanel, BoxLayout.Y_AXIS));
-        recipePanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
-        recipePanel.setBackground(LIGHT_PINK);
+        // 左側第一列：配方書面板
+        gbc.weightx = 0.4;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(0, 0, 10, 5);
+        mainPanel.add(createRecipeSection(), gbc);
         
-        // 配方標題
-        JLabel recipeTitle = new JLabel("配方書", SwingConstants.CENTER);
-        recipeTitle.setFont(new Font("微軟正黑體", Font.BOLD, 24));
-        recipeTitle.setForeground(TEXT_COLOR);
-        recipeTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
-        recipePanel.add(recipeTitle);
-        recipePanel.add(Box.createVerticalStrut(20));
-        
-        // 創建按鈕面板
+        // 左側第二列：配方清單
         buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
-        buttonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         buttonPanel.setBackground(LIGHT_PINK);
-        recipePanel.add(buttonPanel);
+        buttonPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(PINK_THEME, 2, true),
+                "🧩 配方清單",
+                javax.swing.border.TitledBorder.CENTER,
+                javax.swing.border.TitledBorder.TOP,
+                COMBINED_FONT,
+                TEXT_COLOR
+            ),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
         
-        // 創建滾動面板
-        JScrollPane scrollPane = new JScrollPane(recipePanel);
+        JScrollPane recipeScrollPane = new JScrollPane(buttonPanel);
+        recipeScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        recipeScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        
+        gbc.gridy = 1;
+        gbc.weighty = 0.5;  // 恢復配方清單的比例
+        mainPanel.add(recipeScrollPane, gbc);
+        
+        // 右側第一列：資源清��� (增加比例)
+        gbc.weightx = 0.6;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.weighty = 0.7;  // 增加資源清單的比例
+        gbc.insets = new Insets(0, 5, 10, 0);
+        mainPanel.add(createResourceSection(), gbc);
+        
+        // 右側第二列：底部控制面板 (減小比例)
+        JPanel controlPanel = createControlSection();
+        gbc.gridy = 1;
+        gbc.weighty = 0.3;  // 減小底部控制面板的比例
+        mainPanel.add(controlPanel, gbc);
+        
+        add(mainPanel, BorderLayout.CENTER);
+    }
+    
+    private JPanel createRecipeSection() {
+        JPanel section = new JPanel(new BorderLayout());
+        section.setBackground(LIGHT_PINK);
+        section.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(PINK_THEME, 2, true),
+                "📖 配方書",
+                javax.swing.border.TitledBorder.CENTER,
+                javax.swing.border.TitledBorder.TOP,
+                COMBINED_FONT,
+                TEXT_COLOR
+            ),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+        
+        // 創建類別按鈕面板
+        JPanel categoryPanel = createCategoryButtons();
+        section.add(categoryPanel, BorderLayout.NORTH);
+        
+        // 創建配方滾動面板
+        JPanel recipesPanel = new JPanel();
+        recipesPanel.setLayout(new BoxLayout(recipesPanel, BoxLayout.Y_AXIS));
+        
+        JScrollPane scrollPane = new JScrollPane(recipesPanel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setBorder(null);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         
-        // 自定義滾動軸
-        JScrollBar recipeScrollBar = scrollPane.getVerticalScrollBar();
-        recipeScrollBar.setPreferredSize(new Dimension(12, 0));
-        recipeScrollBar.setUI(new BasicScrollBarUI() {
-            @Override
-            protected void configureScrollBarColors() {
-                this.thumbColor = new Color(255, 182, 193);
-                this.trackColor = new Color(255, 240, 245);
-            }
-            
-            @Override
-            protected JButton createDecreaseButton(int orientation) {
-                return createZeroButton();
-            }
-            
-            @Override
-            protected JButton createIncreaseButton(int orientation) {
-                return createZeroButton();
-            }
-            
-            private JButton createZeroButton() {
-                JButton button = new JButton();
-                button.setPreferredSize(new Dimension(0, 0));
-                return button;
-            }
-            
-            @Override
-            protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
-                if (thumbBounds.isEmpty() || !scrollbar.isEnabled()) {
-                    return;
-                }
-                
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
-                g2.setColor(thumbColor);
-                g2.fillRoundRect(thumbBounds.x, thumbBounds.y, 
-                                thumbBounds.width, thumbBounds.height, 
-                                10, 10);
-                
-                g2.dispose();
-            }
-            
-            @Override
-            protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
-                g2.setColor(trackColor);
-                g2.fillRoundRect(trackBounds.x, trackBounds.y,
-                                trackBounds.width, trackBounds.height,
-                                10, 10);
-                
-                g2.dispose();
-            }
-        });
-        
-        // 將滾動面板添加到主面板
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
-        
-        // 創建底部控制面板
-        JPanel bottomPanel = new JPanel();
-        bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
-        bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        bottomPanel.setBackground(LIGHT_PINK);
-        
-        // 添加製作按鈕
-        JButton craftButton = new JButton("開始製作");
-        craftButton.setFont(new Font("微軟正黑體", Font.BOLD, 20));
-        craftButton.setBackground(SOFT_YELLOW);
-        craftButton.setForeground(TEXT_COLOR);
-        craftButton.setBorder(BorderFactory.createCompoundBorder(
-            new RoundedBorder(15, PINK_THEME),
-            BorderFactory.createEmptyBorder(10, 15, 10, 15)
-        ));
-        
-        // 滑鼠效果
-        craftButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                craftButton.setBackground(MINT_GREEN);
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                craftButton.setBackground(SOFT_YELLOW);
-            }
-        });
-        
-        craftButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        craftButton.setMaximumSize(new Dimension(200, 50));
-        
-        craftButton.addActionListener(e -> {
-            if (selectedRecipe != null) {
-                String productId = getProductId(selectedRecipe);
-                if (controller.canCraft(productId)) {
-                    controller.craftProduct(productId);
-                    showSuccess(selectedRecipe + "製作成功！");
-                } else {
-                    processMessage.setText("材料不足，無法製作！");
-                }
-            } else {
-                processMessage.setText("請先選擇要製作的配方！");
-            }
-        });
-        
-        bottomPanel.add(craftButton);
-        
-        // 添加提示訊息
-        processMessage = new JLabel("選擇配方開始製作！", SwingConstants.CENTER);
-        processMessage.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
-        processMessage.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        bottomPanel.add(Box.createVerticalStrut(10));
-        bottomPanel.add(processMessage);
-        
-        // 配方面板和底部控制面板添加到主面板
-        mainPanel.add(recipePanel, BorderLayout.CENTER);
-        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
-        
-        // 主面板添加到當前面板
-        add(mainPanel, BorderLayout.CENTER);
-        
-        // 創建一個容器面板來包裝 resourceScrollPane
-        JPanel containerPanel = new JPanel(new BorderLayout());
-        containerPanel.setBackground(LIGHT_PINK);
-        containerPanel.setPreferredSize(new Dimension(240, 0));
-        
-        // 添加捲軸並美化
-        JScrollPane resourceScrollPane = new JScrollPane(resourcePanel);
-        resourceScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        resourceScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        resourceScrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        // 自定義滾動軸
-        JScrollBar verticalBar = resourceScrollPane.getVerticalScrollBar();
-        verticalBar.setPreferredSize(new Dimension(12, 0));
+        // 自定義滾動條
+        JScrollBar verticalBar = scrollPane.getVerticalScrollBar();
         verticalBar.setUI(new BasicScrollBarUI() {
             @Override
             protected void configureScrollBarColors() {
@@ -286,177 +219,314 @@ public class ProcessingPanel extends JPanel {
             }
         });
         
-        // 將 scrollPane 添加到容器面板
-        containerPanel.add(resourceScrollPane, BorderLayout.CENTER);
+        section.add(scrollPane, BorderLayout.CENTER);
         
-        // 將容器面板添加到主面板
-        add(containerPanel, BorderLayout.WEST);
-        
-        // 初始更新資源顯示
-        updateResources();
-        
-        // 顯示初始頁面
-        showPage(currentPage);
+        return section;
     }
-
-    private void showPage(int pageIndex) {
-        currentPage = pageIndex;
+    
+    private JPanel createResourceSection() {
+        JPanel section = new JPanel(new BorderLayout());
+        section.setBackground(LIGHT_PINK);
+        section.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(PINK_THEME, 2, true),
+                "📦 資源清單",
+                javax.swing.border.TitledBorder.CENTER,
+                javax.swing.border.TitledBorder.TOP,
+                COMBINED_FONT,
+                TEXT_COLOR
+            ),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
         
-        // 清除所有現有按鈕
-        buttonPanel.removeAll();
+        resourcePanel = new JPanel();
+        resourcePanel.setLayout(new BoxLayout(resourcePanel, BoxLayout.Y_AXIS));
         
-        // 添加類別按鈕
-        JPanel categoryButtons = new JPanel();
-        categoryButtons.setLayout(new GridLayout(3, 4, 10, 10));  // 改為 3x4 網格
-        categoryButtons.setAlignmentX(Component.LEFT_ALIGNMENT);
-        categoryButtons.setBackground(LIGHT_PINK);
-        
-        // 設置面板大小
-        categoryButtons.setMinimumSize(new Dimension(500, 150));
-        categoryButtons.setPreferredSize(new Dimension(500, 150));
-        categoryButtons.setMaximumSize(new Dimension(Short.MAX_VALUE, 150));
-        
-        // 添加所有類別按鈕
-        for (int i = 0; i < pageNames.length; i++) {
-            JButton btn = new JButton(pageNames[i]);
-            btn.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
-            btn.setBackground(SOFT_YELLOW);
-            btn.setForeground(TEXT_COLOR);
-            btn.setBorder(BorderFactory.createCompoundBorder(
-                new RoundedBorder(10, PINK_THEME),
-                BorderFactory.createEmptyBorder(5, 10, 5, 10)
-            ));
-            
-            // 當前選中的按鈕使用不同顏色
-            if (i == currentPage) {
-                btn.setBackground(MINT_GREEN);
-            }
-            
-            // 滑鼠效果
-            final int index = i;
-            btn.addMouseListener(new java.awt.event.MouseAdapter() {
-                public void mouseEntered(java.awt.event.MouseEvent evt) {
-                    if (index != currentPage) {
-                        btn.setBackground(MINT_GREEN);
-                    }
-                }
-                public void mouseExited(java.awt.event.MouseEvent evt) {
-                    if (index != currentPage) {
-                        btn.setBackground(SOFT_YELLOW);
-                    }
-                }
-            });
-            
-            btn.addActionListener(e -> showPage(index));
-            categoryButtons.add(btn);
-        }
-        
-        // 創建一個容器來包裝類別按鈕面板
-        JPanel categoryContainer = new JPanel();
-        categoryContainer.setLayout(new BoxLayout(categoryContainer, BoxLayout.X_AXIS));
-        categoryContainer.setBackground(LIGHT_PINK);
-        categoryContainer.add(categoryButtons);
-        categoryContainer.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
-        buttonPanel.add(categoryContainer);
-        buttonPanel.add(Box.createVerticalStrut(20));
-        
-        // 創建配方按鈕面板，並包裝在滾動面板中
-        JPanel recipesPanel = new JPanel();
-        recipesPanel.setLayout(new BoxLayout(recipesPanel, BoxLayout.Y_AXIS));
-        recipesPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
-        // 創建滾動面板
-        JScrollPane scrollPane = new JScrollPane(recipesPanel);
+        JScrollPane scrollPane = new JScrollPane(resourcePanel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setBorder(null);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16); // 設置滾動速度
-
-        // 自定義滾動軸
-        JScrollBar verticalBar = scrollPane.getVerticalScrollBar();
-        verticalBar.setPreferredSize(new Dimension(12, 0));
-        verticalBar.setUI(new BasicScrollBarUI() {
-            @Override
-            protected void configureScrollBarColors() {
-                this.thumbColor = new Color(255, 182, 193);  // 粉紅色滑塊
-                this.trackColor = new Color(255, 240, 245);  // 粉色軌道
+        
+        section.add(scrollPane, BorderLayout.CENTER);
+        
+        return section;
+    }
+    
+    private JPanel createControlSection() {
+        JPanel section = new JPanel();
+        section.setLayout(new BoxLayout(section, BoxLayout.Y_AXIS));
+        section.setBackground(LIGHT_PINK);
+        section.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(PINK_THEME, 2, true),
+                "🔧 底部控制面板",
+                javax.swing.border.TitledBorder.CENTER,
+                javax.swing.border.TitledBorder.TOP,
+                COMBINED_FONT,
+                TEXT_COLOR
+            ),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+        
+        // 添加製作按鈕
+        JButton craftButton = new JButton("開始製作");
+        craftButton.setFont(new Font("微軟正黑體", Font.BOLD, 20));
+        craftButton.setBackground(SOFT_YELLOW);
+        craftButton.setForeground(TEXT_COLOR);
+        craftButton.setBorder(BorderFactory.createCompoundBorder(
+            new RoundedBorder(15, PINK_THEME),
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
+        
+        // 滑鼠效果
+        craftButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                craftButton.setBackground(MINT_GREEN);
             }
-            
-            @Override
-            protected JButton createDecreaseButton(int orientation) {
-                return createZeroButton();
-            }
-            
-            @Override
-            protected JButton createIncreaseButton(int orientation) {
-                return createZeroButton();
-            }
-            
-            private JButton createZeroButton() {
-                JButton button = new JButton();
-                button.setPreferredSize(new Dimension(0, 0));
-                return button;
-            }
-            
-            @Override
-            protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
-                if (thumbBounds.isEmpty() || !scrollbar.isEnabled()) {
-                    return;
-                }
-                
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
-                // 繪製圓角矩形滑塊
-                g2.setColor(thumbColor);
-                g2.fillRoundRect(thumbBounds.x, thumbBounds.y, 
-                                thumbBounds.width, thumbBounds.height, 
-                                10, 10);  // 圓角半徑
-                
-                g2.dispose();
-            }
-            
-            @Override
-            protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
-                // 繪製圓角矩形軌道
-                g2.setColor(trackColor);
-                g2.fillRoundRect(trackBounds.x, trackBounds.y,
-                                trackBounds.width, trackBounds.height,
-                                10, 10);  // 圓角半徑
-                
-                g2.dispose();
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                craftButton.setBackground(SOFT_YELLOW);
             }
         });
         
-        // 設置滾動面板的首選大小
-        scrollPane.setPreferredSize(new Dimension(420, 300));
-        scrollPane.setMaximumSize(new Dimension(420, 300));
+        craftButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        craftButton.setMaximumSize(new Dimension(200, 50));
         
-        // 添加配方按鈕到recipesPanel
-        switch (pageIndex) {
-            case 0 -> addBasicRecipes(recipesPanel);
-            case 1 -> addDyeRecipes(recipesPanel);
-            case 2 -> addFabricRecipes(recipesPanel);
-            case 3 -> addBowRecipes(recipesPanel);
-            case 4 -> addRibbonRecipes(recipesPanel);
-            case 5 -> addDressRecipes(recipesPanel);
-            case 6 -> addShirtRecipes(recipesPanel);
-            case 7 -> addPantsRecipes(recipesPanel);
-            case 8 -> addLaceRecipes(recipesPanel);
+        craftButton.addActionListener(e -> {
+            if (selectedRecipe != null) {
+                String productId = getProductId(selectedRecipe);
+                if (controller.canCraft(productId)) {
+                    controller.craftProduct(productId);
+                    showSuccess(selectedRecipe + "製作成功！");
+                } else {
+                    processMessage.setText("材料不足，無法製作！");
+                }
+            } else {
+                processMessage.setText("請先選擇要製作的配方！");
+            }
+        });
+        
+        section.add(craftButton);
+        
+        // 添加提示訊息
+        processMessage = new JLabel("選擇配方開始製作！", SwingConstants.CENTER);
+        processMessage.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
+        processMessage.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        section.add(Box.createVerticalStrut(10));
+        section.add(processMessage);
+        
+        return section;
+    }
+
+    private void showPage(int pageIndex) {
+        try {
+            System.out.println("嘗試顯示頁面: " + pageIndex);
+            
+            // 清除配方面板
+            buttonPanel.removeAll();
+            
+            // 根據頁面索引更新配方
+            switch (pageIndex) {
+                case 0 -> { // 基本
+                    addBasicRecipes(buttonPanel);
+                    // ... 其他現有代碼
+                }
+                case 1 -> { // 染料
+                    addDyeRecipes(buttonPanel);
+                    // ... 其他現有代碼
+                }
+                case 2 -> { // 布料
+                    addFabricRecipes(buttonPanel);
+                    // ... 其他現有代碼
+                }
+                case 3 -> { // 蝴蝶結
+                    addBowRecipes(buttonPanel);
+                    // ... 他現有代碼
+                }
+                case 4 -> { // 緞帶
+                    addRibbonRecipes(buttonPanel);
+                    // ... 其他現有代碼
+                }
+                case 5 -> { // 連衣裙
+                    addDressRecipes(buttonPanel);
+                    // ... 其他現有代碼
+                }
+                case 6 -> { // 襯衫
+                    addShirtRecipes(buttonPanel);
+                    // ... 其他現有代碼
+                }
+                case 7 -> { // 褲子
+                    addPantsRecipes(buttonPanel);
+                    // ... 其他現有代碼
+                }
+                case 8 -> { // 蕾絲
+                    addLaceRecipes(buttonPanel);
+                    // ... 其他現有代碼
+                }
+            }
+            
+            // 重新驗證和重繪配方面板
+            buttonPanel.revalidate();
+            buttonPanel.repaint();
+            
+            // 清除資源面板
+            resourcePanel.removeAll();
+            
+            // 創建內容面板
+            JPanel contentPanel = new JPanel();
+            contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+            contentPanel.setBackground(LIGHT_PINK);
+            
+            ResourceManager rm = ResourceManager.getInstance();
+            
+            // 根據頁面索引更新資源和配方
+            switch (pageIndex) {
+                case 0 -> { // 基本
+                    String[] items = {"棉花", "白色布料", "白色蕾絲"};
+                    String[] keys = {
+                        "harvested_cotton", 
+                        "white_fabric", 
+                        "white_lace"
+                    };
+                    addResourceList(contentPanel, items, keys, rm);
+                    updateRecipeButtons(new int[]{0, 1});
+                }
+                case 1 -> { // 染料
+                    String[] items = {"紅色染料", "黃色染料", "紫色染料", "粉色染料"};
+                    String[] keys = {
+                        "red_dye", 
+                        "yellow_dye", 
+                        "purple_dye", 
+                        "pink_dye"
+                    };
+                    addResourceList(contentPanel, items, keys, rm);
+                    updateRecipeButtons(new int[]{2, 3, 4, 5});
+                }
+                case 2 -> { // 布料
+                    String[] items = {"白色布料", "紅色染料", "紅色布料", "黃色染料", "黃色布料", "紫色染料", "紫色布料", "粉色染料", "粉色布料"};
+                    String[] keys = {
+                        "white_fabric", 
+                        "red_dye", 
+                        "red_fabric", 
+                        "yellow_dye", 
+                        "yellow_fabric", 
+                        "purple_dye", 
+                        "purple_fabric", 
+                        "pink_dye", 
+                        "pink_fabric"
+                    };
+                    addResourceList(contentPanel, items, keys, rm);
+                    updateRecipeButtons(new int[]{0, 6, 7, 8, 9});
+                }
+                case 3 -> { // 蝴蝶結
+                    String[] items = {"白色布料", "白色蝴蝶結", "紅色布料", "紅色蝴蝶結", "黃色布料", "黃色蝴蝶結", "紫色布料", "紫色蝴蝶結", "粉色布料", "粉色蝴蝶結"};
+                    String[] keys = {
+                        "white_fabric", 
+                        "white_bow", 
+                        "red_fabric", 
+                        "red_bow", 
+                        "yellow_fabric", 
+                        "yellow_bow", 
+                        "purple_fabric", 
+                        "purple_bow", 
+                        "pink_fabric", 
+                        "pink_bow"
+                    };
+                    addResourceList(contentPanel, items, keys, rm);
+                    updateRecipeButtons(new int[]{10, 11, 12, 13, 14});
+                }
+                case 4 -> { // 緞帶
+                    String[] items = {"白色布料", "白色緞帶", "紅色布料", "紅色緞帶", "黃色布料", "黃色緞帶", "紫色布料", "紫色緞帶", "粉色布料", "粉色緞帶"};
+                    String[] keys = {
+                        "white_fabric", 
+                        "white_ribbon", 
+                        "red_fabric", 
+                        "red_ribbon", 
+                        "yellow_fabric", 
+                        "yellow_ribbon", 
+                        "purple_fabric", 
+                        "purple_ribbon", 
+                        "pink_fabric", 
+                        "pink_ribbon",
+                        
+                    };
+                    addResourceList(contentPanel, items, keys, rm);
+                    updateRecipeButtons(new int[]{15, 16, 17, 18, 19});
+                }
+                case 5 -> { // ���衣裙
+                    String[] items = {"白色布料", "紅色布料", "紅色連衣裙", "黃色布料", "黃色連衣裙", "紫色布料", "紫色連衣裙", "粉色布料", "粉色連衣裙"};
+                    String[] keys = {
+                        "white_fabric", 
+                        "red_fabric", 
+                        "red_dress", 
+                        "yellow_fabric", 
+                        "yellow_dress", 
+                        "purple_fabric", 
+                        "purple_dress", 
+                        "pink_fabric", 
+                        "pink_dress"
+                    };
+                    addResourceList(contentPanel, items, keys, rm);
+                    updateRecipeButtons(new int[]{20, 21, 22, 23, 24});
+                }
+                case 6 -> { // 襯衫
+                    String[] items = {"白色布料", "紅色布料", "紅色襯衫", "黃色布料", "黃色襯衫", "紫色布料", "紫色襯衫", "粉色布料", "粉色襯衫"};
+                    String[] keys = {
+                        "white_fabric", 
+                        "red_fabric", 
+                        "red_shirt", 
+                        "yellow_fabric", 
+                        "yellow_shirt", 
+                        "purple_fabric", 
+                        "purple_shirt", 
+                        "pink_fabric", 
+                        "pink_shirt"
+                    };
+                    addResourceList(contentPanel, items, keys, rm);
+                    updateRecipeButtons(new int[]{25, 26, 27, 28, 29});
+                }
+                case 7 -> { // 褲子     
+                    String[] items = {"白色布料", "紅色布料", "紅色褲子", "黃色布料", "黃色褲子", "紫色布料", "紫色褲子", "粉色布料", "粉色褲子"};
+                    String[] keys = {
+                        "white_fabric", 
+                        "red_fabric", 
+                        "red_pants", 
+                        "yellow_fabric", 
+                        "yellow_pants", 
+                        "purple_fabric", 
+                        "purple_pants", 
+                        "pink_fabric", 
+                        "pink_pants"
+                    };
+                    addResourceList(contentPanel, items, keys, rm);
+                    updateRecipeButtons(new int[]{30, 31, 32, 33, 34});
+                }
+                case 8 -> { // 蕾絲
+                    String[] items = {"白色蕾絲", "紅色染料", "紅色蕾絲", "黃色染料", "黃色蕾絲", "紫色染料", "紫色蕾絲", "粉���染料", "粉色蕾絲"};
+                    String[] keys = {
+                        "white_lace", 
+                        "red_dye", 
+                        "red_lace", 
+                        "yellow_dye", 
+                        "yellow_lace", 
+                        "purple_dye", 
+                        "purple_lace", 
+                        "pink_dye", 
+                        "pink_lace"
+                    };
+                    addResourceList(contentPanel, items, keys, rm);
+                    updateRecipeButtons(new int[]{35, 36, 37, 38});
+                }
+            }
+            
+            // 將內容面板添加到資源面板
+            resourcePanel.add(contentPanel);
+            resourcePanel.revalidate();
+            resourcePanel.repaint();
+            
+        } catch (Exception e) {
+            System.err.println("顯示頁面時發生錯誤: ");
+            e.printStackTrace();
         }
-        
-        buttonPanel.add(scrollPane);
-        
-        // 更新資源顯示
-        updateResources();
-        
-        // 重新驗證面板
-        buttonPanel.revalidate();
-        buttonPanel.repaint();
     }
 
     private void addBasicRecipes(JPanel targetPanel) {
@@ -753,7 +823,7 @@ public class ProcessingPanel extends JPanel {
                 updateRecipeButtons(new int[]{0, 6, 7, 8, 9});
             }
             case 3 -> { // 蝴蝶結
-                String[] items = {"白色布料", "白色蝴蝶結", "紅色布料", "紅色蝴蝶結", "黃色布料", "黃色蝴蝶結", "紫色布料", "紫色蝴蝶結", "粉���布料", "粉色蝴蝶結"};
+                String[] items = {"白色布料", "白色蝴蝶結", "紅色布料", "紅色蝴蝶結", "黃色布料", "黃色蝴蝶結", "紫色布料", "紫色蝴蝶結", "粉色布料", "粉色蝴蝶結"};
                 String[] keys = {
                     "white_fabric", 
                     "white_bow", 
@@ -838,7 +908,7 @@ public class ProcessingPanel extends JPanel {
                 updateRecipeButtons(new int[]{30, 31, 32, 33, 34});
             }
             case 8 -> { // 蕾絲
-                String[] items = {"白色蕾絲", "紅���染料", "紅色蕾絲", "黃色染料", "黃色蕾絲", "紫色染料", "紫色蕾絲", "粉色染料", "粉色蕾絲"};
+                String[] items = {"白色蕾絲", "紅色染料", "紅色蕾絲", "黃色染料", "黃色蕾絲", "紫色染料", "紫色蕾絲", "粉色染料", "粉色蕾絲"};
                 String[] keys = {
                     "white_lace", 
                     "red_dye", 
@@ -884,7 +954,7 @@ public class ProcessingPanel extends JPanel {
             } else if (names[i].contains("褲子")) {
                 icon = "👖";
             } else if (names[i].contains("棉花")) {
-                icon = "🌸";
+                icon = "🌱";
             } else if (names[i].contains("玫瑰")) {
                 icon = "🌹";
             } else if (names[i].contains("向日葵")) {
@@ -928,10 +998,17 @@ public class ProcessingPanel extends JPanel {
             recipeButtons[i].setVisible(false);
         }
         
-        // 顯示定的按鈕
+        // 顯示指定的按鈕
         for (int index : indices) {
             if (index < recipeButtons.length) {
                 recipeButtons[index].setVisible(true);
+                
+                // 設置按鈕文字和樣式
+                switch (index) {
+                    case 0 -> recipeButtons[index].setText("基本配方：棉花 → 白色布料");
+                    case 1 -> recipeButtons[index].setText("基本配方：白色布料 → 白色蕾絲");
+                    // 添加其他按鈕的文字
+                }
             }
         }
         
@@ -940,5 +1017,26 @@ public class ProcessingPanel extends JPanel {
         buttonPanel.repaint();
     }
 
+    private JPanel createCategoryButtons() {
+        JPanel categoryPanel = new JPanel(new GridLayout(3, 4, 10, 10));
+        categoryPanel.setBackground(LIGHT_PINK);
+        
+        for (int i = 0; i < pageNames.length; i++) {
+            JButton btn = new JButton(pageNames[i]);
+            btn.setFont(CHINESE_FONT);
+            btn.setBackground(SOFT_YELLOW);
+            btn.setForeground(TEXT_COLOR);
+            
+            final int index = i;
+            btn.addActionListener(e -> {
+                // 添加調試輸出
+                System.out.println("按鈕被點擊: " + pageNames[index] + ", 索引: " + index);
+                showPage(index);
+            });
+            categoryPanel.add(btn);
+        }
+        
+        return categoryPanel;
+    }
 
 }

@@ -26,7 +26,7 @@ public class DialogManager {
             "在這裡，你將開始一段精彩的時尚設計之旅。" +
             "你可以種植原料、設計服裝、經營商店。\n\n" +
             "讓我們一起開始這段奇妙的冒險吧！\n\n" +
-            "若對此DEMO有任何建議，請email我，我會用Unity重製！";
+            "若對此DEMO有任何建議，請email我，bug很多是正常！";
             
         dialogPanel.setCloseAction(e -> {
             System.out.println("開始遊戲！");
