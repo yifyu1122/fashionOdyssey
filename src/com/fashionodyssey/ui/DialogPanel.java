@@ -3,6 +3,7 @@ package com.fashionodyssey.ui;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 
 public class DialogPanel extends JPanel {    
     // 定義配色方案
@@ -43,7 +44,7 @@ public class DialogPanel extends JPanel {
         JLabel emojiLabel1 = new JLabel("✨");
         emojiLabel1.setFont(EMOJI_FONT);
         
-        JLabel textLabel = new JLabel(" 歡迎來到時尚奧德賽 Fashion Odyssey ");
+        JLabel textLabel = new JLabel(" 時尚奧德賽 Fashion Odyssey ");
         textLabel.setFont(TITLE_FONT);
         textLabel.setForeground(TEXT_COLOR);
         
@@ -75,6 +76,65 @@ public class DialogPanel extends JPanel {
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
         scrollPane.setAlignmentX(CENTER_ALIGNMENT);
+        
+        // 自定義滾動條
+        JScrollBar verticalBar = scrollPane.getVerticalScrollBar();
+        verticalBar.setUI(new BasicScrollBarUI() {
+            @Override
+            protected void configureScrollBarColors() {
+                this.thumbColor = PINK_THEME;      // 粉紅色滑塊
+                this.trackColor = LIGHT_PINK;      // 淺粉色軌道
+            }
+            
+            @Override
+            protected JButton createDecreaseButton(int orientation) {
+                return createZeroButton();
+            }
+            
+            @Override
+            protected JButton createIncreaseButton(int orientation) {
+                return createZeroButton();
+            }
+            
+            private JButton createZeroButton() {
+                JButton button = new JButton();
+                button.setPreferredSize(new Dimension(0, 0));
+                return button;
+            }
+            
+            @Override
+            protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
+                if (thumbBounds.isEmpty() || !scrollbar.isEnabled()) {
+                    return;
+                }
+                
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // 繪製圓角矩形滑塊
+                g2.setColor(thumbColor);
+                g2.fillRoundRect(thumbBounds.x, thumbBounds.y, 
+                               thumbBounds.width, thumbBounds.height, 
+                               10, 10);  // 圓角半徑
+                
+                g2.dispose();
+            }
+            
+            @Override
+            protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // 繪製圓角矩形軌道
+                g2.setColor(trackColor);
+                g2.fillRoundRect(trackBounds.x, trackBounds.y,
+                               trackBounds.width, trackBounds.height,
+                               10, 10);  // 圓角半徑
+                
+                g2.dispose();
+            }
+        });
+        
         add(scrollPane);
         
         add(Box.createRigidArea(new Dimension(0, 15)));

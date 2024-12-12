@@ -14,13 +14,16 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
 public class SalesPanel extends JPanel {
+    private static final Color PINK_THEME = new Color(255, 182, 193);    // 淺粉色
+    private static final Color LIGHT_PINK = new Color(255, 218, 224);    // 更淺的粉色
+    private static final Color SOFT_YELLOW = new Color(255, 245, 200);   // 柔和的黃色
+    private static final Color MINT_GREEN = new Color(200, 255, 214);    // 薄荷綠
+    private static final Color TEXT_COLOR = new Color(80, 80, 80);       // 深灰色文字
+
     private JTable productTable;
     private DefaultTableModel model;
     private JLabel salesLabel;
     private double totalSales = 0.0;
-    private static final Color PRIMARY_COLOR = new Color(51, 122, 183);
-    private static final Color BACKGROUND_COLOR = new Color(248, 249, 250);
-    private static final Color BORDER_COLOR = new Color(222, 226, 230);
     
     public SalesPanel() {
         setLayout(new BorderLayout(10, 10)); // 增加間距
@@ -31,7 +34,7 @@ public class SalesPanel extends JPanel {
     }
     
     private void initComponents() {
-        setBackground(BACKGROUND_COLOR);
+        setBackground(LIGHT_PINK);
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         
         // 修改列名，移除利潤欄位
@@ -69,12 +72,13 @@ public class SalesPanel extends JPanel {
         productTable.setRowHeight(30);
         productTable.setFont(new Font("微軟正黑體", Font.PLAIN, 14));
         productTable.getTableHeader().setFont(new Font("微軟正黑體", Font.BOLD, 14));
-        productTable.getTableHeader().setBackground(PRIMARY_COLOR);
-        productTable.getTableHeader().setForeground(Color.WHITE);
-        productTable.setSelectionBackground(BACKGROUND_COLOR);
-        productTable.setSelectionForeground(Color.BLACK);
+        productTable.getTableHeader().setBackground(PINK_THEME);
+        productTable.getTableHeader().setForeground(TEXT_COLOR);
+        productTable.setSelectionBackground(MINT_GREEN);
+        productTable.setSelectionForeground(TEXT_COLOR);
         productTable.setShowGrid(true);
-        productTable.setGridColor(BORDER_COLOR);
+        productTable.setGridColor(LIGHT_PINK);
+        productTable.setBackground(new Color(255, 250, 245));
         
         // 設置列寬
         productTable.getColumnModel().getColumn(0).setPreferredWidth(150); // 商品名稱
@@ -101,33 +105,33 @@ public class SalesPanel extends JPanel {
             }
         });
         
-        // 設置銷售價格���位的渲染器
+        // 設置銷售價格欄位的渲染器
         productTable.getColumnModel().getColumn(5).setCellRenderer(new ButtonRenderer());
         productTable.getColumnModel().getColumn(5).setCellEditor(new ButtonEditor(new JCheckBox()));
         
         // 創建帶有陰影的滾動面板
         JScrollPane scrollPane = new JScrollPane(productTable);
         scrollPane.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createEmptyBorder(0, 0, 10, 0),
-            BorderFactory.createLineBorder(BORDER_COLOR, 1)
+            new RoundedBorder(15, PINK_THEME),
+            BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
         
         // 控制面板
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 5));
-        controlPanel.setBackground(Color.WHITE);
+        controlPanel.setBackground(LIGHT_PINK);
         controlPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(1, 0, 0, 0, PRIMARY_COLOR),
+            BorderFactory.createMatteBorder(1, 0, 0, 0, PINK_THEME),
             BorderFactory.createEmptyBorder(10, 0, 0, 0)
         ));
         
         // 銷售額標籤
         salesLabel = new JLabel("總銷售額: $" + totalSales);
         salesLabel.setFont(new Font("微軟正黑體", Font.BOLD, 16));
-        salesLabel.setForeground(PRIMARY_COLOR);
+        salesLabel.setForeground(TEXT_COLOR);
         
         // 更新按鈕
-        JButton updateButton = createStyledButton("更新庫存");
+        JButton updateButton = createStyledButton("✨ 更新庫存");
         updateButton.addActionListener(e -> updateInventory());
         
         controlPanel.add(updateButton);
@@ -140,17 +144,21 @@ public class SalesPanel extends JPanel {
     private JButton createStyledButton(String text) {
         JButton button = new JButton(text);
         button.setFont(new Font("微軟正黑體", Font.BOLD, 14));
-        button.setForeground(Color.WHITE);
-        button.setBackground(PRIMARY_COLOR);
+        button.setForeground(TEXT_COLOR);
+        button.setBackground(SOFT_YELLOW);
         button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+        button.setBorder(BorderFactory.createCompoundBorder(
+            new RoundedBorder(15, PINK_THEME),
+            BorderFactory.createEmptyBorder(8, 15, 8, 15)
+        ));
         
+        // 添加懸停效果
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(BACKGROUND_COLOR);
+                button.setBackground(MINT_GREEN);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(PRIMARY_COLOR);
+                button.setBackground(SOFT_YELLOW);
             }
         });
         
@@ -161,22 +169,20 @@ public class SalesPanel extends JPanel {
     class ButtonRenderer extends JButton implements TableCellRenderer {
         public ButtonRenderer() {
             setOpaque(true);
-            setFont(new Font("微軟正黑體", Font.BOLD, 12));
-            setForeground(Color.WHITE);
-            setBackground(PRIMARY_COLOR);
-            setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-            setFocusPainted(false);
+            setFont(new Font("微軟正黑體", Font.BOLD, 14));
+            setForeground(TEXT_COLOR);
+            setBackground(SOFT_YELLOW);
+            setBorder(BorderFactory.createCompoundBorder(
+                new RoundedBorder(10, PINK_THEME),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+            ));
         }
         
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                                                      boolean isSelected, boolean hasFocus, int row, int column) {
-            if (isSelected) {
-                setBackground(BACKGROUND_COLOR);
-            } else {
-                setBackground(PRIMARY_COLOR);
-            }
-            setText("賣出");
+            setText("✨ 賣出");
+            setBackground(isSelected ? MINT_GREEN : SOFT_YELLOW);
             return this;
         }
     }
@@ -192,8 +198,8 @@ public class SalesPanel extends JPanel {
             button = new JButton();
             button.setOpaque(true);
             button.setFont(new Font("微軟正黑體", Font.BOLD, 12));
-            button.setForeground(Color.WHITE);
-            button.setBackground(PRIMARY_COLOR);
+            button.setForeground(TEXT_COLOR);
+            button.setBackground(SOFT_YELLOW);
             button.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
             button.setFocusPainted(false);
             
@@ -391,7 +397,7 @@ public class SalesPanel extends JPanel {
                 .toString().replace("$", ""));
             String itemName = (String) productTable.getValueAt(row, 0);
             
-            System.out.println("嘗試銷售��品：" + itemName);
+            System.out.println("嘗試銷售商品：" + itemName);
             System.out.println("銷售價格：" + salePrice);
             System.out.println("成本：" + cost);
             
