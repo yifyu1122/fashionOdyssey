@@ -716,7 +716,7 @@ public class ProcessingPanel extends JPanel {
         // 根據當前頁面顯示對應資源和配方
         switch (currentPage) {
             case 0 -> { // 基本
-                String[] flowers = {"棉花", "白色��料", "白色蕾絲"};
+                String[] flowers = {"棉花", "白色布料", "白色蕾絲"};
                 String[] keys = {"harvested_cotton", "white_fabric", "white_lace"};
                 addResourceList(contentPanel, flowers, keys, rm);
                 updateRecipeButtons(new int[]{0, 1});
@@ -894,7 +894,7 @@ public class ProcessingPanel extends JPanel {
             } else if (names[i].contains("薰衣草")) {
                 icon = "💜";
             } else {
-                icon = "����";
+                icon = "🌸";
             }
             
             // 分開創建 emoji 和文字標籤

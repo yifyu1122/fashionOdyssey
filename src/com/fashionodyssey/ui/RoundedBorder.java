@@ -1,9 +1,9 @@
 package com.fashionodyssey.ui;
 
 import java.awt.*;
-import javax.swing.border.AbstractBorder;
+import javax.swing.border.Border;
 
-public class RoundedBorder extends AbstractBorder {
+public class RoundedBorder implements Border {
     private int radius;
     private Color color;
 
