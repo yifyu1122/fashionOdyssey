@@ -106,11 +106,9 @@ public class InventoryPanel extends JPanel {
                     customDesignNames.put(baseItem.toLowerCase(), designName);
                 }
             }
-            System.out.println("資源數量變化，更新顯示...");
             updateResources();
         });
-        
-        // ���始化顯示
+
         updateResources();
     }
     
@@ -239,39 +237,38 @@ public class InventoryPanel extends JPanel {
             titleLabel.setFont(new Font("微軟正黑體", Font.BOLD, 16));
             titlePanel.add(titleLabel);
 
-            // Create description panel
+
             JPanel descPanel = new JPanel(new BorderLayout(10, 10));
             descPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 5, 20));
 
-            // Get item amount
+
             int amount = resourceManager.getResourceAmount(resourceKey);
 
-            // Create description text
+
             String description = item.getAcquiredDescription() + "\n\n" + item.getDescription() + "\n\n目前擁有：" + amount + " 個";
 
-            // Use JTextArea for text display
             JTextArea descTextArea = new JTextArea(description);
             descTextArea.setFont(new Font("微軟正黑體", Font.PLAIN, 12));
             descTextArea.setLineWrap(true);
             descTextArea.setWrapStyleWord(true);
             descTextArea.setEditable(false);
 
-            // Add JTextArea to JScrollPane
+
             JScrollPane scrollPane = new JScrollPane(descTextArea);
             scrollPane.setPreferredSize(new Dimension(300, 150));
 
             descPanel.add(scrollPane, BorderLayout.CENTER);
 
-            // Add close button
+
             JButton closeButton = new JButton("關閉");
             closeButton.addActionListener(event -> dialog.dispose());
 
-            // Add components to dialog
+
             dialog.add(titlePanel, BorderLayout.NORTH);
             dialog.add(descPanel, BorderLayout.CENTER);
             dialog.add(closeButton, BorderLayout.SOUTH);
 
-            // Set dialog size and position
+
             dialog.setSize(350, 250);
             dialog.setLocationRelativeTo(button);
             dialog.setVisible(true);

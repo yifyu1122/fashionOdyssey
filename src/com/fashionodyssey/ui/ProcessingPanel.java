@@ -3,9 +3,9 @@ package com.fashionodyssey.ui;
 import com.fashionodyssey.controller.ProcessingController;
 import com.fashionodyssey.event.EventManager;
 import com.fashionodyssey.util.ResourceManager;
-import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 
 public class ProcessingPanel extends JPanel {
     // 使用與 DesignPanel 一致的配色和字體
@@ -99,7 +99,7 @@ public class ProcessingPanel extends JPanel {
         buttonPanel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(PINK_THEME, 2, true),
-                "🧩 配方清單",
+                "📜 配方清單",
                 javax.swing.border.TitledBorder.CENTER,
                 javax.swing.border.TitledBorder.TOP,
                 COMBINED_FONT,
@@ -111,12 +111,71 @@ public class ProcessingPanel extends JPanel {
         JScrollPane recipeScrollPane = new JScrollPane(buttonPanel);
         recipeScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         recipeScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        recipeScrollPane.setBorder(BorderFactory.createLineBorder(new Color(255, 182, 193), 1));  // 粉色邊框
+        
+        // 自定義滾動條
+        JScrollBar verticalBar = recipeScrollPane.getVerticalScrollBar();
+        verticalBar.setUI(new BasicScrollBarUI() {
+            @Override
+            protected void configureScrollBarColors() {
+                this.thumbColor = new Color(255, 182, 193);  // 粉紅色滑塊
+                this.trackColor = new Color(255, 240, 245);  // 淺粉色軌道
+            }
+            
+            @Override
+            protected JButton createDecreaseButton(int orientation) {
+                return createZeroButton();
+            }
+            
+            @Override
+            protected JButton createIncreaseButton(int orientation) {
+                return createZeroButton();
+            }
+            
+            private JButton createZeroButton() {
+                JButton button = new JButton();
+                button.setPreferredSize(new Dimension(0, 0));
+                return button;
+            }
+            
+            @Override
+            protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
+                if (thumbBounds.isEmpty() || !scrollbar.isEnabled()) {
+                    return;
+                }
+                
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // 繪��圓角矩形滑塊
+                g2.setColor(thumbColor);
+                g2.fillRoundRect(thumbBounds.x, thumbBounds.y, 
+                                thumbBounds.width, thumbBounds.height, 
+                                10, 10);  // 圓角半徑
+                
+                g2.dispose();
+            }
+            
+            @Override
+            protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // 繪製圓角矩形軌道
+                g2.setColor(trackColor);
+                g2.fillRoundRect(trackBounds.x, trackBounds.y,
+                                trackBounds.width, trackBounds.height,
+                                10, 10);  // 圓角半徑
+                
+                g2.dispose();
+            }
+        });
         
         gbc.gridy = 1;
         gbc.weighty = 0.5;  // 恢復配方清單的比例
         mainPanel.add(recipeScrollPane, gbc);
         
-        // 右側第一列：資源清��� (增加比例)
+        // 右側第一列：資源清單 (增加比例)
         gbc.weightx = 0.6;
         gbc.gridx = 1;
         gbc.gridy = 0;
@@ -139,7 +198,7 @@ public class ProcessingPanel extends JPanel {
         section.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(PINK_THEME, 2, true),
-                "📖 配方書",
+                "📦 配方書",
                 javax.swing.border.TitledBorder.CENTER,
                 javax.swing.border.TitledBorder.TOP,
                 COMBINED_FONT,
@@ -214,7 +273,6 @@ public class ProcessingPanel extends JPanel {
                 g2.fillRoundRect(trackBounds.x, trackBounds.y,
                                 trackBounds.width, trackBounds.height,
                                 10, 10);  // 圓角半徑
-                
                 g2.dispose();
             }
         });
@@ -246,6 +304,64 @@ public class ProcessingPanel extends JPanel {
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         
+        // 自定義滾動條
+        JScrollBar verticalBar = scrollPane.getVerticalScrollBar();
+        verticalBar.setUI(new BasicScrollBarUI() {
+            @Override
+            protected void configureScrollBarColors() {
+                this.thumbColor = new Color(255, 182, 193);  // 粉紅色滑塊
+                this.trackColor = new Color(255, 240, 245);  // 淺粉色軌道
+            }
+            
+            @Override
+            protected JButton createDecreaseButton(int orientation) {
+                return createZeroButton();
+            }
+            
+            @Override
+            protected JButton createIncreaseButton(int orientation) {
+                return createZeroButton();
+            }
+            
+            private JButton createZeroButton() {
+                JButton button = new JButton();
+                button.setPreferredSize(new Dimension(0, 0));
+                return button;
+            }
+            
+            @Override
+            protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
+                if (thumbBounds.isEmpty() || !scrollbar.isEnabled()) {
+                    return;
+                }
+                
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // 繪製圓角矩形滑塊
+                g2.setColor(thumbColor);
+                g2.fillRoundRect(thumbBounds.x, thumbBounds.y, 
+                                thumbBounds.width, thumbBounds.height, 
+                                10, 10);  // 圓角半徑
+                
+                g2.dispose();
+            }
+            
+            @Override
+            protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // 繪製圓角矩形軌道
+                g2.setColor(trackColor);
+                g2.fillRoundRect(trackBounds.x, trackBounds.y,
+                                trackBounds.width, trackBounds.height,
+                                10, 10);  // 圓角半徑
+                
+                g2.dispose();
+            }
+        });
+        
         section.add(scrollPane, BorderLayout.CENTER);
         
         return section;
@@ -258,7 +374,7 @@ public class ProcessingPanel extends JPanel {
         section.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(PINK_THEME, 2, true),
-                "🔧 底部控制面板",
+                "🔧 加工中...",
                 javax.swing.border.TitledBorder.CENTER,
                 javax.swing.border.TitledBorder.TOP,
                 COMBINED_FONT,
@@ -295,7 +411,7 @@ public class ProcessingPanel extends JPanel {
                 String productId = getProductId(selectedRecipe);
                 if (controller.canCraft(productId)) {
                     controller.craftProduct(productId);
-                    showSuccess(selectedRecipe + "製作成功！");
+                    showSuccess(selectedRecipe + "作成功！");
                 } else {
                     processMessage.setText("材料不足，無法製作！");
                 }
@@ -328,39 +444,30 @@ public class ProcessingPanel extends JPanel {
             switch (pageIndex) {
                 case 0 -> { // 基本
                     addBasicRecipes(buttonPanel);
-                    // ... 其他現有代碼
                 }
                 case 1 -> { // 染料
                     addDyeRecipes(buttonPanel);
-                    // ... 其他現有代碼
                 }
                 case 2 -> { // 布料
                     addFabricRecipes(buttonPanel);
-                    // ... 其他現有代碼
                 }
                 case 3 -> { // 蝴蝶結
                     addBowRecipes(buttonPanel);
-                    // ... 他現有代碼
                 }
                 case 4 -> { // 緞帶
                     addRibbonRecipes(buttonPanel);
-                    // ... 其他現有代碼
                 }
                 case 5 -> { // 連衣裙
                     addDressRecipes(buttonPanel);
-                    // ... 其他現有代碼
                 }
                 case 6 -> { // 襯衫
                     addShirtRecipes(buttonPanel);
-                    // ... 其他現有代碼
                 }
                 case 7 -> { // 褲子
                     addPantsRecipes(buttonPanel);
-                    // ... 其他現有代碼
                 }
                 case 8 -> { // 蕾絲
                     addLaceRecipes(buttonPanel);
-                    // ... 其他現有代碼
                 }
             }
             
@@ -371,7 +478,7 @@ public class ProcessingPanel extends JPanel {
             // 清除資源面板
             resourcePanel.removeAll();
             
-            // 創建內容面板
+            // 創建面板
             JPanel contentPanel = new JPanel();
             contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
             contentPanel.setBackground(LIGHT_PINK);
@@ -452,7 +559,7 @@ public class ProcessingPanel extends JPanel {
                     addResourceList(contentPanel, items, keys, rm);
                     updateRecipeButtons(new int[]{15, 16, 17, 18, 19});
                 }
-                case 5 -> { // ���衣裙
+                case 5 -> { // 連衣裙
                     String[] items = {"白色布料", "紅色布料", "紅色連衣裙", "黃色布料", "黃色連衣裙", "紫色布料", "紫色連衣裙", "粉色布料", "粉色連衣裙"};
                     String[] keys = {
                         "white_fabric", 
@@ -501,7 +608,7 @@ public class ProcessingPanel extends JPanel {
                     updateRecipeButtons(new int[]{30, 31, 32, 33, 34});
                 }
                 case 8 -> { // 蕾絲
-                    String[] items = {"白色蕾絲", "紅色染料", "紅色蕾絲", "黃色染料", "黃色蕾絲", "紫色染料", "紫色蕾絲", "粉���染料", "粉色蕾絲"};
+                    String[] items = {"白色蕾絲", "紅色染料", "紅色蕾絲", "黃色染料", "黃色蕾絲", "紫色染料", "紫色蕾絲", "粉色染料", "粉��蕾絲"};
                     String[] keys = {
                         "white_lace", 
                         "red_dye", 
@@ -998,19 +1105,6 @@ public class ProcessingPanel extends JPanel {
             recipeButtons[i].setVisible(false);
         }
         
-        // 顯示指定的按鈕
-        for (int index : indices) {
-            if (index < recipeButtons.length) {
-                recipeButtons[index].setVisible(true);
-                
-                // 設置按鈕文字和樣式
-                switch (index) {
-                    case 0 -> recipeButtons[index].setText("基本配方：棉花 → 白色布料");
-                    case 1 -> recipeButtons[index].setText("基本配方：白色布料 → 白色蕾絲");
-                    // 添加其他按鈕的文字
-                }
-            }
-        }
         
         // 重新驗證面板
         buttonPanel.revalidate();

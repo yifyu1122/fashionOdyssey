@@ -21,7 +21,7 @@ public class GameMain {
             String cropType = (String) event.getArgs()[1];
             CropStage stage = (CropStage) event.getArgs()[2];
             
-            int row = index / 2;  // Assuming GRID_SIZE is 2
+            int row = index / 2;  // GRID_SIZE = 2
             int col = index % 2;
             
             mainFrame.getFarmPanel().updateSlotStatus(row, col, cropType, stage);
