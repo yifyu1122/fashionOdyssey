@@ -188,26 +188,14 @@ public class InventoryPanel extends JPanel {
             public Dimension getPreferredSize() {
                 return new Dimension(80, 80);
             }
-            
-            @Override
-            public Dimension getMinimumSize() {
-                return getPreferredSize();
-            }
-            
-            @Override
-            public Dimension getMaximumSize() {
-                return getPreferredSize();
-            }
         };
         
-        // Set button appearance
         button.setBackground(SOFT_YELLOW);
         button.setBorder(BorderFactory.createCompoundBorder(
             new RoundedBorder(10, PINK_THEME),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
         
-        // Create quantity label
         JLabel countLabel = new JLabel("0");
         countLabel.setFont(new Font("微軟正黑體", Font.BOLD, 12));
         countLabel.setForeground(Color.WHITE);
@@ -218,10 +206,16 @@ public class InventoryPanel extends JPanel {
         button.setLayout(null);
         button.add(countLabel);
         
-        // Set tooltip and name
-        String displayName = customDesignNames.getOrDefault(resourceKey, item.getName());
-        button.setText(displayName);
-        button.setToolTipText("<html>" + displayName + "<br>" + 
+        // 設置圖標
+        ImageIcon icon = resourceManager.getItemIcon(resourceKey);
+        if (icon != null) {
+            button.setIcon(icon);
+            button.setText(""); // 隱藏文字
+        } else {
+            button.setText(item.getName()); // 顯示物品名稱
+        }
+        
+        button.setToolTipText("<html>" + item.getName() + "<br>" + 
                              item.getFullDescription().replace("\n", "<br>") + "</html>");
         
         // Add click event
@@ -229,46 +223,38 @@ public class InventoryPanel extends JPanel {
             // Create a dialog to display item information
             JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "物品資訊", true);
             dialog.setLayout(new BorderLayout(10, 5));
-
+            
             // Create title panel
             JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
             titlePanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
             JLabel titleLabel = new JLabel(item.getName());
             titleLabel.setFont(new Font("微軟正黑體", Font.BOLD, 16));
             titlePanel.add(titleLabel);
-
-
+            
             JPanel descPanel = new JPanel(new BorderLayout(10, 10));
             descPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 5, 20));
-
-
+            
             int amount = resourceManager.getResourceAmount(resourceKey);
-
-
             String description = item.getAcquiredDescription() + "\n\n" + item.getDescription() + "\n\n目前擁有：" + amount + " 個";
-
+            
             JTextArea descTextArea = new JTextArea(description);
             descTextArea.setFont(new Font("微軟正黑體", Font.PLAIN, 12));
             descTextArea.setLineWrap(true);
             descTextArea.setWrapStyleWord(true);
             descTextArea.setEditable(false);
-
-
+            
             JScrollPane scrollPane = new JScrollPane(descTextArea);
             scrollPane.setPreferredSize(new Dimension(300, 150));
-
+            
             descPanel.add(scrollPane, BorderLayout.CENTER);
-
-
+            
             JButton closeButton = new JButton("關閉");
             closeButton.addActionListener(event -> dialog.dispose());
-
-
+            
             dialog.add(titlePanel, BorderLayout.NORTH);
             dialog.add(descPanel, BorderLayout.CENTER);
             dialog.add(closeButton, BorderLayout.SOUTH);
-
-
+            
             dialog.setSize(350, 250);
             dialog.setLocationRelativeTo(button);
             dialog.setVisible(true);
@@ -285,8 +271,8 @@ public class InventoryPanel extends JPanel {
         
         countLabel.setText(String.valueOf(amount));
         countLabel.setVisible(amount > 0);
-        button.setEnabled(true);  // Keep button enabled to allow clicking
-        button.setBackground(amount > 0 ? SOFT_YELLOW : Color.LIGHT_GRAY);  // Change color if quantity is 0
+        button.setEnabled(true);  
+        button.setBackground(amount > 0 ? SOFT_YELLOW : Color.LIGHT_GRAY);  
         
         if (item != null) {
             button.setText(item.getName());

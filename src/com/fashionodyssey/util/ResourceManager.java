@@ -4,8 +4,10 @@ import com.fashionodyssey.event.EventManager;
 import com.fashionodyssey.event.GameEvent;
 import com.fashionodyssey.model.design.Design;
 import com.fashionodyssey.model.resource.CropType;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.ImageIcon;
 
 public class ResourceManager {
     private static ResourceManager instance;
@@ -27,7 +29,7 @@ public class ResourceManager {
     
     private ResourceManager() {
         resources = new HashMap<>();
-        money = 1000.0; // 初始資金
+        money = 100.0; // 初始資金
         initializeResources();
     }
     
@@ -318,5 +320,14 @@ public class ResourceManager {
             new GameEvent("DESIGN_CREATED", design)
         );
         notifyInventoryChange();
+    }
+    public ImageIcon getItemIcon(String resourceKey) {
+        String path = "/main/resources/images/base/" + resourceKey + ".png";
+        URL location = getClass().getResource(path);
+        if (location == null) {
+            System.out.println("Image not found: " + path);
+            return null; // 返回 null 表示圖片不存在
+        }
+        return new ImageIcon(location);
     }
 } 

@@ -49,7 +49,7 @@ public class FarmController {
     }
 
     private void initializeResources() {
-        resourceManager.addResource("money", 1000);
+        resourceManager.addResource("money", 100);
         resourceManager.addResource("seeds", 10);
         resourceManager.addResource("water", 20);
         resourceManager.addResource("fertilizer", 5);
