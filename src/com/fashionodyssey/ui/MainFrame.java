@@ -1,8 +1,8 @@
 package com.fashionodyssey.ui;
 
 import com.fashionodyssey.event.EventManager;
-import com.fashionodyssey.util.ResourceManager;
 import com.fashionodyssey.story.dialog.DialogManager;
+import com.fashionodyssey.util.ResourceManager;
 import java.awt.*;
 import javax.swing.*;
 
@@ -34,7 +34,7 @@ public class MainFrame extends JFrame {
         getContentPane().setBackground(LIGHT_PINK);
         
         // 初始化標籤，使用更大的字體
-        statusLabel = new JLabel("★ 歡迎來到夢想農場！今天也要好好照顧作物喔～ ★");
+        statusLabel = new JLabel("● 靈感來襲！讓我們一起創造最閃耀的時尚品～");
         statusLabel.setFont(new Font("微軟正黑體", Font.BOLD, 18));
         statusLabel.setForeground(TEXT_COLOR);
         statusLabel.setBorder(BorderFactory.createCompoundBorder(
@@ -68,9 +68,9 @@ public class MainFrame extends JFrame {
         
         // 創建內容面板
         contentPanel = new JPanel(new CardLayout());
-        contentPanel.add(farmPanel, "農場");
-        contentPanel.add(processingPanel, "加工");
         contentPanel.add(designPanel, "設計");
+        contentPanel.add(processingPanel, "加工");
+        contentPanel.add(farmPanel, "農場");
         contentPanel.add(salesPanel, "銷售");
         
         // 創建底部按鈕面板，使用 GridLayout 確保按鈕等寬
@@ -79,7 +79,7 @@ public class MainFrame extends JFrame {
         buttonPanel.setBackground(LIGHT_PINK);
         Font buttonFont = new Font("微軟正黑體", Font.BOLD, 20);
         
-        String[] buttonNames = {"農場", "加工", "設計", "銷售"};
+        String[] buttonNames = {"設計", "加工", "農場", "銷售"};
         for (String name : buttonNames) {
             buttonPanel.add(createNavButton(name, buttonFont));
         }
@@ -93,7 +93,7 @@ public class MainFrame extends JFrame {
         add(inventoryPanel, BorderLayout.EAST);
         
         // 顯示初始面板
-        showPanel("農場");
+        showPanel("設計");
         
         // 註冊資金更新事件
         EventManager.getInstance().addEventListener("UPDATE_MONEY", event -> {

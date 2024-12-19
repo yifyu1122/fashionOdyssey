@@ -84,13 +84,14 @@ public class ProcessingPanel extends JPanel {
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 0.5; // 確保左側和右側面板的比例
+        gbc.weighty = 1.0; // 讓它們填滿整個高度
         
         // 左側第一列：配方書面板
-        gbc.weightx = 0.4;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.insets = new Insets(0, 0, 10, 5);
-        mainPanel.add(createRecipeSection(), gbc);
+        JPanel recipeSection = createRecipeSection();
+        recipeSection.setMinimumSize(new Dimension(0, 80));  // 設置最小高度
+        recipeSection.setPreferredSize(new Dimension(0, 80)); // 設置首選高度
+        mainPanel.add(recipeSection, gbc);
         
         // 左側第二列：配方清單
         buttonPanel = new JPanel();
@@ -147,7 +148,7 @@ public class ProcessingPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 
-                // 繪��圓角矩形滑塊
+                // 繪圓角矩形滑塊
                 g2.setColor(thumbColor);
                 g2.fillRoundRect(thumbBounds.x, thumbBounds.y, 
                                 thumbBounds.width, thumbBounds.height, 
@@ -193,7 +194,8 @@ public class ProcessingPanel extends JPanel {
     }
     
     private JPanel createRecipeSection() {
-        JPanel section = new JPanel(new BorderLayout());
+        JPanel section = new JPanel();
+        section.setLayout(new BoxLayout(section, BoxLayout.Y_AXIS));
         section.setBackground(LIGHT_PINK);
         section.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createTitledBorder(
@@ -209,75 +211,8 @@ public class ProcessingPanel extends JPanel {
         
         // 創建類別按鈕面板
         JPanel categoryPanel = createCategoryButtons();
-        section.add(categoryPanel, BorderLayout.NORTH);
+        section.add(categoryPanel);
         
-        // 創建配方滾動面板
-        JPanel recipesPanel = new JPanel();
-        recipesPanel.setLayout(new BoxLayout(recipesPanel, BoxLayout.Y_AXIS));
-        
-        JScrollPane scrollPane = new JScrollPane(recipesPanel);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setBorder(null);
-        
-        // 自定義滾動條
-        JScrollBar verticalBar = scrollPane.getVerticalScrollBar();
-        verticalBar.setUI(new BasicScrollBarUI() {
-            @Override
-            protected void configureScrollBarColors() {
-                this.thumbColor = new Color(255, 182, 193);  // 粉紅色滑塊
-                this.trackColor = new Color(255, 240, 245);  // 淺粉色軌道
-            }
-            
-            @Override
-            protected JButton createDecreaseButton(int orientation) {
-                return createZeroButton();
-            }
-            
-            @Override
-            protected JButton createIncreaseButton(int orientation) {
-                return createZeroButton();
-            }
-            
-            private JButton createZeroButton() {
-                JButton button = new JButton();
-                button.setPreferredSize(new Dimension(0, 0));
-                return button;
-            }
-            
-            @Override
-            protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
-                if (thumbBounds.isEmpty() || !scrollbar.isEnabled()) {
-                    return;
-                }
-                
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
-                // 繪製圓角矩形滑塊
-                g2.setColor(thumbColor);
-                g2.fillRoundRect(thumbBounds.x, thumbBounds.y, 
-                                thumbBounds.width, thumbBounds.height, 
-                                10, 10);  // 圓角半徑
-                
-                g2.dispose();
-            }
-            
-            @Override
-            protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
-                // 繪製圓角矩形軌道
-                g2.setColor(trackColor);
-                g2.fillRoundRect(trackBounds.x, trackBounds.y,
-                                trackBounds.width, trackBounds.height,
-                                10, 10);  // 圓角半徑
-                g2.dispose();
-            }
-        });
-        
-        section.add(scrollPane, BorderLayout.CENTER);
         
         return section;
     }
@@ -525,7 +460,7 @@ public class ProcessingPanel extends JPanel {
                     updateRecipeButtons(new int[]{0, 6, 7, 8, 9});
                 }
                 case 3 -> { // 蝴蝶結
-                    String[] items = {"白色布料", "白色蝴蝶結", "紅色布料", "紅色蝴蝶結", "黃色布料", "黃色蝴蝶結", "紫色布料", "紫色蝴蝶結", "粉色布料", "粉色蝴蝶結"};
+                    String[] items = {"白��布料", "白色蝴蝶結", "紅色布料", "紅色蝴蝶結", "黃色布料", "黃色蝴蝶結", "紫色布料", "紫色蝴蝶結", "粉色布料", "粉色蝴蝶結"};
                     String[] keys = {
                         "white_fabric", 
                         "white_bow", 
@@ -576,7 +511,7 @@ public class ProcessingPanel extends JPanel {
                     updateRecipeButtons(new int[]{20, 21, 22, 23, 24});
                 }
                 case 6 -> { // 襯衫
-                    String[] items = {"白色布料", "紅色布料", "紅色襯衫", "黃色布料", "黃色襯衫", "紫色布料", "紫色襯衫", "粉色布料", "粉色襯衫"};
+                    String[] items = {"白色布料", "紅色布���", "紅色襯衫", "黃色布料", "黃色襯衫", "紫色布料", "紫色襯衫", "粉色布料", "粉色襯衫"};
                     String[] keys = {
                         "white_fabric", 
                         "red_fabric", 
@@ -608,7 +543,7 @@ public class ProcessingPanel extends JPanel {
                     updateRecipeButtons(new int[]{30, 31, 32, 33, 34});
                 }
                 case 8 -> { // 蕾絲
-                    String[] items = {"白色蕾絲", "紅色染料", "紅色蕾絲", "黃色染料", "黃色蕾絲", "紫色染料", "紫色蕾絲", "粉色染料", "粉��蕾絲"};
+                    String[] items = {"白色蕾絲", "紅色染料", "紅色蕾絲", "黃色染料", "黃色蕾絲", "紫色染料", "紫色蕾絲", "粉色染料", "粉色蕾絲"};
                     String[] keys = {
                         "white_lace", 
                         "red_dye", 
@@ -841,7 +776,7 @@ public class ProcessingPanel extends JPanel {
             case "白色襯衫" -> "white_shirt";
             case "紅色襯衫" -> "red_shirt";
             case "黃色襯衫" -> "yellow_shirt";
-            case "粉色襯衫" -> "pink_shirt";
+            case "粉色襯��" -> "pink_shirt";
             case "紫色襯衫" -> "purple_shirt";
             case "白色褲子" -> "white_pants";
             case "紅色褲子" -> "red_pants";
@@ -930,7 +865,7 @@ public class ProcessingPanel extends JPanel {
                 updateRecipeButtons(new int[]{0, 6, 7, 8, 9});
             }
             case 3 -> { // 蝴蝶結
-                String[] items = {"白色布料", "白色蝴蝶結", "紅色布料", "紅色蝴蝶結", "黃色布料", "黃色蝴蝶結", "紫色布料", "紫色蝴蝶結", "粉色布料", "粉色蝴蝶結"};
+                String[] items = {"白色布料", "白色蝴蝶結", "紅色布料", "紅色蝴蝶結", "黃色布料", "黃色蝴蝶結", "紫色布料", "紫色蝴蝶結", "粉色���料", "粉色蝴蝶結"};
                 String[] keys = {
                     "white_fabric", 
                     "white_bow", 
@@ -998,7 +933,7 @@ public class ProcessingPanel extends JPanel {
                 updateRecipeButtons(new int[]{25, 26, 27, 28, 29});
             }
             case 7 -> { // 褲子
-                String[] items = {"白色布料", "白色褲子", "紅色布料", "紅色褲子", "黃色布料", "黃色褲子", "紫色布料", "紫色褲子", "粉色布料", "粉色褲子"};
+                String[] items = {"白色布料", "白色褲子", "紅色布料", "紅色褲子", "黃色布料", "黃色褲子", "紫色布料", "紫���褲子", "粉色布料", "粉色褲子"};
                 String[] keys = {
                     "white_fabric", 
                     "white_pants", 
@@ -1120,6 +1055,9 @@ public class ProcessingPanel extends JPanel {
             btn.setFont(CHINESE_FONT);
             btn.setBackground(SOFT_YELLOW);
             btn.setForeground(TEXT_COLOR);
+            
+            // 添加圓角邊框
+            btn.setBorder(new RoundedBorder(15, PINK_THEME));
             
             final int index = i;
             btn.addActionListener(e -> {
