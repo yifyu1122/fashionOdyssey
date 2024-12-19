@@ -44,7 +44,7 @@ public class DialogPanel extends JPanel {
         JLabel emojiLabel1 = new JLabel("✨");
         emojiLabel1.setFont(EMOJI_FONT);
         
-        JLabel textLabel = new JLabel(" 時尚奧德賽 Fashion Odyssey ");
+        JLabel textLabel = new JLabel(" 時尚創夢家 Fashion Odyssey ");
         textLabel.setFont(TITLE_FONT);
         textLabel.setForeground(TEXT_COLOR);
         

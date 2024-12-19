@@ -131,7 +131,7 @@ public class SalesPanel extends JPanel {
         salesLabel.setForeground(TEXT_COLOR);
         
         // 更新按鈕
-        JButton updateButton = createStyledButton("✨ 更新庫存");
+        JButton updateButton = createStyledButton("更新庫存");
         updateButton.addActionListener(e -> updateInventory());
         
         controlPanel.add(updateButton);
@@ -142,17 +142,28 @@ public class SalesPanel extends JPanel {
     }
     
     private JButton createStyledButton(String text) {
-        JButton button = new JButton(text);
-        button.setFont(new Font("微軟正黑體", Font.BOLD, 14));
-        button.setForeground(TEXT_COLOR);
+        JButton button = new JButton();
+        button.setLayout(new FlowLayout(FlowLayout.CENTER)); // Center the content
+
+        // Create emoji and text labels
+        JLabel emojiLabel = new JLabel("✨");
+        emojiLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 14)); // Emoji font
+
+        JLabel textLabel = new JLabel(text);
+        textLabel.setFont(new Font("微軟正黑體", Font.BOLD, 14)); // Text font
+        textLabel.setForeground(TEXT_COLOR);
+
+        // Add labels to button
+        button.add(emojiLabel);
+        button.add(textLabel);
         button.setBackground(SOFT_YELLOW);
         button.setFocusPainted(false);
         button.setBorder(BorderFactory.createCompoundBorder(
             new RoundedBorder(15, PINK_THEME),
             BorderFactory.createEmptyBorder(8, 15, 8, 15)
         ));
-        
-        // 添加懸停效果
+
+        // Add hover effect
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(MINT_GREEN);
@@ -161,7 +172,7 @@ public class SalesPanel extends JPanel {
                 button.setBackground(SOFT_YELLOW);
             }
         });
-        
+
         return button;
     }
     
@@ -232,7 +243,7 @@ public class SalesPanel extends JPanel {
                 
                 if (priceText == null || priceText.trim().isEmpty()) {
                     JOptionPane.showMessageDialog(SalesPanel.this, 
-                        "請先輸入銷售價格！", 
+                        "請先輸入銷���價格！", 
                         "提示", 
                         JOptionPane.WARNING_MESSAGE);
                     return label;
