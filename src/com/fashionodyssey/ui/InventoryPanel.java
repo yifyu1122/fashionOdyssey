@@ -186,7 +186,7 @@ public class InventoryPanel extends JPanel {
         JButton button = new JButton() {
             @Override
             public Dimension getPreferredSize() {
-                return new Dimension(80, 80);
+                return new Dimension(80,90);
             }
         };
         
@@ -211,6 +211,8 @@ public class InventoryPanel extends JPanel {
         if (icon != null) {
             button.setIcon(icon);
             button.setText(""); // 隱藏文字
+            button.setHorizontalTextPosition(SwingConstants.CENTER); // 設置文本位置
+            button.setVerticalTextPosition(SwingConstants.BOTTOM); // 設置文本位置為底部
         } else {
             button.setText(item.getName()); // 顯示物品名稱
         }
