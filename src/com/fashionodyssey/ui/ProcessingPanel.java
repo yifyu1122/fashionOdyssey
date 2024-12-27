@@ -693,9 +693,9 @@ public class ProcessingPanel extends JPanel {
             ));
             
             // 設置按鈕的最小和首選大小
-            recipeButton.setMinimumSize(new Dimension(400, 50));
-            recipeButton.setPreferredSize(new Dimension(400, 50));
-            recipeButton.setMaximumSize(new Dimension(Short.MAX_VALUE, 50));
+            recipeButton.setMinimumSize(new Dimension(400, 60));
+            recipeButton.setPreferredSize(new Dimension(400, 60));
+            recipeButton.setMaximumSize(new Dimension(Short.MAX_VALUE, 60));
             recipeButton.setAlignmentX(Component.LEFT_ALIGNMENT);
             
             // 設置按鈕狀態
@@ -829,9 +829,6 @@ public class ProcessingPanel extends JPanel {
        
         contentPanel.add(Box.createVerticalStrut(20));
 
-       
-
-        
         resourcePanel.add(contentPanel);
         resourcePanel.revalidate();
         resourcePanel.repaint();
