@@ -5,6 +5,10 @@ import com.fashionodyssey.event.EventManager;
 import com.fashionodyssey.model.resource.CropStage;
 import com.fashionodyssey.ui.MainFrame;
 import com.fashionodyssey.util.ResourceManager;
+import java.io.File;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 public class GameMain {
     public static void main(String[] args) {
@@ -66,8 +70,26 @@ public class GameMain {
             mainFrame.getInventoryPanel().updateResources();
         });
  
+        // 播放音樂
+        playMusic("c:/Users/user/Desktop/FashionOdyssey/src/main/resources/music/Sunshine and Stitch.wav");
 
-        
         mainFrame.setVisible(true);
     }
-} 
+
+    private static void playMusic(String filePath) {
+        try {
+            File musicPath = new File(filePath);
+            if (musicPath.exists()) {
+                System.out.println("Music file found: " + filePath);
+                AudioInputStream audioInput = AudioSystem.getAudioInputStream(musicPath);
+                Clip clip = AudioSystem.getClip();
+                clip.open(audioInput);
+                clip.start();
+            } else {
+                System.out.println("Can't find file: " + filePath);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
