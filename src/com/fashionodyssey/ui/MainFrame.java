@@ -62,15 +62,55 @@ public class MainFrame extends JFrame {
         designPanel = new DesignPanel();
         salesPanel = new SalesPanel();
         inventoryPanel = new InventoryPanel();
+        inventoryPanel.setPreferredSize(new Dimension(300, 600)); // Set a shorter height for the inventory panel
+        
+        // Create a task button
+        JButton taskButton = new JButton("查看任務");
+        taskButton.setFont(new Font("微軟正黑體", Font.BOLD, 16)); // Set a bold font
+        taskButton.setBackground(SOFT_YELLOW); // Set background color
+        taskButton.setForeground(TEXT_COLOR); // Set text color
+        taskButton.setFocusPainted(false); // Remove focus border
+        taskButton.setBorder(BorderFactory.createCompoundBorder(
+            new RoundedBorder(15, PINK_THEME), // Rounded border
+            BorderFactory.createEmptyBorder(10, 15, 10, 15) // Padding
+        ));
+        
+        // Add mouse hover effects
+        taskButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                taskButton.setBackground(MINT_GREEN); // Change background on hover
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                taskButton.setBackground(SOFT_YELLOW); // Revert background color
+            }
+        });
+        
+        // Add action listener for the button
+        taskButton.addActionListener(e -> {
+            // Create and display TaskPanel
+            JFrame taskFrame = new JFrame("任務面板");
+            taskFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            taskFrame.add(new TaskPanel()); // Add the TaskPanel instance
+            taskFrame.setSize(400, 300); // Set window size
+            taskFrame.setLocationRelativeTo(null); // Center the window
+            taskFrame.setVisible(true); // Show the window
+        });
+        
+        // Create a panel to hold the InventoryPanel and the task button
+        JPanel inventoryContainer = new JPanel();
+        inventoryContainer.setLayout(new BorderLayout());
+        inventoryContainer.add(inventoryPanel, BorderLayout.CENTER);
+        inventoryContainer.add(taskButton, BorderLayout.SOUTH); // Add task button below the inventory panel
         
         // 創建一個包含內容面板和按鈕面板的中央容器
         JPanel centerContainer = new JPanel(new BorderLayout());
         
         // 創建內容面板
         contentPanel = new JPanel(new CardLayout());
-        contentPanel.add(designPanel, "設計");
-        contentPanel.add(processingPanel, "加工");
+        
         contentPanel.add(farmPanel, "農場");
+        contentPanel.add(processingPanel, "加工");
+        contentPanel.add(designPanel, "設計");
         contentPanel.add(salesPanel, "銷售");
         
         // 創建底部按鈕面板，使用 GridLayout 確保按鈕等寬
@@ -79,7 +119,7 @@ public class MainFrame extends JFrame {
         buttonPanel.setBackground(LIGHT_PINK);
         Font buttonFont = new Font("微軟正黑體", Font.BOLD, 20);
         
-        String[] buttonNames = {"設計", "加工", "農場", "銷售"};
+        String[] buttonNames = {"農場", "加工", "設計", "銷售"};
         for (String name : buttonNames) {
             buttonPanel.add(createNavButton(name, buttonFont));
         }
@@ -90,10 +130,32 @@ public class MainFrame extends JFrame {
         
         // 添加到主框架
         add(centerContainer, BorderLayout.CENTER);
-        add(inventoryPanel, BorderLayout.EAST);
+        add(inventoryContainer, BorderLayout.EAST);
+        
+        // 自定義圓形按鈕類
+        JButton roundButton = new JButton() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                g.setColor(Color.PINK); // 設置按鈕顏色
+                g.fillOval(0, 0, getWidth(), getHeight()); // 繪製圓形
+                super.paintComponent(g);
+            }
+        };
+        roundButton.setPreferredSize(new Dimension(60, 60)); // 設置按鈕大小
+        roundButton.setContentAreaFilled(false); // 去除背景
+        roundButton.setBorderPainted(false); // 去除邊框
+        roundButton.setFocusPainted(false); // 去除焦點邊框
+        roundButton.setFont(new Font("微軟正黑體", Font.BOLD, 12));
+        
+        // 添加按鈕的行為
+        roundButton.addActionListener(e -> {
+            // 在這裡添加查看訂單的邏輯
+            JOptionPane.showMessageDialog(this, "這裡是訂單面板的邏輯");
+        });
+
         
         // 顯示初始面板
-        showPanel("設計");
+        showPanel("農場");
         
         // 註冊資金更新事件
         EventManager.getInstance().addEventListener("UPDATE_MONEY", event -> {

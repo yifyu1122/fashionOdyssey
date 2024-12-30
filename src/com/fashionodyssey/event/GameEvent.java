@@ -6,7 +6,7 @@ public class GameEvent {
     
     public GameEvent(String eventType, Object... args) {
         this.eventType = eventType;
-        this.args = args;
+        this.args = args != null ? args : new Object[0];
     }
     
     public String getEventType() {
@@ -25,7 +25,11 @@ public class GameEvent {
         return null;
     }
     
-    public Object getData() {
-        return args.length > 0 ? args[0] : null;
+    @SuppressWarnings("unchecked")
+    public <T> T getData() {
+        if (args != null && args.length > 0) {
+            return (T) args[0];
+        }
+        return null;
     }
 } 

@@ -57,6 +57,16 @@ public class FarmPanel extends JPanel {
         // 通知資源管理器觸發初始更新
         rm.notifyResourceChange();
         rm.notifyInventoryChange();
+        
+        // Inside the FarmPanel constructor, add event listeners
+        EventManager.getInstance().addEventListener("HARVEST_CROP", event -> {
+            
+        });
+        
+        EventManager.getInstance().addEventListener("BUY_FERTILIZER", event -> {
+            // Implement the logic to buy fertilizer
+            buyFertilizer();
+        });
     }
     
     private void initComponents() {
@@ -370,5 +380,11 @@ public class FarmPanel extends JPanel {
 
     private void updateFarmStatus(String message) {
         farmStatusLabel.setText(message);
+    }
+
+
+    private void buyFertilizer() {
+        // Logic to buy fertilizer
+        JOptionPane.showMessageDialog(this, "已購買肥料！", "購買成功", JOptionPane.INFORMATION_MESSAGE);
     }
 } 
