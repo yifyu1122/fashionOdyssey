@@ -65,42 +65,43 @@ public class MainFrame extends JFrame {
         inventoryPanel.setPreferredSize(new Dimension(300, 600)); // Set a shorter height for the inventory panel
         
         // Create a task button
-        JButton taskButton = new JButton("查看任務");
-        taskButton.setFont(new Font("微軟正黑體", Font.BOLD, 16)); // Set a bold font
-        taskButton.setBackground(SOFT_YELLOW); // Set background color
-        taskButton.setForeground(TEXT_COLOR); // Set text color
-        taskButton.setFocusPainted(false); // Remove focus border
-        taskButton.setBorder(BorderFactory.createCompoundBorder(
-            new RoundedBorder(15, PINK_THEME), // Rounded border
-            BorderFactory.createEmptyBorder(10, 15, 10, 15) // Padding
-        ));
+        // JButton taskButton = new JButton("查看任務");
+        // taskButton.setFont(new Font("微軟正黑體", Font.BOLD, 16)); // Set a bold font
+        // taskButton.setBackground(SOFT_YELLOW); // Set background color
+        // taskButton.setForeground(TEXT_COLOR); // Set text color
+        // taskButton.setFocusPainted(false); // Remove focus border
+        // taskButton.setBorder(BorderFactory.createCompoundBorder(
+        //     new RoundedBorder(15, PINK_THEME), // Rounded border
+        //     BorderFactory.createEmptyBorder(10, 15, 10, 15) // Padding
+        // ));
         
-        // Add mouse hover effects
-        taskButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                taskButton.setBackground(MINT_GREEN); // Change background on hover
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                taskButton.setBackground(SOFT_YELLOW); // Revert background color
-            }
-        });
+        // // Add mouse hover effects
+        // taskButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            
+        //     public void mouseEntered(java.awt.event.MouseEvent evt) {
+        //         taskButton.setBackground(MINT_GREEN); // Change background on hover
+        //     }
+        //     public void mouseExited(java.awt.event.MouseEvent evt) {
+        //         taskButton.setBackground(SOFT_YELLOW); // Revert background color
+        //     }
+        // });
         
-        // Add action listener for the button
-        taskButton.addActionListener(e -> {
-            // Create and display TaskPanel
-            JFrame taskFrame = new JFrame("任務面板");
-            taskFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            taskFrame.add(new TaskPanel()); // Add the TaskPanel instance
-            taskFrame.setSize(400, 300); // Set window size
-            taskFrame.setLocationRelativeTo(null); // Center the window
-            taskFrame.setVisible(true); // Show the window
-        });
+        // // Add action listener for the button
+        // taskButton.addActionListener(e -> {
+        //     // Create and display TaskPanel
+        //     JFrame taskFrame = new JFrame("任務面板");
+        //     taskFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        //     taskFrame.add(new TaskPanel()); // Add the TaskPanel instance
+        //     taskFrame.setSize(400, 300); // Set window size
+        //     taskFrame.setLocationRelativeTo(null); // Center the window
+        //     taskFrame.setVisible(true); // Show the window
+        // });
         
         // Create a panel to hold the InventoryPanel and the task button
         JPanel inventoryContainer = new JPanel();
         inventoryContainer.setLayout(new BorderLayout());
         inventoryContainer.add(inventoryPanel, BorderLayout.CENTER);
-        inventoryContainer.add(taskButton, BorderLayout.SOUTH); // Add task button below the inventory panel
+        // inventoryContainer.add(taskButton, BorderLayout.SOUTH); // Add task button below the inventory panel
         
         // 創建一個包含內容面板和按鈕面板的中央容器
         JPanel centerContainer = new JPanel(new BorderLayout());

@@ -223,6 +223,8 @@ public class FarmController {
                 ResourceManager.getInstance().addHarvestedCrop(chineseName);
                 currentGrid.clear();
                 harvestCount++;
+                
+                // Fire events for UI updates
                 EventManager.getInstance().fireEvent(
                     new GameEvent("UPDATE_FARM_SLOT", 
                         currentRow * GRID_SIZE + currentCol,
@@ -230,6 +232,20 @@ public class FarmController {
                         CropStage.EMPTY
                     )
                 );
+                
+                // Notify task completion based on crop type
+                if (cropType.equalsIgnoreCase("cotton")) {
+                    EventManager.getInstance().fireEvent(
+                        new GameEvent("TASK_COMPLETE", "收穫一個棉花")
+                    );
+                    showStatus("成功收穫棉花！");
+                } else if (cropType.equalsIgnoreCase("lavender")) {
+                    EventManager.getInstance().fireEvent(
+                        new GameEvent("TASK_COMPLETE", "收穫一個薰衣草")
+                    );
+                    showStatus("成功收穫薰衣草！");
+                }
+                
                 EventManager.getInstance().fireEvent(
                     new GameEvent("UPDATE_HARVEST_COUNT", harvestCount)
                 );

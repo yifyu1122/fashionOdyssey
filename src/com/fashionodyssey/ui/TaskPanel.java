@@ -13,6 +13,13 @@ public class TaskPanel extends JPanel {
     private int rewardAmount = 50; // Amount of money rewarded for completing a task
 
     public TaskPanel() {
+        // Register event listener for task completion first
+        EventManager.getInstance().addEventListener("TASK_COMPLETE", event -> {
+            String completedTask = (String) event.getData();
+            System.out.println("收到任務完成事件: " + completedTask); // 調試輸出
+            completeTask(completedTask);
+        });
+
         setLayout(new BorderLayout());
         setBackground(new Color(255, 240, 245));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -30,14 +37,8 @@ public class TaskPanel extends JPanel {
 
         // Create a scroll pane for the task panel
         JScrollPane scrollPane = new JScrollPane(taskPanel);
-        scrollPane.setPreferredSize(new Dimension(300, 150)); // Set preferred size for the task list
+        scrollPane.setPreferredSize(new Dimension(300, 150));
         add(scrollPane, BorderLayout.CENTER);
-
-        // Register event listener for task completion
-        EventManager.getInstance().addEventListener("TASK_COMPLETE", event -> {
-            String completedTask = (String) event.getData();
-            completeTask(completedTask); // Call completeTask with the task name
-        });
     }
 
     private void loadTasks() {
@@ -81,14 +82,21 @@ public class TaskPanel extends JPanel {
     // Update the completeTask method to handle different tasks
     private void completeTask(String task) {
         if (!completedTasks.contains(task)) {
-            completedTasks.add(task); // Mark the task as completed
-            // Update UI, disable the button
-            for (Component comp : taskPanel.getComponents()) {
-                if (comp instanceof JButton && ((JButton) comp).getText().equals("領取獎勵")) {
-                    ((JButton) comp).setEnabled(false); // Disable button
+            // Find the corresponding task label and button
+            Component[] components = taskPanel.getComponents();
+            for (int i = 0; i < components.length; i += 2) { // Increment by 2 since we have label-button pairs
+                if (components[i] instanceof JLabel) {
+                    JLabel label = (JLabel) components[i];
+                    if (label.getText().equals(task)) {
+                        // Enable the corresponding button
+                        if (components[i + 1] instanceof JButton) {
+                            JButton button = (JButton) components[i + 1];
+                            button.setEnabled(true);
+                        }
+                        break;
+                    }
                 }
             }
-            // Optionally, show a message or perform other actions
         }
     }
 }
